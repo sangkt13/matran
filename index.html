@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedExam Graduation Tool</title>
+    <meta name="theme-color" content="#2563eb">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+      scroll-behavior: smooth;
+    </style>
+</head>
+<body>
+    <!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedMatrix Graduation - Công cụ Thiết kế Ma trận Đề thi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        /* Modal Animation */
+        .modal {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+        .modal .modal-content {
+            transform: scale(0.95);
+            transition: all 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-800">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
+        <div class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center cursor-pointer" onclick="window.location.reload()">
+                        <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white mr-3 shadow-lg shadow-blue-200">
+                            <i class="fa-solid fa-user-doctor text-xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-xl font-bold text-slate-800 block leading-none">Med<span class="text-blue-600">Exam</span></span>
+                            <span class="text-xs text-gray-500 font-medium tracking-wider">GRADUATION TOOL</span>
+                        </div>
+                    </div>
+                    <div class="hidden sm:ml-10 sm:flex sm:space-x-8">
+                        <a href="#" class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Thiết kế Ma trận</a>
+                        <button onclick="toggleCLOModal(true)" class="border-transparent text-gray-500 hover:text-blue-600 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors">
+                            <i class="fa-solid fa-list-check mr-2"></i> Quản lý CLO
+                        </button>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right mr-2 hidden lg:block">
+                        <div class="text-sm font-medium text-gray-900">Kỳ thi Tốt nghiệp Bác sĩ Đa khoa</div>
+                        <div class="text-xs text-gray-500">Niên khóa 2023-2024</div>
+                    </div>
+                    <button onclick="exportData()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
+                        <i class="fa-solid fa-file-export mr-2"></i> Xuất Đề thi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow w-full px-4 sm:px-6 lg:px-8 py-6 max-w-[1920px] mx-auto">
+        
+        <div class="grid grid-cols-12 gap-6 h-[calc(100vh-140px)]">
+            
+            <!-- Left Sidebar: Configuration & Clinical Problems -->
+            <div class="col-span-3 flex flex-col gap-6 overflow-hidden h-full">
+                
+                <!-- General Settings -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 shrink-0">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4 flex items-center">
+                        <i class="fa-solid fa-sliders mr-2 text-blue-500"></i> Thông số chung
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center group">
+                            <label class="text-sm text-slate-600 font-medium">Tổng số câu hỏi</label>
+                            <div class="relative">
+                                <input type="number" id="totalQuestions" value="100" onchange="updateCalculations()" class="w-24 text-right border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm font-bold text-blue-600 pr-8">
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">câu</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <label class="text-sm text-slate-600">Thời gian làm bài</label>
+                            <div class="relative">
+                                <input type="number" value="90" class="w-24 text-right border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm pr-8">
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">phút</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clinical Problems Allocation -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col flex-grow overflow-hidden">
+                    <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide">
+                                <i class="fa-solid fa-stethoscope mr-2 text-rose-500"></i> Vấn đề Lâm sàng
+                            </h3>
+                            <p class="text-[11px] text-gray-500 mt-0.5">Phân bổ % trọng số cho từng vấn đề</p>
+                        </div>
+                        <button onclick="addProblem()" class="text-xs bg-white border border-gray-300 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 text-gray-700 px-3 py-1.5 rounded shadow-sm transition font-medium">
+                            <i class="fa-solid fa-plus"></i> Thêm
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-y-auto p-3 space-y-3 flex-grow bg-slate-50/50" id="problemsList">
+                        <!-- Dynamic Problems Injected Here -->
+                    </div>
+
+                    <div class="p-4 border-t border-gray-200 bg-white">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-gray-700">Tổng trọng số:</span>
+                            <span id="totalWeightDisplay" class="text-lg font-bold text-green-600">100%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2 overflow-hidden">
+                            <div id="weightProgressBar" class="bg-green-500 h-2 rounded-full transition-all duration-300" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Detailed Matrix -->
+            <div class="col-span-9 flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                
+                <!-- Header -->
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 shrink-0">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center">
+                            <i class="fa-solid fa-table-cells mr-2 text-gray-400"></i> Chi tiết Phân môn & Bloom
+                        </h2>
+                        <p class="text-xs text-gray-500 mt-1">Phân chia câu hỏi chi tiết theo Chuẩn đầu ra (CLO) và Mức độ nhận thức.</p>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <div class="flex items-center space-x-4 text-xs bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm">
+                            <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 mr-1.5"></span> Nhớ (1)</span>
+                            <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500 mr-1.5"></span> Hiểu (2)</span>
+                            <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500 mr-1.5"></span> Vận dụng (3)</span>
+                            <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 mr-1.5"></span> Phân tích (4)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Matrix Table -->
+                <div class="overflow-auto table-container flex-grow relative bg-white">
+                    <table class="min-w-full divide-y divide-gray-200 relative">
+                        <thead class="bg-gray-100 sticky top-0 z-20 shadow-sm ring-1 ring-gray-200">
+                            <tr>
+                                <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-600 uppercase w-[30%] tracking-wider">Vấn đề & Phân môn</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-xs font-bold text-gray-600 uppercase w-[20%] tracking-wider">
+                                    Chuẩn đầu ra (CLO) 
+                                    <button onclick="toggleCLOModal(true)" class="ml-1 text-blue-500 hover:text-blue-700"><i class="fa-solid fa-gear"></i></button>
+                                </th>
+                                <th scope="col" class="px-2 py-3.5 text-center text-xs font-bold text-blue-600 uppercase tracking-wider">Nhớ</th>
+                                <th scope="col" class="px-2 py-3.5 text-center text-xs font-bold text-cyan-600 uppercase tracking-wider">Hiểu</th>
+                                <th scope="col" class="px-2 py-3.5 text-center text-xs font-bold text-indigo-600 uppercase tracking-wider">V.Dụng</th>
+                                <th scope="col" class="px-2 py-3.5 text-center text-xs font-bold text-purple-600 uppercase tracking-wider">P.Tích</th>
+                                <th scope="col" class="px-4 py-3.5 text-center text-xs font-bold text-gray-800 uppercase bg-gray-200 border-l border-gray-300">Tổng</th>
+                                <th scope="col" class="px-2 py-3.5"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="matrixBody" class="bg-white divide-y divide-gray-200 text-sm">
+                            <!-- Content Generated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Footer Stats -->
+                <div class="bg-white border-t border-gray-200 px-6 py-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] shrink-0">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                             <span class="text-xs font-bold uppercase text-slate-500 mr-2">Trạng thái Kiểm tra:</span>
+                             <span id="validationStatus" class="text-xs font-bold px-3 py-1.5 rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                <i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang tính toán
+                             </span>
+                        </div>
+                        
+                        <div class="flex items-center space-x-8">
+                            <div class="text-center">
+                                <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Recall</div>
+                                <div id="sumRecall" class="font-bold text-lg text-blue-600 leading-none">0</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Understand</div>
+                                <div id="sumUnderstand" class="font-bold text-lg text-cyan-600 leading-none">0</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">App/Ana</div>
+                                <div id="sumAdvanced" class="font-bold text-lg text-indigo-600 leading-none">0</div>
+                            </div>
+                            <div class="pl-8 border-l border-gray-200 text-center">
+                                <div class="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1">Tổng cộng</div>
+                                <div id="grandTotal" class="font-black text-2xl text-slate-800 leading-none">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- CLO Management Modal -->
+    <div id="cloModal" class="modal fixed inset-0 z-[60] flex items-center justify-center">
+        <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="toggleCLOModal(false)"></div>
+        <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-2xl relative z-10 flex flex-col max-h-[85vh]">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-800">Quản lý Chuẩn đầu ra (CLO)</h3>
+                <button onclick="toggleCLOModal(false)" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-grow bg-slate-50">
+                <div id="cloListContainer" class="space-y-3">
+                    <!-- JS renders items here -->
+                </div>
+                
+                <button onclick="addCLO()" class="mt-4 w-full py-2.5 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 font-medium hover:bg-blue-50 hover:border-blue-400 transition-colors flex items-center justify-center">
+                    <i class="fa-solid fa-plus mr-2"></i> Thêm Chuẩn đầu ra mới
+                </button>
+            </div>
+
+            <div class="px-6 py-4 border-t border-gray-100 flex justify-end bg-white rounded-b-xl">
+                <button onclick="toggleCLOModal(false)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-lg font-medium transition mr-3">
+                    Đóng
+                </button>
+                <button onclick="saveCLOs()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium shadow-sm transition">
+                    <i class="fa-solid fa-save mr-2"></i> Lưu thay đổi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA MODEL ---
+        // Global state for CLOs
+        let CLOs = [
+            { id: 'clo1', code: 'CLO1', name: 'Chẩn đoán xác định & phân biệt' },
+            { id: 'clo2', code: 'CLO2', name: 'Điều trị & Xử trí cấp cứu' },
+            { id: 'clo3', code: 'CLO3', name: 'Dự phòng & Giáo dục sức khỏe' },
+            { id: 'clo4', code: 'CLO4', name: 'Cơ chế bệnh sinh & Sinh lý bệnh' }
+        ];
+        
+        let problems = [
+            { 
+                id: 1, 
+                name: "Đau ngực cấp", 
+                weight: 20, 
+                specialties: [
+                    { name: "Nội Tim mạch", cloId: "clo1", levels: [2, 3, 2, 1] },
+                    { name: "Nội Hô hấp", cloId: "clo1", levels: [1, 2, 1, 0] },
+                    { name: "Cấp cứu", cloId: "clo2", levels: [1, 2, 3, 2] }
+                ]
+            },
+            { 
+                id: 2, 
+                name: "Khó thở", 
+                weight: 15, 
+                specialties: [
+                    { name: "Nội Hô hấp", cloId: "clo1", levels: [2, 3, 1, 0] },
+                    { name: "Nội Tim mạch", cloId: "clo4", levels: [1, 2, 0, 0] }
+                ]
+            },
+            { 
+                id: 3, 
+                name: "Đau bụng cấp", 
+                weight: 25, 
+                specialties: [
+                    { name: "Nội Tiêu hóa", cloId: "clo1", levels: [3, 4, 2, 1] },
+                    { name: "Ngoại Tiêu hóa", cloId: "clo2", levels: [2, 3, 3, 2] }
+                ]
+            }
+        ];
+
+        // --- CLO MANAGEMENT ---
+
+        function toggleCLOModal(show) {
+            const modal = document.getElementById('cloModal');
+            if(show) {
+                renderCLOManager();
+                modal.classList.add('active');
+            } else {
+                modal.classList.remove('active');
+                updateCalculations(); // Refresh matrix dropdowns on close
+            }
+        }
+
+        function renderCLOManager() {
+            const container = document.getElementById('cloListContainer');
+            container.innerHTML = '';
+            CLOs.forEach((clo, index) => {
+                const div = document.createElement('div');
+                div.className = "bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex items-center gap-3 group hover:border-blue-300 transition";
+                div.innerHTML = `
+                    <div class="flex-none">
+                        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Mã CLO</span>
+                        <input type="text" value="${clo.code}" onchange="updateCLOData(${index}, 'code', this.value)" class="w-16 text-sm font-bold text-blue-700 bg-blue-50 border-transparent rounded focus:border-blue-500 focus:ring-0 text-center px-1">
+                    </div>
+                    <div class="flex-grow">
+                        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Nội dung năng lực</span>
+                        <input type="text" value="${clo.name}" onchange="updateCLOData(${index}, 'name', this.value)" class="w-full text-sm text-slate-700 border-b border-gray-200 focus:border-blue-500 border-t-0 border-x-0 bg-transparent focus:ring-0 px-0 py-1" placeholder="Mô tả chuẩn đầu ra...">
+                    </div>
+                    <div class="flex-none pt-4">
+                        <button onclick="removeCLO(${index})" class="text-gray-300 hover:text-red-500 transition p-2" title="Xóa">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addCLO() {
+            const newId = 'clo' + Date.now();
+            CLOs.push({ id: newId, code: 'NEW', name: 'Chuẩn đầu ra mới' });
+            renderCLOManager();
+        }
+
+        function removeCLO(index) {
+            if(CLOs.length <= 1) {
+                alert("Cần ít nhất 1 chuẩn đầu ra!");
+                return;
+            }
+            if(confirm("Xóa CLO này? Các câu hỏi liên quan sẽ bị ảnh hưởng.")) {
+                CLOs.splice(index, 1);
+                renderCLOManager();
+            }
+        }
+
+        function updateCLOData(index, field, value) {
+            CLOs[index][field] = value;
+        }
+
+        function saveCLOs() {
+            toggleCLOModal(false);
+        }
+
+        // --- MAIN RENDER FUNCTIONS ---
+
+        function renderProblemsList() {
+            const container = document.getElementById('problemsList');
+            const totalQ = parseInt(document.getElementById('totalQuestions').value) || 0;
+            container.innerHTML = '';
+            let totalWeight = 0;
+
+            problems.forEach((p, index) => {
+                totalWeight += p.weight;
+                const targetQ = Math.round((p.weight / 100) * totalQ);
+                let currentActual = 0;
+                p.specialties.forEach(s => currentActual += s.levels.reduce((a,b)=>a+b, 0));
+                
+                const el = document.createElement('div');
+                el.className = "bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow group relative";
+                el.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <input type="text" value="${p.name}" onchange="updateProblemName(${index}, this.value)" class="font-bold text-sm text-slate-800 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-0 p-0 w-full mr-2 transition-colors" placeholder="Tên vấn đề...">
+                        <button onclick="removeProblem(${index})" class="text-gray-300 hover:text-red-500 transition opacity-0 group-hover:opacity-100">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="flex-grow relative pt-1">
+                             <input type="range" min="0" max="100" value="${p.weight}" oninput="updateProblemWeight(${index}, this.value)" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        </div>
+                        <div class="flex items-center bg-blue-50 px-2 py-1 rounded border border-blue-100">
+                            <input type="number" value="${p.weight}" onchange="updateProblemWeight(${index}, this.value)" class="w-8 bg-transparent text-right text-xs font-bold text-blue-700 focus:outline-none p-0 border-none"> 
+                            <span class="text-xs text-blue-600 ml-0.5">%</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-[11px] text-gray-500 bg-gray-50 rounded px-2 py-1.5">
+                        <span>Mục tiêu: <span class="font-bold text-slate-700">${targetQ} câu</span></span>
+                        <span class="${currentActual === targetQ ? 'text-green-600 font-bold' : 'text-orange-500 font-semibold'}">Hiện tại: ${currentActual}</span>
+                    </div>
+                `;
+                container.appendChild(el);
+            });
+
+            // Update Weight Progress
+            const weightDisplay = document.getElementById('totalWeightDisplay');
+            const weightBar = document.getElementById('weightProgressBar');
+            weightDisplay.innerText = totalWeight + '%';
+            weightBar.style.width = Math.min(totalWeight, 100) + '%';
+            
+            if (totalWeight === 100) {
+                weightDisplay.className = "text-lg font-bold text-green-600";
+                weightBar.className = "bg-green-500 h-2 rounded-full transition-all duration-300";
+            } else if (totalWeight > 100) {
+                weightDisplay.className = "text-lg font-bold text-red-600";
+                weightBar.className = "bg-red-500 h-2 rounded-full transition-all duration-300";
+            } else {
+                weightDisplay.className = "text-lg font-bold text-orange-500";
+                weightBar.className = "bg-orange-400 h-2 rounded-full transition-all duration-300";
+            }
+        }
+
+        function renderMatrix() {
+            const tbody = document.getElementById('matrixBody');
+            tbody.innerHTML = '';
+            const totalQ = parseInt(document.getElementById('totalQuestions').value) || 0;
+
+            let grandTotal = 0;
+            let sumR = 0, sumU = 0, sumAp = 0, sumAn = 0;
+
+            problems.forEach((p, pIndex) => {
+                // Problem Header Row
+                const targetQ = Math.round((p.weight / 100) * totalQ);
+                let currentProblemTotal = 0;
+                p.specialties.forEach(s => currentProblemTotal += s.levels.reduce((a, b) => a + b, 0));
+                
+                const trHeader = document.createElement('tr');
+                trHeader.className = "bg-slate-50/80 hover:bg-slate-100 transition-colors border-b border-gray-200";
+                trHeader.innerHTML = `
+                    <td colspan="8" class="px-6 py-2.5">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-1.5 h-8 bg-blue-500 rounded-sm mr-3"></div>
+                                <div>
+                                    <div class="text-sm font-bold text-slate-800">${p.name}</div>
+                                    <div class="text-[11px] text-slate-500 mt-0.5">Trọng số: <span class="font-semibold text-blue-600">${p.weight}%</span> (${targetQ} câu)</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-[11px] font-bold uppercase tracking-wider ${currentProblemTotal === targetQ ? 'text-green-600' : 'text-orange-500'}">
+                                    Đã phân bổ: ${currentProblemTotal}/${targetQ}
+                                </span>
+                                <button onclick="addSpecialty(${pIndex})" class="text-xs bg-white border border-blue-200 text-blue-600 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-md font-medium transition shadow-sm flex items-center">
+                                    <i class="fa-solid fa-plus mr-1.5"></i> Thêm Phân môn
+                                </button>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(trHeader);
+
+                // Specialties Rows
+                p.specialties.forEach((s, sIndex) => {
+                    const sTotal = s.levels.reduce((a, b) => a + b, 0);
+                    grandTotal += sTotal;
+                    sumR += s.levels[0];
+                    sumU += s.levels[1];
+                    sumAp += s.levels[2];
+                    sumAn += s.levels[3];
+
+                    const tr = document.createElement('tr');
+                    tr.className = "group hover:bg-blue-50/30 transition-colors";
+                    
+                    // Generate Options for CLO dynamically from global CLOs array
+                    let cloOptions = CLOs.map(c => 
+                        `<option value="${c.id}" ${c.id === s.cloId ? 'selected' : ''}>${c.code}: ${c.name}</option>`
+                    ).join('');
+
+                    tr.innerHTML = `
+                        <td class="px-6 py-2 pl-12">
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-turn-up rotate-90 text-gray-300 mr-3 text-xs"></i>
+                                <input type="text" value="${s.name}" onchange="updateSpecialtyName(${pIndex}, ${sIndex}, this.value)" class="w-full text-sm font-medium text-slate-700 bg-transparent border-0 border-b border-transparent focus:border-blue-500 focus:ring-0 p-0 placeholder-gray-400 hover:border-gray-200 transition-colors" placeholder="Nhập tên phân môn...">
+                            </div>
+                        </td>
+                        <td class="px-3 py-2">
+                             <select onchange="updateSpecialtyCLO(${pIndex}, ${sIndex}, this.value)" class="block w-full text-xs text-slate-600 border-gray-200 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 py-1.5">
+                                ${cloOptions}
+                             </select>
+                        </td>
+                        <td class="px-2 py-2 text-center">
+                            <input type="number" min="0" value="${s.levels[0]}" onchange="updateLevel(${pIndex}, ${sIndex}, 0, this.value)" class="w-12 text-center text-sm font-medium border border-gray-200 rounded-md py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-blue-50/30 text-blue-700">
+                        </td>
+                        <td class="px-2 py-2 text-center">
+                            <input type="number" min="0" value="${s.levels[1]}" onchange="updateLevel(${pIndex}, ${sIndex}, 1, this.value)" class="w-12 text-center text-sm font-medium border border-gray-200 rounded-md py-1 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-cyan-50/30 text-cyan-700">
+                        </td>
+                        <td class="px-2 py-2 text-center">
+                            <input type="number" min="0" value="${s.levels[2]}" onchange="updateLevel(${pIndex}, ${sIndex}, 2, this.value)" class="w-12 text-center text-sm font-medium border border-gray-200 rounded-md py-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-indigo-50/30 text-indigo-700">
+                        </td>
+                        <td class="px-2 py-2 text-center">
+                            <input type="number" min="0" value="${s.levels[3]}" onchange="updateLevel(${pIndex}, ${sIndex}, 3, this.value)" class="w-12 text-center text-sm font-medium border border-gray-200 rounded-md py-1 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-purple-50/30 text-purple-700">
+                        </td>
+                        <td class="px-4 py-2 text-center font-bold text-slate-800 bg-gray-50 border-l border-gray-100">${sTotal}</td>
+                        <td class="px-2 py-2 text-center">
+                            <button onclick="removeSpecialty(${pIndex}, ${sIndex})" class="text-gray-300 hover:text-red-500 hover:bg-red-50 w-8 h-8 rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+
+            // Update Footer Stats
+            animateValue("sumRecall", parseInt(document.getElementById('sumRecall').innerText), sumR, 500);
+            animateValue("sumUnderstand", parseInt(document.getElementById('sumUnderstand').innerText), sumU, 500);
+            animateValue("sumAdvanced", parseInt(document.getElementById('sumAdvanced').innerText), sumAp + sumAn, 500);
+            animateValue("grandTotal", parseInt(document.getElementById('grandTotal').innerText), grandTotal, 500);
+            
+            const statusEl = document.getElementById('validationStatus');
+            const diff = grandTotal - totalQ;
+            if (grandTotal === totalQ) {
+                statusEl.className = "text-xs font-bold px-3 py-1.5 rounded-full bg-green-100 text-green-700 border border-green-200";
+                statusEl.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Hợp lệ';
+            } else if (diff > 0) {
+                statusEl.className = "text-xs font-bold px-3 py-1.5 rounded-full bg-red-100 text-red-700 border border-red-200";
+                statusEl.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-1"></i> Dư ${diff} câu`;
+            } else {
+                statusEl.className = "text-xs font-bold px-3 py-1.5 rounded-full bg-orange-100 text-orange-700 border border-orange-200";
+                statusEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> Thiếu ${Math.abs(diff)} câu`;
+            }
+        }
+
+        // Helper for smooth number transition
+        function animateValue(id, start, end, duration) {
+            if (start === end) return;
+            const range = end - start;
+            let current = start;
+            const increment = end > start ? 1 : -1;
+            const stepTime = Math.abs(Math.floor(duration / range));
+            const obj = document.getElementById(id);
+            const timer = setInterval(function() {
+                current += increment;
+                obj.innerHTML = current;
+                if (current == end) {
+                    clearInterval(timer);
+                }
+            }, stepTime < 10 ? 10 : stepTime);
+            // Fallback for large jumps
+            setTimeout(() => { obj.innerHTML = end; clearInterval(timer); }, duration);
+        }
+
+        // --- LOGIC UPDATES ---
+
+        function updateCalculations() {
+            renderProblemsList();
+            renderMatrix();
+        }
+
+        function updateProblemWeight(index, val) {
+            problems[index].weight = parseInt(val) || 0;
+            renderProblemsList(); // Only re-render list for performance if needed, but here we do all
+            renderMatrix(); 
+        }
+        
+        function updateProblemName(index, val) {
+            problems[index].name = val;
+            // Update header text in matrix without full re-render could be optimized, but full render is safer
+            renderMatrix(); 
+        }
+
+        function addProblem() {
+            problems.push({
+                id: Date.now(),
+                name: "Vấn đề mới",
+                weight: 0,
+                specialties: [
+                    { name: "Phân môn 1", cloId: CLOs[0].id, levels: [0, 0, 0, 0] }
+                ]
+            });
+            updateCalculations();
+            // Scroll to bottom of list
+            setTimeout(() => {
+                const list = document.getElementById('problemsList');
+                list.scrollTop = list.scrollHeight;
+            }, 100);
+        }
+
+        function removeProblem(index) {
+            if(confirm("Xóa vấn đề lâm sàng này sẽ xóa tất cả phân môn liên quan?")) {
+                problems.splice(index, 1);
+                updateCalculations();
+            }
+        }
+
+        function addSpecialty(pIndex) {
+            problems[pIndex].specialties.push({
+                name: "",
+                cloId: CLOs[0].id,
+                levels: [0, 0, 0, 0]
+            });
+            renderMatrix();
+        }
+
+        function removeSpecialty(pIndex, sIndex) {
+            problems[pIndex].specialties.splice(sIndex, 1);
+            updateCalculations();
+        }
+
+        function updateSpecialtyName(pIndex, sIndex, val) {
+            problems[pIndex].specialties[sIndex].name = val;
+        }
+
+        function updateSpecialtyCLO(pIndex, sIndex, val) {
+            problems[pIndex].specialties[sIndex].cloId = val;
+        }
+
+        function updateLevel(pIndex, sIndex, levelIndex, val) {
+            const parsed = parseInt(val) || 0;
+            if (parsed >= 0) {
+                problems[pIndex].specialties[sIndex].levels[levelIndex] = parsed;
+                updateCalculations();
+            }
+        }
+        
+        function exportData() {
+            alert("Tính năng đang phát triển: Xuất dữ liệu ra file Excel/PDF.");
+        }
+
+        // --- INIT ---
+        window.onload = function() {
+            updateCalculations();
+        }
+
+    </script>
+</body>
+</html>
+</body>
+</html>
