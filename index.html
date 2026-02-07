@@ -116,7 +116,37 @@
       </div>
     </div>
   </nav>
+<button onclick="aiSuggest()" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
+  🤖 Gợi ý AI
+</button>
+async function aiSuggest() {
+  try {
+    const payload = {
+      totalQuestions: parseInt(document.getElementById("totalQuestions").value) || 0,
+      problems,
+      CLOs
+    };
 
+    const r = await fetch("/api/ai-suggest", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error || "AI failed");
+
+    // nhận suggested.problems và gán vào state
+    if (j.suggested?.problems) {
+      problems = j.suggested.problems;
+      updateCalculations();
+    }
+
+    alert("✅ AI đã gợi ý xong!\n" + (j.notes?.[0] ? ("Ghi chú: " + j.notes[0]) : ""));
+  } catch (e) {
+    alert("❌ AI lỗi: " + (e?.message || e));
+  }
+}
   <!-- Main Content -->
   <main class="flex-grow w-full px-4 sm:px-6 lg:px-8 py-6 max-w-[1920px] mx-auto">
     <div class="grid grid-cols-12 gap-6 h-[calc(100vh-140px)]">
