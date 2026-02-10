@@ -16,36 +16,16 @@
       padding: 0;
       scroll-behavior: smooth;
     }
-    .table-container::-webkit-scrollbar {
-      height: 8px;
-      width: 8px;
-    }
-    .table-container::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
+    .table-container::-webkit-scrollbar { height: 8px; width: 8px; }
+    .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
     /* Modal Animation */
-    .modal {
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease-in-out;
-    }
-    .modal.active {
-      opacity: 1;
-      visibility: visible;
-    }
-    .modal.active .modal-content {
-      transform: scale(1);
-    }
-    .modal .modal-content {
-      transform: scale(0.95);
-      transition: all 0.3s ease-in-out;
-    }
+    .modal { opacity: 0; visibility: hidden; transition: all 0.3s ease-in-out; }
+    .modal.active { opacity: 1; visibility: visible; }
+    .modal.active .modal-content { transform: scale(1); }
+    .modal .modal-content { transform: scale(0.95); transition: all 0.3s ease-in-out; }
 
     /* Tiny toast */
     .toast {
@@ -84,9 +64,13 @@
               <span class="text-xs text-gray-500 font-medium tracking-wider">GRADUATION TOOL</span>
             </div>
           </div>
+
           <div class="hidden sm:ml-10 sm:flex sm:space-x-8">
-            <a href="#" class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Thiết kế Ma trận</a>
-            <button onclick="toggleCLOModal(true)" class="border-transparent text-gray-500 hover:text-blue-600 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors">
+            <a href="#" class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              Thiết kế Ma trận
+            </a>
+            <button onclick="toggleCLOModal(true)"
+              class="border-transparent text-gray-500 hover:text-blue-600 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors">
               <i class="fa-solid fa-list-check mr-2"></i> Quản lý CLO
             </button>
           </div>
@@ -98,65 +82,47 @@
             <div class="text-xs text-gray-500">Niên khóa 2023-2024</div>
           </div>
 
-          <!-- ✅ Nút LOAD -->
-          <button onclick="loadBlueprint()" class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
+          <!-- ✅ LOAD -->
+          <button onclick="loadBlueprint()"
+            class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
             <i class="fa-solid fa-cloud-arrow-down mr-2"></i> Tải (Load)
           </button>
 
-          <!-- ✅ Nút SAVE -->
-          <button onclick="saveBlueprint()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
+          <!-- ✅ SAVE -->
+          <button onclick="saveBlueprint()"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
             <i class="fa-solid fa-floppy-disk mr-2"></i> Lưu (Save)
           </button>
 
-          <!-- Nút Export hiện có -->
-          <button onclick="exportData()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
+          <!-- ✅ AI Suggest -->
+          <button onclick="aiSuggest()"
+            class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
+            <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Gợi ý AI
+          </button>
+
+          <!-- ✅ Export -->
+          <button onclick="exportData()"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
             <i class="fa-solid fa-file-export mr-2"></i> Xuất Đề thi
           </button>
         </div>
       </div>
     </div>
   </nav>
-<button onclick="aiSuggest()" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
-  🤖 Gợi ý AI
-</button>
-async function aiSuggest() {
-  try {
-    const payload = {
-      totalQuestions: parseInt(document.getElementById("totalQuestions").value) || 0,
-      problems,
-      CLOs
-    };
 
-    const r = await fetch("/api/ai-suggest", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    const j = await r.json();
-    if (!j.ok) throw new Error(j.error || "AI failed");
-
-    // nhận suggested.problems và gán vào state
-    if (j.suggested?.problems) {
-      problems = j.suggested.problems;
-      updateCalculations();
-    }
-
-    alert("✅ AI đã gợi ý xong!\n" + (j.notes?.[0] ? ("Ghi chú: " + j.notes[0]) : ""));
-  } catch (e) {
-    alert("❌ AI lỗi: " + (e?.message || e));
-  }
-}
   <!-- Main Content -->
   <main class="flex-grow w-full px-4 sm:px-6 lg:px-8 py-6 max-w-[1920px] mx-auto">
     <div class="grid grid-cols-12 gap-6 h-[calc(100vh-140px)]">
+
       <!-- Left Sidebar -->
       <div class="col-span-3 flex flex-col gap-6 overflow-hidden h-full">
+
         <!-- General Settings -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 shrink-0">
           <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4 flex items-center">
             <i class="fa-solid fa-sliders mr-2 text-blue-500"></i> Thông số chung
           </h3>
+
           <div class="space-y-4">
             <div class="flex justify-between items-center group">
               <label class="text-sm text-slate-600 font-medium">Tổng số câu hỏi</label>
@@ -166,6 +132,7 @@ async function aiSuggest() {
                 <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">câu</span>
               </div>
             </div>
+
             <div class="flex justify-between items-center">
               <label class="text-sm text-slate-600">Thời gian làm bài</label>
               <div class="relative">
@@ -208,6 +175,7 @@ async function aiSuggest() {
 
       <!-- Right Panel -->
       <div class="col-span-9 flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 shrink-0">
           <div>
             <h2 class="text-lg font-bold text-slate-800 flex items-center">
@@ -215,6 +183,7 @@ async function aiSuggest() {
             </h2>
             <p class="text-xs text-gray-500 mt-1">Phân chia câu hỏi chi tiết theo Chuẩn đầu ra (CLO) và Mức độ nhận thức.</p>
           </div>
+
           <div class="flex items-center space-x-6">
             <div class="flex items-center space-x-4 text-xs bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm">
               <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 mr-1.5"></span> Nhớ (1)</span>
@@ -293,17 +262,19 @@ async function aiSuggest() {
 
       <div class="p-6 overflow-y-auto flex-grow bg-slate-50">
         <div id="cloListContainer" class="space-y-3"></div>
-
-        <button onclick="addCLO()" class="mt-4 w-full py-2.5 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 font-medium hover:bg-blue-50 hover:border-blue-400 transition-colors flex items-center justify-center">
+        <button onclick="addCLO()"
+          class="mt-4 w-full py-2.5 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 font-medium hover:bg-blue-50 hover:border-blue-400 transition-colors flex items-center justify-center">
           <i class="fa-solid fa-plus mr-2"></i> Thêm Chuẩn đầu ra mới
         </button>
       </div>
 
       <div class="px-6 py-4 border-t border-gray-100 flex justify-end bg-white rounded-b-xl">
-        <button onclick="toggleCLOModal(false)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-lg font-medium transition mr-3">
+        <button onclick="toggleCLOModal(false)"
+          class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-lg font-medium transition mr-3">
           Đóng
         </button>
-        <button onclick="saveCLOs()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium shadow-sm transition">
+        <button onclick="saveCLOs()"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium shadow-sm transition">
           <i class="fa-solid fa-save mr-2"></i> Lưu thay đổi
         </button>
       </div>
@@ -360,6 +331,33 @@ async function aiSuggest() {
       setTimeout(() => t.classList.remove('show'), 2200);
     }
 
+    // ✅ AI Suggest (via /api/ai-suggest)
+    async function aiSuggest() {
+      try {
+        const totalQuestions = parseInt(document.getElementById("totalQuestions")?.value || "0", 10) || 0;
+        const payload = { totalQuestions, problems, CLOs };
+
+        const r = await fetch("/api/ai-suggest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const j = await r.json();
+        if (!r.ok || !j?.ok) throw new Error(j?.error || "AI failed");
+
+        if (j?.suggested?.problems) {
+          problems = j.suggested.problems;
+          updateCalculations();
+        }
+
+        const note = j?.notes?.[0] ? ("Ghi chú: " + j.notes[0]) : "✅ AI đã gợi ý xong!";
+        showToast(note);
+      } catch (e) {
+        showToast("❌ AI lỗi: " + (e?.message || e));
+      }
+    }
+
     // ✅ SAVE to DB (Vercel Postgres via /api/save)
     async function saveBlueprint() {
       try {
@@ -385,7 +383,6 @@ async function aiSuggest() {
         const id = json.id;
         localStorage.setItem("lastBlueprintId", id);
 
-        // set id into URL for easy load later
         const url = new URL(window.location.href);
         url.searchParams.set("id", id);
         window.history.replaceState({}, "", url.toString());
@@ -414,7 +411,6 @@ async function aiSuggest() {
         if (!res.ok) throw new Error(json?.error || "Load failed");
         if (!json || !json.data) throw new Error("Không có dữ liệu trong bản lưu");
 
-        // restore
         if (json.data.totalQuestions != null) {
           document.getElementById('totalQuestions').value = json.data.totalQuestions;
         }
@@ -449,12 +445,12 @@ async function aiSuggest() {
         div.innerHTML = `
           <div class="flex-none">
             <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Mã CLO</span>
-            <input type="text" value="${clo.code}" onchange="updateCLOData(${index}, 'code', this.value)"
+            <input type="text" value="${escapeHtml(clo.code)}" onchange="updateCLOData(${index}, 'code', this.value)"
               class="w-16 text-sm font-bold text-blue-700 bg-blue-50 border-transparent rounded focus:border-blue-500 focus:ring-0 text-center px-1">
           </div>
           <div class="flex-grow">
             <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Nội dung năng lực</span>
-            <input type="text" value="${clo.name}" onchange="updateCLOData(${index}, 'name', this.value)"
+            <input type="text" value="${escapeHtml(clo.name)}" onchange="updateCLOData(${index}, 'name', this.value)"
               class="w-full text-sm text-slate-700 border-b border-gray-200 focus:border-blue-500 border-t-0 border-x-0 bg-transparent focus:ring-0 px-0 py-1"
               placeholder="Mô tả chuẩn đầu ra...">
           </div>
@@ -510,13 +506,14 @@ async function aiSuggest() {
         el.className = "bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow group relative";
         el.innerHTML = `
           <div class="flex justify-between items-start mb-2">
-            <input type="text" value="${p.name}" onchange="updateProblemName(${index}, this.value)"
+            <input type="text" value="${escapeHtml(p.name)}" onchange="updateProblemName(${index}, this.value)"
               class="font-bold text-sm text-slate-800 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-0 p-0 w-full mr-2 transition-colors"
               placeholder="Tên vấn đề...">
             <button onclick="removeProblem(${index})" class="text-gray-300 hover:text-red-500 transition opacity-0 group-hover:opacity-100">
               <i class="fa-solid fa-times"></i>
             </button>
           </div>
+
           <div class="flex items-center space-x-3 mb-3">
             <div class="flex-grow relative pt-1">
               <input type="range" min="0" max="100" value="${p.weight}" oninput="updateProblemWeight(${index}, this.value)"
@@ -528,9 +525,12 @@ async function aiSuggest() {
               <span class="text-xs text-blue-600 ml-0.5">%</span>
             </div>
           </div>
+
           <div class="flex justify-between text-[11px] text-gray-500 bg-gray-50 rounded px-2 py-1.5">
             <span>Mục tiêu: <span class="font-bold text-slate-700">${targetQ} câu</span></span>
-            <span class="${currentActual === targetQ ? 'text-green-600 font-bold' : 'text-orange-500 font-semibold'}">Hiện tại: ${currentActual}</span>
+            <span class="${currentActual === targetQ ? 'text-green-600 font-bold' : 'text-orange-500 font-semibold'}">
+              Hiện tại: ${currentActual}
+            </span>
           </div>
         `;
         container.appendChild(el);
@@ -575,15 +575,18 @@ async function aiSuggest() {
               <div class="flex items-center">
                 <div class="w-1.5 h-8 bg-blue-500 rounded-sm mr-3"></div>
                 <div>
-                  <div class="text-sm font-bold text-slate-800">${p.name}</div>
-                  <div class="text-[11px] text-slate-500 mt-0.5">Trọng số: <span class="font-semibold text-blue-600">${p.weight}%</span> (${targetQ} câu)</div>
+                  <div class="text-sm font-bold text-slate-800">${escapeHtml(p.name)}</div>
+                  <div class="text-[11px] text-slate-500 mt-0.5">
+                    Trọng số: <span class="font-semibold text-blue-600">${p.weight}%</span> (${targetQ} câu)
+                  </div>
                 </div>
               </div>
               <div class="flex items-center space-x-4">
                 <span class="text-[11px] font-bold uppercase tracking-wider ${currentProblemTotal === targetQ ? 'text-green-600' : 'text-orange-500'}">
                   Đã phân bổ: ${currentProblemTotal}/${targetQ}
                 </span>
-                <button onclick="addSpecialty(${pIndex})" class="text-xs bg-white border border-blue-200 text-blue-600 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-md font-medium transition shadow-sm flex items-center">
+                <button onclick="addSpecialty(${pIndex})"
+                  class="text-xs bg-white border border-blue-200 text-blue-600 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-md font-medium transition shadow-sm flex items-center">
                   <i class="fa-solid fa-plus mr-1.5"></i> Thêm Phân môn
                 </button>
               </div>
@@ -603,42 +606,49 @@ async function aiSuggest() {
           const tr = document.createElement('tr');
           tr.className = "group hover:bg-blue-50/30 transition-colors";
 
-          let cloOptions = CLOs.map(c =>
-            `<option value="${c.id}" ${c.id === s.cloId ? 'selected' : ''}>${c.code}: ${c.name}</option>`
+          const cloOptions = CLOs.map(c =>
+            `<option value="${c.id}" ${c.id === s.cloId ? 'selected' : ''}>${escapeHtml(c.code)}: ${escapeHtml(c.name)}</option>`
           ).join('');
 
           tr.innerHTML = `
             <td class="px-6 py-2 pl-12">
               <div class="flex items-center">
                 <i class="fa-solid fa-turn-up rotate-90 text-gray-300 mr-3 text-xs"></i>
-                <input type="text" value="${s.name}" onchange="updateSpecialtyName(${pIndex}, ${sIndex}, this.value)"
+                <input type="text" value="${escapeHtml(s.name)}" onchange="updateSpecialtyName(${pIndex}, ${sIndex}, this.value)"
                   class="w-full text-sm font-medium text-slate-700 bg-transparent border-0 border-b border-transparent focus:border-blue-500 focus:ring-0 p-0 placeholder-gray-400 hover:border-gray-200 transition-colors"
                   placeholder="Nhập tên phân môn...">
               </div>
             </td>
+
             <td class="px-3 py-2">
               <select onchange="updateSpecialtyCLO(${pIndex}, ${sIndex}, this.value)"
                 class="block w-full text-xs text-slate-600 border-gray-200 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 py-1.5">
                 ${cloOptions}
               </select>
             </td>
+
             <td class="px-2 py-2 text-center">
               <input type="number" min="0" value="${s.levels[0]}" onchange="updateLevel(${pIndex}, ${sIndex}, 0, this.value)"
                 class="w-12 text-center text-sm font-medium border border-gray-200 rounded-md py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-blue-50/30 text-blue-700">
             </td>
+
             <td class="px-2 py-2 text-center">
               <input type="number" min="0" value="${s.levels[1]}" onchange="updateLevel(${pIndex}, ${sIndex}, 1, this.value)"
                 class="w-12 text-center text-sm font-medium border border-gray-200 rounded-md py-1 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-cyan-50/30 text-cyan-700">
             </td>
+
             <td class="px-2 py-2 text-center">
               <input type="number" min="0" value="${s.levels[2]}" onchange="updateLevel(${pIndex}, ${sIndex}, 2, this.value)"
                 class="w-12 text-center text-sm font-medium border border-gray-200 rounded-md py-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-indigo-50/30 text-indigo-700">
             </td>
+
             <td class="px-2 py-2 text-center">
               <input type="number" min="0" value="${s.levels[3]}" onchange="updateLevel(${pIndex}, ${sIndex}, 3, this.value)"
                 class="w-12 text-center text-sm font-medium border border-gray-200 rounded-md py-1 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-purple-50/30 text-purple-700">
             </td>
+
             <td class="px-4 py-2 text-center font-bold text-slate-800 bg-gray-50 border-l border-gray-100">${sTotal}</td>
+
             <td class="px-2 py-2 text-center">
               <button onclick="removeSpecialty(${pIndex}, ${sIndex})"
                 class="text-gray-300 hover:text-red-500 hover:bg-red-50 w-8 h-8 rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100">
@@ -650,13 +660,14 @@ async function aiSuggest() {
         });
       });
 
-      animateValue("sumRecall", parseInt(document.getElementById('sumRecall').innerText), sumR, 500);
-      animateValue("sumUnderstand", parseInt(document.getElementById('sumUnderstand').innerText), sumU, 500);
-      animateValue("sumAdvanced", parseInt(document.getElementById('sumAdvanced').innerText), sumAp + sumAn, 500);
-      animateValue("grandTotal", parseInt(document.getElementById('grandTotal').innerText), grandTotal, 500);
+      animateValue("sumRecall", parseInt(document.getElementById('sumRecall').innerText, 10) || 0, sumR, 500);
+      animateValue("sumUnderstand", parseInt(document.getElementById('sumUnderstand').innerText, 10) || 0, sumU, 500);
+      animateValue("sumAdvanced", parseInt(document.getElementById('sumAdvanced').innerText, 10) || 0, (sumAp + sumAn), 500);
+      animateValue("grandTotal", parseInt(document.getElementById('grandTotal').innerText, 10) || 0, grandTotal, 500);
 
       const statusEl = document.getElementById('validationStatus');
       const diff = grandTotal - totalQ;
+
       if (grandTotal === totalQ) {
         statusEl.className = "text-xs font-bold px-3 py-1.5 rounded-full bg-green-100 text-green-700 border border-green-200";
         statusEl.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Hợp lệ';
@@ -676,11 +687,13 @@ async function aiSuggest() {
       const increment = end > start ? 1 : -1;
       const stepTime = Math.abs(Math.floor(duration / (range || 1)));
       const obj = document.getElementById(id);
+
       const timer = setInterval(function () {
         current += increment;
         obj.innerHTML = current;
-        if (current == end) clearInterval(timer);
+        if (current === end) clearInterval(timer);
       }, stepTime < 10 ? 10 : stepTime);
+
       setTimeout(() => { obj.innerHTML = end; clearInterval(timer); }, duration);
     }
 
@@ -691,7 +704,7 @@ async function aiSuggest() {
     }
 
     function updateProblemWeight(index, val) {
-      problems[index].weight = parseInt(val) || 0;
+      problems[index].weight = parseInt(val, 10) || 0;
       renderProblemsList();
       renderMatrix();
     }
@@ -741,7 +754,7 @@ async function aiSuggest() {
     }
 
     function updateLevel(pIndex, sIndex, levelIndex, val) {
-      const parsed = parseInt(val) || 0;
+      const parsed = parseInt(val, 10) || 0;
       if (parsed >= 0) {
         problems[pIndex].specialties[sIndex].levels[levelIndex] = parsed;
         updateCalculations();
@@ -752,13 +765,23 @@ async function aiSuggest() {
       alert("Tính năng đang phát triển: Xuất dữ liệu ra file Excel/PDF.");
     }
 
+    // --- Helpers ---
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
     // --- INIT ---
     window.onload = function () {
       updateCalculations();
-      // nếu URL có ?id=... thì tự load luôn (tuỳ bạn)
+      // Nếu muốn auto-load theo URL ?id=... thì mở dòng dưới:
       // const id = new URL(window.location.href).searchParams.get("id");
       // if (id) loadBlueprint();
-    }
+    };
   </script>
 </body>
 </html>
