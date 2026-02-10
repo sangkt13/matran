@@ -77,9 +77,14 @@
         </div>
 
         <div class="flex items-center space-x-2 sm:space-x-3">
-          <div class="text-right mr-2 hidden lg:block">
-            <div class="text-sm font-medium text-gray-900">Kỳ thi Tốt nghiệp Bác sĩ Đa khoa</div>
-            <div class="text-xs text-gray-500">Niên khóa 2023-2024</div>
+          <!-- Editable exam meta -->
+          <div class="hidden lg:flex flex-col mr-2">
+            <input id="examTitle" value="Kỳ thi Tốt nghiệp Bác sĩ Đa khoa"
+              class="text-sm font-semibold text-gray-900 bg-transparent border-b border-transparent focus:border-blue-500 focus:ring-0 outline-none"
+              onchange="updateExamMeta()" />
+            <input id="examCohort" value="Niên khóa 2023-2024"
+              class="text-xs text-gray-500 bg-transparent border-b border-transparent focus:border-blue-500 focus:ring-0 outline-none"
+              onchange="updateExamMeta()" />
           </div>
 
           <!-- ✅ LOAD -->
@@ -127,7 +132,8 @@
             <div class="flex justify-between items-center group">
               <label class="text-sm text-slate-600 font-medium">Tổng số câu hỏi</label>
               <div class="relative">
-                <input type="number" id="totalQuestions" value="100" onchange="updateCalculations()"
+                <input type="number" id="totalQuestions" value="100"
+                  onchange="if(lockBloom){applyBloomDefaultsToMatrix(true)} else {updateCalculations()}"
                   class="w-24 text-right border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm font-bold text-blue-600 pr-8">
                 <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">câu</span>
               </div>
@@ -142,6 +148,56 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Bloom Defaults -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 shrink-0">
+          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4 flex items-center">
+            <i class="fa-solid fa-brain mr-2 text-purple-500"></i> Bloom mặc định (%)
+          </h3>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-gray-500 font-medium">Nhớ</label>
+              <input id="bloomP0" type="number" min="0" max="100" value="30"
+                class="mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm font-semibold text-slate-700"
+                onchange="updateBloomDefaultsFromUI()">
+            </div>
+            <div>
+              <label class="text-xs text-gray-500 font-medium">Hiểu</label>
+              <input id="bloomP1" type="number" min="0" max="100" value="30"
+                class="mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm font-semibold text-slate-700"
+                onchange="updateBloomDefaultsFromUI()">
+            </div>
+            <div>
+              <label class="text-xs text-gray-500 font-medium">Vận dụng</label>
+              <input id="bloomP2" type="number" min="0" max="100" value="25"
+                class="mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm font-semibold text-slate-700"
+                onchange="updateBloomDefaultsFromUI()">
+            </div>
+            <div>
+              <label class="text-xs text-gray-500 font-medium">Phân tích</label>
+              <input id="bloomP3" type="number" min="0" max="100" value="15"
+                class="mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm font-semibold text-slate-700"
+                onchange="updateBloomDefaultsFromUI()">
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between mt-4">
+            <label class="flex items-center gap-2 text-sm text-slate-600">
+              <input id="lockBloom" type="checkbox" class="rounded border-gray-300"
+                onchange="toggleLockBloom(this.checked)">
+              <span class="font-medium">Khóa Bloom (tự phân bổ)</span>
+            </label>
+            <button onclick="applyBloomDefaultsToMatrix(true)"
+              class="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-md font-semibold shadow-sm transition">
+              Áp dụng Bloom
+            </button>
+          </div>
+
+          <p class="text-[11px] text-gray-500 mt-2">
+            Khi bật “Khóa Bloom”, mọi thay đổi tổng số câu/trọng số sẽ tự phân bổ theo % Bloom này.
+          </p>
         </div>
 
         <!-- Clinical Problems Allocation -->
@@ -323,12 +379,154 @@
       }
     ];
 
+    // --- EXAM META ---
+    let examMeta = {
+      title: "Kỳ thi Tốt nghiệp Bác sĩ Đa khoa",
+      cohort: "Niên khóa 2023-2024",
+    };
+
+    // --- BLOOM DEFAULTS ---
+    let bloomDefaults = [30, 30, 25, 15]; // [%] Nhớ, Hiểu, Vận dụng, Phân tích
+    let lockBloom = false;
+
     // --- TOAST ---
     function showToast(msg) {
       const t = document.getElementById('toast');
       t.textContent = msg;
       t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    // --- Helpers ---
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function updateExamMeta() {
+      const t = document.getElementById("examTitle")?.value || "";
+      const c = document.getElementById("examCohort")?.value || "";
+      examMeta.title = t.trim();
+      examMeta.cohort = c.trim();
+    }
+
+    function setExamUIFromState() {
+      if (document.getElementById("examTitle")) document.getElementById("examTitle").value = examMeta.title || "";
+      if (document.getElementById("examCohort")) document.getElementById("examCohort").value = examMeta.cohort || "";
+    }
+
+    function setBloomUIFromState() {
+      document.getElementById("bloomP0").value = bloomDefaults[0];
+      document.getElementById("bloomP1").value = bloomDefaults[1];
+      document.getElementById("bloomP2").value = bloomDefaults[2];
+      document.getElementById("bloomP3").value = bloomDefaults[3];
+      document.getElementById("lockBloom").checked = lockBloom;
+    }
+
+    function updateBloomDefaultsFromUI() {
+      const p0 = parseInt(document.getElementById("bloomP0")?.value || "0", 10) || 0;
+      const p1 = parseInt(document.getElementById("bloomP1")?.value || "0", 10) || 0;
+      const p2 = parseInt(document.getElementById("bloomP2")?.value || "0", 10) || 0;
+      const p3 = parseInt(document.getElementById("bloomP3")?.value || "0", 10) || 0;
+
+      const sum = p0 + p1 + p2 + p3;
+      if (sum !== 100) {
+        showToast("❌ Tổng % Bloom phải = 100");
+        return;
+      }
+      bloomDefaults = [p0, p1, p2, p3];
+      if (lockBloom) applyBloomDefaultsToMatrix(true);
+    }
+
+    function toggleLockBloom(v) {
+      lockBloom = !!v;
+      if (lockBloom) applyBloomDefaultsToMatrix(true);
+      showToast(lockBloom ? "🔒 Đã bật Khóa Bloom" : "🔓 Đã tắt Khóa Bloom");
+    }
+
+    // Chia N theo tỉ lệ %, làm tròn và đảm bảo tổng đúng N
+    function splitByPercents(total, percents4) {
+      const raw = percents4.map(p => total * (p / 100));
+      const ints = raw.map(x => Math.floor(x));
+      let remain = total - ints.reduce((a,b)=>a+b,0);
+
+      const fracIdx = raw
+        .map((x, i) => ({ i, frac: x - Math.floor(x) }))
+        .sort((a, b) => b.frac - a.frac);
+
+      let k = 0;
+      while (remain > 0) {
+        ints[fracIdx[k % fracIdx.length].i] += 1;
+        remain--;
+        k++;
+      }
+      return ints;
+    }
+
+    // Áp dụng Bloom mặc định để phân bổ lại TOÀN BỘ matrix
+    function applyBloomDefaultsToMatrix(keepSpecialtyWeights = true) {
+      const totalQ = parseInt(document.getElementById("totalQuestions")?.value || "0", 10) || 0;
+      if (totalQ <= 0) { showToast("❌ Tổng số câu hỏi phải > 0"); return; }
+
+      // Target mỗi vấn đề theo weight
+      const targetsByProblem = problems.map(p => Math.round((p.weight / 100) * totalQ));
+
+      // chỉnh sai số do làm tròn để tổng = totalQ
+      let sumTargets = targetsByProblem.reduce((a,b)=>a+b,0);
+      let diff = totalQ - sumTargets;
+
+      const order = problems
+        .map((p, idx) => ({ idx, w: p.weight }))
+        .sort((a,b)=>b.w-a.w);
+
+      let oi = 0;
+      while (diff !== 0 && order.length) {
+        const idx = order[oi % order.length].idx;
+        targetsByProblem[idx] += (diff > 0 ? 1 : -1);
+        diff += (diff > 0 ? -1 : 1);
+        oi++;
+      }
+
+      // Phân bổ vấn đề -> phân môn -> bloom 4 mức
+      problems.forEach((p, pIndex) => {
+        const targetProblemQ = targetsByProblem[pIndex];
+        const specs = p.specialties || [];
+        if (specs.length === 0) return;
+
+        const currentTotals = specs.map(s => (s.levels || [0,0,0,0]).reduce((a,b)=>a+b,0));
+        const currentSum = currentTotals.reduce((a,b)=>a+b,0);
+
+        let specTargets;
+        if (keepSpecialtyWeights && currentSum > 0) {
+          const ratios = currentTotals.map(x => x / currentSum);
+          const raw = ratios.map(r => targetProblemQ * r);
+          specTargets = raw.map(x => Math.floor(x));
+          let remain = targetProblemQ - specTargets.reduce((a,b)=>a+b,0);
+
+          const fracIdx = raw.map((x,i)=>({i, frac:x-Math.floor(x)})).sort((a,b)=>b.frac-a.frac);
+          let k=0;
+          while (remain>0) { specTargets[fracIdx[k%fracIdx.length].i]++; remain--; k++; }
+        } else {
+          const base = Math.floor(targetProblemQ / specs.length);
+          specTargets = specs.map(()=>base);
+          let remain = targetProblemQ - base*specs.length;
+          let k=0;
+          while (remain>0) { specTargets[k%specs.length]++; remain--; k++; }
+        }
+
+        specs.forEach((s, sIndex) => {
+          const t = specTargets[sIndex];
+          const lv = splitByPercents(t, bloomDefaults);
+          s.levels = lv;
+        });
+      });
+
+      updateCalculations();
+      showToast("✅ Đã áp dụng Bloom mặc định cho toàn bộ ma trận");
     }
 
     // ✅ AI Suggest (via /api/ai-suggest)
@@ -348,7 +546,9 @@
 
         if (j?.suggested?.problems) {
           problems = j.suggested.problems;
-          updateCalculations();
+          // Nếu đang khóa bloom thì áp bloom lại cho nhất quán
+          if (lockBloom) applyBloomDefaultsToMatrix(true);
+          else updateCalculations();
         }
 
         const note = j?.notes?.[0] ? ("Ghi chú: " + j.notes[0]) : "✅ AI đã gợi ý xong!";
@@ -361,7 +561,12 @@
     // ✅ SAVE to DB (Vercel Postgres via /api/save)
     async function saveBlueprint() {
       try {
+        updateExamMeta();
+
         const payload = {
+          examMeta,
+          bloomDefaults,
+          lockBloom,
           totalQuestions: parseInt(document.getElementById('totalQuestions')?.value || "0", 10),
           CLOs,
           problems,
@@ -372,7 +577,7 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            title: "MedMatrix Blueprint - " + new Date().toLocaleString(),
+            title: (examMeta?.title || "MedMatrix Blueprint") + " - " + new Date().toLocaleString(),
             data: payload
           })
         });
@@ -414,10 +619,20 @@
         if (json.data.totalQuestions != null) {
           document.getElementById('totalQuestions').value = json.data.totalQuestions;
         }
+
         CLOs = json.data.CLOs || CLOs;
         problems = json.data.problems || problems;
 
-        updateCalculations();
+        examMeta = json.data.examMeta || examMeta;
+        bloomDefaults = json.data.bloomDefaults || bloomDefaults;
+        lockBloom = (json.data.lockBloom != null) ? !!json.data.lockBloom : lockBloom;
+
+        setExamUIFromState();
+        setBloomUIFromState();
+
+        if (lockBloom) applyBloomDefaultsToMatrix(true);
+        else updateCalculations();
+
         showToast("✅ Đã tải dữ liệu từ DB!");
       } catch (e) {
         alert("❌ Tải thất bại: " + (e?.message || e));
@@ -705,8 +920,13 @@
 
     function updateProblemWeight(index, val) {
       problems[index].weight = parseInt(val, 10) || 0;
-      renderProblemsList();
-      renderMatrix();
+
+      if (lockBloom) {
+        applyBloomDefaultsToMatrix(true);
+      } else {
+        renderProblemsList();
+        renderMatrix();
+      }
     }
 
     function updateProblemName(index, val) {
@@ -721,7 +941,10 @@
         weight: 0,
         specialties: [{ name: "Phân môn 1", cloId: CLOs[0].id, levels: [0, 0, 0, 0] }]
       });
-      updateCalculations();
+
+      if (lockBloom) applyBloomDefaultsToMatrix(true);
+      else updateCalculations();
+
       setTimeout(() => {
         const list = document.getElementById('problemsList');
         list.scrollTop = list.scrollHeight;
@@ -731,18 +954,21 @@
     function removeProblem(index) {
       if (confirm("Xóa vấn đề lâm sàng này sẽ xóa tất cả phân môn liên quan?")) {
         problems.splice(index, 1);
-        updateCalculations();
+        if (lockBloom) applyBloomDefaultsToMatrix(true);
+        else updateCalculations();
       }
     }
 
     function addSpecialty(pIndex) {
       problems[pIndex].specialties.push({ name: "", cloId: CLOs[0].id, levels: [0, 0, 0, 0] });
-      renderMatrix();
+      if (lockBloom) applyBloomDefaultsToMatrix(true);
+      else renderMatrix();
     }
 
     function removeSpecialty(pIndex, sIndex) {
       problems[pIndex].specialties.splice(sIndex, 1);
-      updateCalculations();
+      if (lockBloom) applyBloomDefaultsToMatrix(true);
+      else updateCalculations();
     }
 
     function updateSpecialtyName(pIndex, sIndex, val) {
@@ -757,7 +983,9 @@
       const parsed = parseInt(val, 10) || 0;
       if (parsed >= 0) {
         problems[pIndex].specialties[sIndex].levels[levelIndex] = parsed;
-        updateCalculations();
+        // Nếu khóa bloom thì không cho “lệch”
+        if (lockBloom) applyBloomDefaultsToMatrix(true);
+        else updateCalculations();
       }
     }
 
@@ -765,22 +993,11 @@
       alert("Tính năng đang phát triển: Xuất dữ liệu ra file Excel/PDF.");
     }
 
-    // --- Helpers ---
-    function escapeHtml(str) {
-      return String(str ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
-
     // --- INIT ---
     window.onload = function () {
+      setExamUIFromState();
+      setBloomUIFromState();
       updateCalculations();
-      // Nếu muốn auto-load theo URL ?id=... thì mở dòng dưới:
-      // const id = new URL(window.location.href).searchParams.get("id");
-      // if (id) loadBlueprint();
     };
   </script>
 </body>
