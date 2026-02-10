@@ -8,43 +8,65 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f8fafc;
-      margin: 0;
-      padding: 0;
-      scroll-behavior: smooth;
-    }
+    body { font-family: 'Inter', sans-serif; background:#f8fafc; margin:0; padding:0; scroll-behavior:smooth; }
     .table-container::-webkit-scrollbar { height: 8px; width: 8px; }
     .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     input[type=number]::-webkit-inner-spin-button,
     input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
     /* Modal Animation */
-    .modal { opacity: 0; visibility: hidden; transition: all 0.3s ease-in-out; }
-    .modal.active { opacity: 1; visibility: visible; }
-    .modal.active .modal-content { transform: scale(1); }
-    .modal .modal-content { transform: scale(0.95); transition: all 0.3s ease-in-out; }
+    .modal { opacity:0; visibility:hidden; transition:all .25s ease; }
+    .modal.active { opacity:1; visibility:visible; }
+    .modal .modal-content { transform:scale(.96); transition:all .25s ease; }
+    .modal.active .modal-content { transform:scale(1); }
 
     /* Tiny toast */
     .toast {
-      position: fixed;
-      left: 50%;
-      bottom: 18px;
-      transform: translateX(-50%);
-      z-index: 9999;
-      background: #0f172a;
-      color: white;
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 13px;
-      box-shadow: 0 10px 20px rgba(0,0,0,.2);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .2s ease;
+      position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+      z-index:9999; background:#0f172a; color:#fff; padding:10px 14px; border-radius:10px;
+      font-size:13px; box-shadow:0 10px 20px rgba(0,0,0,.2);
+      opacity:0; pointer-events:none; transition:opacity .2s ease;
     }
-    .toast.show { opacity: 1; }
+    .toast.show { opacity:1; }
+
+    /* --- Split panes (resizable widths) --- */
+    .split-root { height: calc(100vh - 140px); }
+    .split {
+      display:flex; height:100%;
+      background:transparent;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .pane {
+      height:100%;
+      min-width: 260px;
+      overflow: hidden;
+      display:flex;
+      flex-direction: column;
+    }
+    .gutter {
+      width: 10px;
+      cursor: col-resize;
+      position: relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      user-select:none;
+    }
+    .gutter::before {
+      content:"";
+      width: 4px;
+      height: 70px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      box-shadow: inset 0 0 0 1px #cbd5e1;
+    }
+    .gutter:hover::before { background:#cbd5e1; }
+
+    /* modal scroll */
+    .modal-scroll { max-height: 72vh; overflow:auto; }
   </style>
 </head>
 
@@ -73,6 +95,10 @@
               class="border-transparent text-gray-500 hover:text-blue-600 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors">
               <i class="fa-solid fa-list-check mr-2"></i> Quản lý CLO
             </button>
+            <button onclick="toggleSpecialtyLibrary(true)"
+              class="border-transparent text-gray-500 hover:text-blue-600 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors">
+              <i class="fa-solid fa-book-medical mr-2"></i> Thư viện Phân môn
+            </button>
           </div>
         </div>
 
@@ -90,25 +116,19 @@
           <!-- ✅ LOAD -->
           <button onclick="loadBlueprint()"
             class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
-            <i class="fa-solid fa-cloud-arrow-down mr-2"></i> Tải (Load)
+            <i class="fa-solid fa-cloud-arrow-down mr-2"></i> Tải
           </button>
 
           <!-- ✅ SAVE -->
           <button onclick="saveBlueprint()"
             class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
-            <i class="fa-solid fa-floppy-disk mr-2"></i> Lưu (Save)
+            <i class="fa-solid fa-floppy-disk mr-2"></i> Lưu
           </button>
 
-          <!-- ✅ AI Suggest -->
-          <button onclick="aiSuggest()"
-            class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
-            <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Gợi ý AI
-          </button>
-
-          <!-- ✅ Export -->
-          <button onclick="exportData()"
+          <!-- ✅ Export Report (specialties counts) -->
+          <button onclick="openReportModal()"
             class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
-            <i class="fa-solid fa-file-export mr-2"></i> Xuất Đề thi
+            <i class="fa-solid fa-file-export mr-2"></i> Xuất báo cáo
           </button>
         </div>
       </div>
@@ -117,198 +137,208 @@
 
   <!-- Main Content -->
   <main class="flex-grow w-full px-4 sm:px-6 lg:px-8 py-6 max-w-[1920px] mx-auto">
-    <div class="grid grid-cols-12 gap-6 h-[calc(100vh-140px)]">
+    <!-- Split panes: left/right with draggable gutter -->
+    <div class="split-root">
+      <div class="split" id="split">
+        <!-- Left pane -->
+        <div id="leftPane" class="pane" style="width: 32%;">
+          <div class="flex flex-col gap-6 overflow-hidden h-full">
 
-      <!-- Left Sidebar -->
-      <div class="col-span-3 flex flex-col gap-6 overflow-hidden h-full">
-
-        <!-- General Settings -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 shrink-0">
-          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4 flex items-center">
-            <i class="fa-solid fa-sliders mr-2 text-blue-500"></i> Thông số chung
-          </h3>
-
-          <div class="space-y-4">
-            <div class="flex justify-between items-center group">
-              <label class="text-sm text-slate-600 font-medium">Tổng số câu hỏi</label>
-              <div class="relative">
-                <input type="number" id="totalQuestions" value="100"
-                  onchange="if(lockBloom){applyBloomDefaultsToMatrix(true)} else {updateCalculations()}"
-                  class="w-24 text-right border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm font-bold text-blue-600 pr-8">
-                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">câu</span>
-              </div>
-            </div>
-
-            <div class="flex justify-between items-center">
-              <label class="text-sm text-slate-600">Thời gian làm bài</label>
-              <div class="relative">
-                <input type="number" value="90"
-                  class="w-24 text-right border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm pr-8">
-                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">phút</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bloom Defaults -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 shrink-0">
-          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4 flex items-center">
-            <i class="fa-solid fa-brain mr-2 text-purple-500"></i> Bloom mặc định (%)
-          </h3>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="text-xs text-gray-500 font-medium">Nhớ</label>
-              <input id="bloomP0" type="number" min="0" max="100" value="30"
-                class="mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm font-semibold text-slate-700"
-                onchange="updateBloomDefaultsFromUI()">
-            </div>
-            <div>
-              <label class="text-xs text-gray-500 font-medium">Hiểu</label>
-              <input id="bloomP1" type="number" min="0" max="100" value="30"
-                class="mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm font-semibold text-slate-700"
-                onchange="updateBloomDefaultsFromUI()">
-            </div>
-            <div>
-              <label class="text-xs text-gray-500 font-medium">Vận dụng</label>
-              <input id="bloomP2" type="number" min="0" max="100" value="25"
-                class="mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm font-semibold text-slate-700"
-                onchange="updateBloomDefaultsFromUI()">
-            </div>
-            <div>
-              <label class="text-xs text-gray-500 font-medium">Phân tích</label>
-              <input id="bloomP3" type="number" min="0" max="100" value="15"
-                class="mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm font-semibold text-slate-700"
-                onchange="updateBloomDefaultsFromUI()">
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between mt-4">
-            <label class="flex items-center gap-2 text-sm text-slate-600">
-              <input id="lockBloom" type="checkbox" class="rounded border-gray-300"
-                onchange="toggleLockBloom(this.checked)">
-              <span class="font-medium">Khóa Bloom (tự phân bổ)</span>
-            </label>
-            <button onclick="applyBloomDefaultsToMatrix(true)"
-              class="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-md font-semibold shadow-sm transition">
-              Áp dụng Bloom
-            </button>
-          </div>
-
-          <p class="text-[11px] text-gray-500 mt-2">
-            Khi bật “Khóa Bloom”, mọi thay đổi tổng số câu/trọng số sẽ tự phân bổ theo % Bloom này.
-          </p>
-        </div>
-
-        <!-- Clinical Problems Allocation -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col flex-grow overflow-hidden">
-          <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-            <div>
-              <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide">
-                <i class="fa-solid fa-stethoscope mr-2 text-rose-500"></i> Vấn đề Lâm sàng
+            <!-- General Settings -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 shrink-0">
+              <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4 flex items-center">
+                <i class="fa-solid fa-sliders mr-2 text-blue-500"></i> Thông số chung
               </h3>
-              <p class="text-[11px] text-gray-500 mt-0.5">Phân bổ % trọng số cho từng vấn đề</p>
-            </div>
-            <button onclick="addProblem()"
-              class="text-xs bg-white border border-gray-300 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 text-gray-700 px-3 py-1.5 rounded shadow-sm transition font-medium">
-              <i class="fa-solid fa-plus"></i> Thêm
-            </button>
-          </div>
 
-          <div class="overflow-y-auto p-3 space-y-3 flex-grow bg-slate-50/50" id="problemsList"></div>
+              <div class="space-y-4">
+                <div class="flex justify-between items-center group">
+                  <label class="text-sm text-slate-600 font-medium">Tổng số câu hỏi</label>
+                  <div class="relative">
+                    <input type="number" id="totalQuestions" value="100"
+                      onchange="if(lockBloom){applyBloomDefaultsToMatrix(true)} else {updateCalculations()}"
+                      class="w-24 text-right border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm font-bold text-blue-600 pr-8">
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">câu</span>
+                  </div>
+                </div>
 
-          <div class="p-4 border-t border-gray-200 bg-white">
-            <div class="flex justify-between items-center">
-              <span class="text-sm font-medium text-gray-700">Tổng trọng số:</span>
-              <span id="totalWeightDisplay" class="text-lg font-bold text-green-600">100%</span>
+                <div class="flex justify-between items-center">
+                  <label class="text-sm text-slate-600">Thời gian làm bài</label>
+                  <div class="relative">
+                    <input type="number" value="90"
+                      class="w-24 text-right border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm pr-8">
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">phút</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="w-full bg-gray-200 rounded-full h-2 mt-2 overflow-hidden">
-              <div id="weightProgressBar" class="bg-green-500 h-2 rounded-full transition-all duration-300" style="width: 100%"></div>
+
+            <!-- Bloom Defaults -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 shrink-0">
+              <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4 flex items-center">
+                <i class="fa-solid fa-brain mr-2 text-purple-500"></i> Bloom mặc định (%)
+              </h3>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="text-xs text-gray-500 font-medium">Nhớ</label>
+                  <input id="bloomP0" type="number" min="0" max="100" value="30"
+                    class="mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm font-semibold text-slate-700"
+                    onchange="updateBloomDefaultsFromUI()">
+                </div>
+                <div>
+                  <label class="text-xs text-gray-500 font-medium">Hiểu</label>
+                  <input id="bloomP1" type="number" min="0" max="100" value="30"
+                    class="mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm font-semibold text-slate-700"
+                    onchange="updateBloomDefaultsFromUI()">
+                </div>
+                <div>
+                  <label class="text-xs text-gray-500 font-medium">Vận dụng</label>
+                  <input id="bloomP2" type="number" min="0" max="100" value="25"
+                    class="mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm font-semibold text-slate-700"
+                    onchange="updateBloomDefaultsFromUI()">
+                </div>
+                <div>
+                  <label class="text-xs text-gray-500 font-medium">Phân tích</label>
+                  <input id="bloomP3" type="number" min="0" max="100" value="15"
+                    class="mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm font-semibold text-slate-700"
+                    onchange="updateBloomDefaultsFromUI()">
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between mt-4">
+                <label class="flex items-center gap-2 text-sm text-slate-600">
+                  <input id="lockBloom" type="checkbox" class="rounded border-gray-300"
+                    onchange="toggleLockBloom(this.checked)">
+                  <span class="font-medium">Khóa Bloom (tự phân bổ)</span>
+                </label>
+                <button onclick="applyBloomDefaultsToMatrix(true)"
+                  class="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-md font-semibold shadow-sm transition">
+                  Áp dụng Bloom
+                </button>
+              </div>
+
+              <p class="text-[11px] text-gray-500 mt-2">
+                Khi bật “Khóa Bloom”, mọi thay đổi tổng số câu/trọng số sẽ tự phân bổ theo % Bloom này.
+              </p>
             </div>
+
+            <!-- Clinical Problems Allocation -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col flex-grow overflow-hidden">
+              <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                <div>
+                  <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide">
+                    <i class="fa-solid fa-stethoscope mr-2 text-rose-500"></i> Vấn đề Lâm sàng
+                  </h3>
+                  <p class="text-[11px] text-gray-500 mt-0.5">Phân bổ % trọng số cho từng vấn đề</p>
+                </div>
+                <button onclick="addProblem()"
+                  class="text-xs bg-white border border-gray-300 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 text-gray-700 px-3 py-1.5 rounded shadow-sm transition font-medium">
+                  <i class="fa-solid fa-plus"></i> Thêm
+                </button>
+              </div>
+
+              <div class="overflow-y-auto p-3 space-y-3 flex-grow bg-slate-50/50" id="problemsList"></div>
+
+              <div class="p-4 border-t border-gray-200 bg-white">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm font-medium text-gray-700">Tổng trọng số:</span>
+                  <span id="totalWeightDisplay" class="text-lg font-bold text-green-600">100%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2 mt-2 overflow-hidden">
+                  <div id="weightProgressBar" class="bg-green-500 h-2 rounded-full transition-all duration-300" style="width: 100%"></div>
+                </div>
+              </div>
+            </div>
+
           </div>
+        </div>
+
+        <!-- Gutter -->
+        <div id="gutter" class="gutter" title="Kéo để đổi độ rộng"></div>
+
+        <!-- Right pane -->
+        <div id="rightPane" class="pane" style="width: 68%;">
+          <div class="flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 shrink-0">
+              <div>
+                <h2 class="text-lg font-bold text-slate-800 flex items-center">
+                  <i class="fa-solid fa-table-cells mr-2 text-gray-400"></i> Chi tiết Phân môn & Bloom
+                </h2>
+                <p class="text-xs text-gray-500 mt-1">Phân chia câu hỏi chi tiết theo Chuẩn đầu ra (CLO) và Mức độ nhận thức.</p>
+              </div>
+
+              <div class="flex items-center space-x-6">
+                <div class="flex items-center space-x-4 text-xs bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm">
+                  <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 mr-1.5"></span> Nhớ (1)</span>
+                  <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500 mr-1.5"></span> Hiểu (2)</span>
+                  <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500 mr-1.5"></span> Vận dụng (3)</span>
+                  <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 mr-1.5"></span> Phân tích (4)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="overflow-auto table-container flex-grow relative bg-white">
+              <table class="min-w-full divide-y divide-gray-200 relative">
+                <thead class="bg-gray-100 sticky top-0 z-20 shadow-sm ring-1 ring-gray-200">
+                  <tr>
+                    <th class="px-6 py-3.5 text-left text-xs font-bold text-gray-600 uppercase w-[30%] tracking-wider">Vấn đề & Phân môn</th>
+                    <th class="px-3 py-3.5 text-left text-xs font-bold text-gray-600 uppercase w-[20%] tracking-wider">
+                      Chuẩn đầu ra (CLO)
+                      <button onclick="toggleCLOModal(true)" class="ml-1 text-blue-500 hover:text-blue-700"><i class="fa-solid fa-gear"></i></button>
+                    </th>
+                    <th class="px-2 py-3.5 text-center text-xs font-bold text-blue-600 uppercase tracking-wider">Nhớ</th>
+                    <th class="px-2 py-3.5 text-center text-xs font-bold text-cyan-600 uppercase tracking-wider">Hiểu</th>
+                    <th class="px-2 py-3.5 text-center text-xs font-bold text-indigo-600 uppercase tracking-wider">V.Dụng</th>
+                    <th class="px-2 py-3.5 text-center text-xs font-bold text-purple-600 uppercase tracking-wider">P.Tích</th>
+                    <th class="px-4 py-3.5 text-center text-xs font-bold text-gray-800 uppercase bg-gray-200 border-l border-gray-300">Tổng</th>
+                    <th class="px-2 py-3.5"></th>
+                  </tr>
+                </thead>
+                <tbody id="matrixBody" class="bg-white divide-y divide-gray-200 text-sm"></tbody>
+              </table>
+            </div>
+
+            <div class="bg-white border-t border-gray-200 px-6 py-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] shrink-0">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <span class="text-xs font-bold uppercase text-slate-500 mr-2">Trạng thái Kiểm tra:</span>
+                  <span id="validationStatus" class="text-xs font-bold px-3 py-1.5 rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
+                    <i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang tính toán
+                  </span>
+                </div>
+
+                <div class="flex items-center space-x-8">
+                  <div class="text-center">
+                    <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Recall</div>
+                    <div id="sumRecall" class="font-bold text-lg text-blue-600 leading-none">0</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Understand</div>
+                    <div id="sumUnderstand" class="font-bold text-lg text-cyan-600 leading-none">0</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">App/Ana</div>
+                    <div id="sumAdvanced" class="font-bold text-lg text-indigo-600 leading-none">0</div>
+                  </div>
+                  <div class="pl-8 border-l border-gray-200 text-center">
+                    <div class="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1">Tổng cộng</div>
+                    <div id="grandTotal" class="font-black text-2xl text-slate-800 leading-none">0</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /Right panel inner -->
         </div>
       </div>
-
-      <!-- Right Panel -->
-      <div class="col-span-9 flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-
-        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 shrink-0">
-          <div>
-            <h2 class="text-lg font-bold text-slate-800 flex items-center">
-              <i class="fa-solid fa-table-cells mr-2 text-gray-400"></i> Chi tiết Phân môn & Bloom
-            </h2>
-            <p class="text-xs text-gray-500 mt-1">Phân chia câu hỏi chi tiết theo Chuẩn đầu ra (CLO) và Mức độ nhận thức.</p>
-          </div>
-
-          <div class="flex items-center space-x-6">
-            <div class="flex items-center space-x-4 text-xs bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm">
-              <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 mr-1.5"></span> Nhớ (1)</span>
-              <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500 mr-1.5"></span> Hiểu (2)</span>
-              <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500 mr-1.5"></span> Vận dụng (3)</span>
-              <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 mr-1.5"></span> Phân tích (4)</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="overflow-auto table-container flex-grow relative bg-white">
-          <table class="min-w-full divide-y divide-gray-200 relative">
-            <thead class="bg-gray-100 sticky top-0 z-20 shadow-sm ring-1 ring-gray-200">
-              <tr>
-                <th class="px-6 py-3.5 text-left text-xs font-bold text-gray-600 uppercase w-[30%] tracking-wider">Vấn đề & Phân môn</th>
-                <th class="px-3 py-3.5 text-left text-xs font-bold text-gray-600 uppercase w-[20%] tracking-wider">
-                  Chuẩn đầu ra (CLO)
-                  <button onclick="toggleCLOModal(true)" class="ml-1 text-blue-500 hover:text-blue-700"><i class="fa-solid fa-gear"></i></button>
-                </th>
-                <th class="px-2 py-3.5 text-center text-xs font-bold text-blue-600 uppercase tracking-wider">Nhớ</th>
-                <th class="px-2 py-3.5 text-center text-xs font-bold text-cyan-600 uppercase tracking-wider">Hiểu</th>
-                <th class="px-2 py-3.5 text-center text-xs font-bold text-indigo-600 uppercase tracking-wider">V.Dụng</th>
-                <th class="px-2 py-3.5 text-center text-xs font-bold text-purple-600 uppercase tracking-wider">P.Tích</th>
-                <th class="px-4 py-3.5 text-center text-xs font-bold text-gray-800 uppercase bg-gray-200 border-l border-gray-300">Tổng</th>
-                <th class="px-2 py-3.5"></th>
-              </tr>
-            </thead>
-            <tbody id="matrixBody" class="bg-white divide-y divide-gray-200 text-sm"></tbody>
-          </table>
-        </div>
-
-        <div class="bg-white border-t border-gray-200 px-6 py-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] shrink-0">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-              <span class="text-xs font-bold uppercase text-slate-500 mr-2">Trạng thái Kiểm tra:</span>
-              <span id="validationStatus" class="text-xs font-bold px-3 py-1.5 rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
-                <i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang tính toán
-              </span>
-            </div>
-
-            <div class="flex items-center space-x-8">
-              <div class="text-center">
-                <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Recall</div>
-                <div id="sumRecall" class="font-bold text-lg text-blue-600 leading-none">0</div>
-              </div>
-              <div class="text-center">
-                <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Understand</div>
-                <div id="sumUnderstand" class="font-bold text-lg text-cyan-600 leading-none">0</div>
-              </div>
-              <div class="text-center">
-                <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">App/Ana</div>
-                <div id="sumAdvanced" class="font-bold text-lg text-indigo-600 leading-none">0</div>
-              </div>
-              <div class="pl-8 border-l border-gray-200 text-center">
-                <div class="text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-1">Tổng cộng</div>
-                <div id="grandTotal" class="font-black text-2xl text-slate-800 leading-none">0</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- /Right Panel -->
     </div>
   </main>
 
   <!-- CLO Management Modal -->
   <div id="cloModal" class="modal fixed inset-0 z-[60] flex items-center justify-center">
     <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="toggleCLOModal(false)"></div>
-    <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-2xl relative z-10 flex flex-col max-h-[85vh]">
+    <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-2xl relative z-10 flex flex-col">
       <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
         <h3 class="text-lg font-bold text-slate-800">Quản lý Chuẩn đầu ra (CLO)</h3>
         <button onclick="toggleCLOModal(false)" class="text-gray-400 hover:text-gray-600">
@@ -316,7 +346,7 @@
         </button>
       </div>
 
-      <div class="p-6 overflow-y-auto flex-grow bg-slate-50">
+      <div class="p-6 bg-slate-50 modal-scroll">
         <div id="cloListContainer" class="space-y-3"></div>
         <button onclick="addCLO()"
           class="mt-4 w-full py-2.5 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 font-medium hover:bg-blue-50 hover:border-blue-400 transition-colors flex items-center justify-center">
@@ -326,9 +356,7 @@
 
       <div class="px-6 py-4 border-t border-gray-100 flex justify-end bg-white rounded-b-xl">
         <button onclick="toggleCLOModal(false)"
-          class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-lg font-medium transition mr-3">
-          Đóng
-        </button>
+          class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-lg font-medium transition mr-3">Đóng</button>
         <button onclick="saveCLOs()"
           class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium shadow-sm transition">
           <i class="fa-solid fa-save mr-2"></i> Lưu thay đổi
@@ -337,10 +365,110 @@
     </div>
   </div>
 
+  <!-- Specialty Library Modal -->
+  <div id="specLibModal" class="modal fixed inset-0 z-[60] flex items-center justify-center">
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="toggleSpecialtyLibrary(false)"></div>
+    <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-2xl relative z-10 flex flex-col">
+      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+        <h3 class="text-lg font-bold text-slate-800">Thư viện Phân môn (nhập trước)</h3>
+        <button onclick="toggleSpecialtyLibrary(false)" class="text-gray-400 hover:text-gray-600">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+
+      <div class="p-6 bg-slate-50 modal-scroll">
+        <p class="text-sm text-gray-600 mb-3">
+          Nhập danh sách phân môn dùng chung. Khi “Thêm Phân môn”, bạn có thể chọn nhanh từ danh sách này.
+        </p>
+
+        <div class="flex gap-2">
+          <input id="specLibInput" type="text" placeholder="Ví dụ: Nội Tim mạch"
+            class="flex-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm">
+          <button onclick="addToSpecialtyLibrary()"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-semibold shadow-sm transition">
+            Thêm
+          </button>
+        </div>
+
+        <div class="mt-4">
+          <div class="text-xs font-bold text-gray-500 uppercase mb-2">Danh sách phân môn</div>
+          <div id="specLibList" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <div class="px-6 py-4 border-t border-gray-100 flex justify-end bg-white rounded-b-xl">
+        <button onclick="toggleSpecialtyLibrary(false)"
+          class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-lg font-medium transition">
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Modal (export counts by problem & specialty) -->
+  <div id="reportModal" class="modal fixed inset-0 z-[60] flex items-center justify-center">
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeReportModal()"></div>
+    <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-4xl relative z-10 flex flex-col">
+      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+        <h3 class="text-lg font-bold text-slate-800">Báo cáo: Số câu theo Vấn đề → Phân môn</h3>
+        <button onclick="closeReportModal()" class="text-gray-400 hover:text-gray-600">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+
+      <div class="p-6 bg-slate-50 modal-scroll">
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-sm text-gray-600">
+            Xuất nhanh để dán vào Excel/Google Sheets.
+          </div>
+          <div class="flex gap-2">
+            <button onclick="copyReportTSV()"
+              class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-semibold shadow-sm transition">
+              <i class="fa-solid fa-copy mr-2"></i> Copy TSV
+            </button>
+            <button onclick="downloadReportCSV()"
+              class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-semibold shadow-sm transition">
+              <i class="fa-solid fa-download mr-2"></i> Tải CSV
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+          <table class="min-w-full text-sm">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="text-left px-4 py-2 font-bold text-gray-600 uppercase text-xs">Vấn đề</th>
+                <th class="text-left px-4 py-2 font-bold text-gray-600 uppercase text-xs">Phân môn</th>
+                <th class="text-center px-4 py-2 font-bold text-gray-600 uppercase text-xs">Nhớ</th>
+                <th class="text-center px-4 py-2 font-bold text-gray-600 uppercase text-xs">Hiểu</th>
+                <th class="text-center px-4 py-2 font-bold text-gray-600 uppercase text-xs">V.Dụng</th>
+                <th class="text-center px-4 py-2 font-bold text-gray-600 uppercase text-xs">P.Tích</th>
+                <th class="text-center px-4 py-2 font-bold text-gray-800 uppercase text-xs bg-gray-200">Tổng</th>
+              </tr>
+            </thead>
+            <tbody id="reportBody" class="divide-y divide-gray-100"></tbody>
+          </table>
+        </div>
+
+        <textarea id="reportText" class="mt-4 w-full h-36 text-xs font-mono border border-gray-300 rounded-md p-3 bg-white"
+          placeholder="TSV sẽ hiện ở đây để copy..." readonly></textarea>
+      </div>
+
+      <div class="px-6 py-4 border-t border-gray-100 flex justify-end bg-white rounded-b-xl">
+        <button onclick="closeReportModal()"
+          class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-lg font-medium transition">
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast"></div>
 
   <script>
-    // --- DATA MODEL ---
+    // ---------------------------
+    // DATA MODEL
+    // ---------------------------
     let CLOs = [
       { id: 'clo1', code: 'CLO1', name: 'Chẩn đoán xác định & phân biệt' },
       { id: 'clo2', code: 'CLO2', name: 'Điều trị & Xử trí cấp cứu' },
@@ -389,7 +517,12 @@
     let bloomDefaults = [30, 30, 25, 15]; // [%] Nhớ, Hiểu, Vận dụng, Phân tích
     let lockBloom = false;
 
-    // --- TOAST ---
+    // --- SPECIALTY LIBRARY (pre-input) ---
+    let specialtyLibrary = ["Nội Tim mạch", "Nội Hô hấp", "Cấp cứu", "Nội Tiêu hóa", "Ngoại Tiêu hóa"];
+
+    // ---------------------------
+    // TOAST
+    // ---------------------------
     function showToast(msg) {
       const t = document.getElementById('toast');
       t.textContent = msg;
@@ -397,7 +530,9 @@
       setTimeout(() => t.classList.remove('show'), 2200);
     }
 
-    // --- Helpers ---
+    // ---------------------------
+    // Helpers
+    // ---------------------------
     function escapeHtml(str) {
       return String(str ?? '')
         .replaceAll('&', '&amp;')
@@ -448,11 +583,11 @@
       showToast(lockBloom ? "🔒 Đã bật Khóa Bloom" : "🔓 Đã tắt Khóa Bloom");
     }
 
-    // Chia N theo tỉ lệ %, làm tròn và đảm bảo tổng đúng N
+    // Split N by percents ensuring exact sum
     function splitByPercents(total, percents4) {
       const raw = percents4.map(p => total * (p / 100));
       const ints = raw.map(x => Math.floor(x));
-      let remain = total - ints.reduce((a,b)=>a+b,0);
+      let remain = total - ints.reduce((a, b) => a + b, 0);
 
       const fracIdx = raw
         .map((x, i) => ({ i, frac: x - Math.floor(x) }))
@@ -467,22 +602,16 @@
       return ints;
     }
 
-    // Áp dụng Bloom mặc định để phân bổ lại TOÀN BỘ matrix
+    // Apply bloom defaults to whole matrix
     function applyBloomDefaultsToMatrix(keepSpecialtyWeights = true) {
       const totalQ = parseInt(document.getElementById("totalQuestions")?.value || "0", 10) || 0;
       if (totalQ <= 0) { showToast("❌ Tổng số câu hỏi phải > 0"); return; }
 
-      // Target mỗi vấn đề theo weight
       const targetsByProblem = problems.map(p => Math.round((p.weight / 100) * totalQ));
-
-      // chỉnh sai số do làm tròn để tổng = totalQ
-      let sumTargets = targetsByProblem.reduce((a,b)=>a+b,0);
+      let sumTargets = targetsByProblem.reduce((a, b) => a + b, 0);
       let diff = totalQ - sumTargets;
 
-      const order = problems
-        .map((p, idx) => ({ idx, w: p.weight }))
-        .sort((a,b)=>b.w-a.w);
-
+      const order = problems.map((p, idx) => ({ idx, w: p.weight })).sort((a, b) => b.w - a.w);
       let oi = 0;
       while (diff !== 0 && order.length) {
         const idx = order[oi % order.length].idx;
@@ -491,114 +620,89 @@
         oi++;
       }
 
-      // Phân bổ vấn đề -> phân môn -> bloom 4 mức
       problems.forEach((p, pIndex) => {
         const targetProblemQ = targetsByProblem[pIndex];
         const specs = p.specialties || [];
         if (specs.length === 0) return;
 
-        const currentTotals = specs.map(s => (s.levels || [0,0,0,0]).reduce((a,b)=>a+b,0));
-        const currentSum = currentTotals.reduce((a,b)=>a+b,0);
+        const currentTotals = specs.map(s => (s.levels || [0, 0, 0, 0]).reduce((a, b) => a + b, 0));
+        const currentSum = currentTotals.reduce((a, b) => a + b, 0);
 
         let specTargets;
         if (keepSpecialtyWeights && currentSum > 0) {
           const ratios = currentTotals.map(x => x / currentSum);
           const raw = ratios.map(r => targetProblemQ * r);
           specTargets = raw.map(x => Math.floor(x));
-          let remain = targetProblemQ - specTargets.reduce((a,b)=>a+b,0);
+          let remain = targetProblemQ - specTargets.reduce((a, b) => a + b, 0);
 
-          const fracIdx = raw.map((x,i)=>({i, frac:x-Math.floor(x)})).sort((a,b)=>b.frac-a.frac);
-          let k=0;
-          while (remain>0) { specTargets[fracIdx[k%fracIdx.length].i]++; remain--; k++; }
+          const fracIdx = raw.map((x, i) => ({ i, frac: x - Math.floor(x) })).sort((a, b) => b.frac - a.frac);
+          let k = 0;
+          while (remain > 0) { specTargets[fracIdx[k % fracIdx.length].i]++; remain--; k++; }
         } else {
           const base = Math.floor(targetProblemQ / specs.length);
-          specTargets = specs.map(()=>base);
-          let remain = targetProblemQ - base*specs.length;
-          let k=0;
-          while (remain>0) { specTargets[k%specs.length]++; remain--; k++; }
+          specTargets = specs.map(() => base);
+          let remain = targetProblemQ - base * specs.length;
+          let k = 0;
+          while (remain > 0) { specTargets[k % specs.length]++; remain--; k++; }
         }
 
         specs.forEach((s, sIndex) => {
           const t = specTargets[sIndex];
-          const lv = splitByPercents(t, bloomDefaults);
-          s.levels = lv;
+          s.levels = splitByPercents(t, bloomDefaults);
         });
       });
 
       updateCalculations();
-      showToast("✅ Đã áp dụng Bloom mặc định cho toàn bộ ma trận");
+      showToast("✅ Đã áp dụng Bloom mặc định");
     }
 
-    // ✅ AI Suggest (via /api/ai-suggest)
-    async function aiSuggest() {
-      try {
-        const totalQuestions = parseInt(document.getElementById("totalQuestions")?.value || "0", 10) || 0;
-        const payload = { totalQuestions, problems, CLOs };
-
-        const r = await fetch("/api/ai-suggest", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        const j = await r.json();
-        if (!r.ok || !j?.ok) throw new Error(j?.error || "AI failed");
-
-        if (j?.suggested?.problems) {
-          problems = j.suggested.problems;
-          // Nếu đang khóa bloom thì áp bloom lại cho nhất quán
-          if (lockBloom) applyBloomDefaultsToMatrix(true);
-          else updateCalculations();
-        }
-
-        const note = j?.notes?.[0] ? ("Ghi chú: " + j.notes[0]) : "✅ AI đã gợi ý xong!";
-        showToast(note);
-      } catch (e) {
-        showToast("❌ AI lỗi: " + (e?.message || e));
-      }
-    }
-
-    // ✅ SAVE to DB (Vercel Postgres via /api/save)
+    // ---------------------------
+    // SAVE / LOAD (optional API hooks)
+    // ---------------------------
     async function saveBlueprint() {
       try {
         updateExamMeta();
+        saveSplitSizes();
 
         const payload = {
           examMeta,
           bloomDefaults,
           lockBloom,
+          split: getSplitState(),
+          specialtyLibrary,
           totalQuestions: parseInt(document.getElementById('totalQuestions')?.value || "0", 10),
           CLOs,
           problems,
           savedAt: new Date().toISOString()
         };
 
-        const res = await fetch("/api/save", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: (examMeta?.title || "MedMatrix Blueprint") + " - " + new Date().toLocaleString(),
-            data: payload
-          })
-        });
-
-        const json = await res.json();
-        if (!res.ok) throw new Error(json?.error || "Save failed");
-
-        const id = json.id;
-        localStorage.setItem("lastBlueprintId", id);
-
-        const url = new URL(window.location.href);
-        url.searchParams.set("id", id);
-        window.history.replaceState({}, "", url.toString());
-
-        showToast("✅ Đã lưu! ID: " + id);
+        // If you have /api/save, keep. Otherwise fallback localStorage only.
+        if (await endpointExists("/api/save")) {
+          const res = await fetch("/api/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title: (examMeta?.title || "MedMatrix Blueprint") + " - " + new Date().toLocaleString(),
+              data: payload
+            })
+          });
+          const json = await res.json();
+          if (!res.ok) throw new Error(json?.error || "Save failed");
+          const id = json.id;
+          localStorage.setItem("lastBlueprintId", id);
+          const url = new URL(window.location.href);
+          url.searchParams.set("id", id);
+          window.history.replaceState({}, "", url.toString());
+          showToast("✅ Đã lưu! ID: " + id);
+        } else {
+          localStorage.setItem("medmatrix_blueprint_local", JSON.stringify(payload));
+          showToast("✅ Đã lưu (localStorage)");
+        }
       } catch (e) {
         alert("❌ Lưu thất bại: " + (e?.message || e));
       }
     }
 
-    // ✅ LOAD from DB (via /api/load?id=...)
     async function loadBlueprint() {
       try {
         const url = new URL(window.location.href);
@@ -606,49 +710,72 @@
         const idFromLocal = localStorage.getItem("lastBlueprintId");
         const id = idFromUrl || idFromLocal;
 
-        if (!id) {
-          alert("Chưa có ID để tải. Hãy bấm Save trước, hoặc mở link có dạng: ?id=xxxxx");
+        if (id && await endpointExists("/api/load")) {
+          const res = await fetch("/api/load?id=" + encodeURIComponent(id));
+          const json = await res.json();
+          if (!res.ok) throw new Error(json?.error || "Load failed");
+          if (!json || !json.data) throw new Error("Không có dữ liệu trong bản lưu");
+
+          restoreFromPayload(json.data);
+          showToast("✅ Đã tải dữ liệu từ DB!");
           return;
         }
 
-        const res = await fetch("/api/load?id=" + encodeURIComponent(id));
-        const json = await res.json();
-        if (!res.ok) throw new Error(json?.error || "Load failed");
-        if (!json || !json.data) throw new Error("Không có dữ liệu trong bản lưu");
-
-        if (json.data.totalQuestions != null) {
-          document.getElementById('totalQuestions').value = json.data.totalQuestions;
-        }
-
-        CLOs = json.data.CLOs || CLOs;
-        problems = json.data.problems || problems;
-
-        examMeta = json.data.examMeta || examMeta;
-        bloomDefaults = json.data.bloomDefaults || bloomDefaults;
-        lockBloom = (json.data.lockBloom != null) ? !!json.data.lockBloom : lockBloom;
-
-        setExamUIFromState();
-        setBloomUIFromState();
-
-        if (lockBloom) applyBloomDefaultsToMatrix(true);
-        else updateCalculations();
-
-        showToast("✅ Đã tải dữ liệu từ DB!");
+        // fallback local
+        const raw = localStorage.getItem("medmatrix_blueprint_local");
+        if (!raw) { alert("Chưa có dữ liệu để tải. Hãy bấm Lưu trước."); return; }
+        const data = JSON.parse(raw);
+        restoreFromPayload(data);
+        showToast("✅ Đã tải (localStorage)");
       } catch (e) {
         alert("❌ Tải thất bại: " + (e?.message || e));
       }
     }
 
-    // --- CLO MANAGEMENT ---
+    function restoreFromPayload(data) {
+      if (data.totalQuestions != null) document.getElementById('totalQuestions').value = data.totalQuestions;
+
+      CLOs = data.CLOs || CLOs;
+      problems = data.problems || problems;
+
+      examMeta = data.examMeta || examMeta;
+      bloomDefaults = data.bloomDefaults || bloomDefaults;
+      lockBloom = (data.lockBloom != null) ? !!data.lockBloom : lockBloom;
+
+      specialtyLibrary = data.specialtyLibrary || specialtyLibrary;
+
+      setExamUIFromState();
+      setBloomUIFromState();
+      renderSpecialtyLibrary();
+
+      // restore split widths
+      if (data.split) {
+        setSplitState(data.split);
+        saveSplitSizes();
+      } else {
+        restoreSplitSizes();
+      }
+
+      if (lockBloom) applyBloomDefaultsToMatrix(true);
+      else updateCalculations();
+    }
+
+    async function endpointExists(path) {
+      try {
+        const res = await fetch(path, { method: "HEAD" });
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+
+    // ---------------------------
+    // CLO MANAGEMENT
+    // ---------------------------
     function toggleCLOModal(show) {
       const modal = document.getElementById('cloModal');
-      if (show) {
-        renderCLOManager();
-        modal.classList.add('active');
-      } else {
-        modal.classList.remove('active');
-        updateCalculations();
-      }
+      if (show) { renderCLOManager(); modal.classList.add('active'); }
+      else { modal.classList.remove('active'); updateCalculations(); }
     }
 
     function renderCLOManager() {
@@ -686,10 +813,7 @@
     }
 
     function removeCLO(index) {
-      if (CLOs.length <= 1) {
-        alert("Cần ít nhất 1 chuẩn đầu ra!");
-        return;
-      }
+      if (CLOs.length <= 1) { alert("Cần ít nhất 1 chuẩn đầu ra!"); return; }
       if (confirm("Xóa CLO này? Các câu hỏi liên quan sẽ bị ảnh hưởng.")) {
         CLOs.splice(index, 1);
         renderCLOManager();
@@ -700,11 +824,60 @@
       CLOs[index][field] = value;
     }
 
-    function saveCLOs() {
-      toggleCLOModal(false);
+    function saveCLOs() { toggleCLOModal(false); }
+
+    // ---------------------------
+    // SPECIALTY LIBRARY
+    // ---------------------------
+    function toggleSpecialtyLibrary(show) {
+      const modal = document.getElementById('specLibModal');
+      if (show) {
+        renderSpecialtyLibrary();
+        modal.classList.add('active');
+        setTimeout(() => document.getElementById('specLibInput')?.focus(), 50);
+      } else {
+        modal.classList.remove('active');
+      }
     }
 
-    // --- MAIN RENDER FUNCTIONS ---
+    function renderSpecialtyLibrary() {
+      const wrap = document.getElementById('specLibList');
+      wrap.innerHTML = '';
+
+      const items = [...new Set((specialtyLibrary || []).map(s => String(s).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'vi'));
+      specialtyLibrary = items;
+
+      items.forEach((name, idx) => {
+        const div = document.createElement('div');
+        div.className = "flex items-center justify-between bg-white border border-gray-200 rounded-md px-3 py-2";
+        div.innerHTML = `
+          <div class="text-sm font-medium text-slate-700">${escapeHtml(name)}</div>
+          <button class="text-gray-300 hover:text-red-500" onclick="removeFromSpecialtyLibrary(${idx})" title="Xóa">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        `;
+        wrap.appendChild(div);
+      });
+    }
+
+    function addToSpecialtyLibrary() {
+      const input = document.getElementById('specLibInput');
+      const v = (input?.value || "").trim();
+      if (!v) { showToast("❌ Nhập tên phân môn"); return; }
+      specialtyLibrary.push(v);
+      input.value = "";
+      renderSpecialtyLibrary();
+      showToast("✅ Đã thêm phân môn vào thư viện");
+    }
+
+    function removeFromSpecialtyLibrary(idx) {
+      specialtyLibrary.splice(idx, 1);
+      renderSpecialtyLibrary();
+    }
+
+    // ---------------------------
+    // MAIN RENDER
+    // ---------------------------
     function renderProblemsList() {
       const container = document.getElementById('problemsList');
       const totalQ = parseInt(document.getElementById('totalQuestions').value) || 0;
@@ -715,7 +888,7 @@
         totalWeight += p.weight;
         const targetQ = Math.round((p.weight / 100) * totalQ);
         let currentActual = 0;
-        p.specialties.forEach(s => currentActual += s.levels.reduce((a, b) => a + b, 0));
+        (p.specialties || []).forEach(s => currentActual += (s.levels || [0,0,0,0]).reduce((a, b) => a + b, 0));
 
         const el = document.createElement('div');
         el.className = "bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow group relative";
@@ -736,7 +909,7 @@
             </div>
             <div class="flex items-center bg-blue-50 px-2 py-1 rounded border border-blue-100">
               <input type="number" value="${p.weight}" onchange="updateProblemWeight(${index}, this.value)"
-                class="w-8 bg-transparent text-right text-xs font-bold text-blue-700 focus:outline-none p-0 border-none">
+                class="w-10 bg-transparent text-right text-xs font-bold text-blue-700 focus:outline-none p-0 border-none">
               <span class="text-xs text-blue-600 ml-0.5">%</span>
             </div>
           </div>
@@ -780,7 +953,7 @@
       problems.forEach((p, pIndex) => {
         const targetQ = Math.round((p.weight / 100) * totalQ);
         let currentProblemTotal = 0;
-        p.specialties.forEach(s => currentProblemTotal += s.levels.reduce((a, b) => a + b, 0));
+        (p.specialties || []).forEach(s => currentProblemTotal += (s.levels || [0,0,0,0]).reduce((a, b) => a + b, 0));
 
         const trHeader = document.createElement('tr');
         trHeader.className = "bg-slate-50/80 hover:bg-slate-100 transition-colors border-b border-gray-200";
@@ -796,13 +969,30 @@
                   </div>
                 </div>
               </div>
+
               <div class="flex items-center space-x-4">
                 <span class="text-[11px] font-bold uppercase tracking-wider ${currentProblemTotal === targetQ ? 'text-green-600' : 'text-orange-500'}">
                   Đã phân bổ: ${currentProblemTotal}/${targetQ}
                 </span>
+
+                <!-- Add specialty quick pick -->
+                <div class="hidden md:flex items-center gap-2">
+                  <select id="quickSpec_${pIndex}"
+                    class="text-xs border border-gray-200 rounded-md py-1.5 px-2 bg-white focus:ring-blue-500 focus:border-blue-500">
+                    ${specialtyLibrary.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('')}
+                    <option value="__custom__">+ Nhập tay…</option>
+                  </select>
+
+                  <button onclick="addSpecialty(${pIndex})"
+                    class="text-xs bg-white border border-blue-200 text-blue-600 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-md font-medium transition shadow-sm flex items-center">
+                    <i class="fa-solid fa-plus mr-1.5"></i> Thêm Phân môn
+                  </button>
+                </div>
+
+                <!-- Mobile fallback -->
                 <button onclick="addSpecialty(${pIndex})"
-                  class="text-xs bg-white border border-blue-200 text-blue-600 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-md font-medium transition shadow-sm flex items-center">
-                  <i class="fa-solid fa-plus mr-1.5"></i> Thêm Phân môn
+                  class="md:hidden text-xs bg-white border border-blue-200 text-blue-600 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-md font-medium transition shadow-sm flex items-center">
+                  <i class="fa-solid fa-plus mr-1.5"></i> Thêm
                 </button>
               </div>
             </div>
@@ -810,8 +1000,8 @@
         `;
         tbody.appendChild(trHeader);
 
-        p.specialties.forEach((s, sIndex) => {
-          const sTotal = s.levels.reduce((a, b) => a + b, 0);
+        (p.specialties || []).forEach((s, sIndex) => {
+          const sTotal = (s.levels || [0,0,0,0]).reduce((a, b) => a + b, 0);
           grandTotal += sTotal;
           sumR += s.levels[0];
           sumU += s.levels[1];
@@ -875,10 +1065,10 @@
         });
       });
 
-      animateValue("sumRecall", parseInt(document.getElementById('sumRecall').innerText, 10) || 0, sumR, 500);
-      animateValue("sumUnderstand", parseInt(document.getElementById('sumUnderstand').innerText, 10) || 0, sumU, 500);
-      animateValue("sumAdvanced", parseInt(document.getElementById('sumAdvanced').innerText, 10) || 0, (sumAp + sumAn), 500);
-      animateValue("grandTotal", parseInt(document.getElementById('grandTotal').innerText, 10) || 0, grandTotal, 500);
+      animateValue("sumRecall", parseInt(document.getElementById('sumRecall').innerText, 10) || 0, sumR, 350);
+      animateValue("sumUnderstand", parseInt(document.getElementById('sumUnderstand').innerText, 10) || 0, sumU, 350);
+      animateValue("sumAdvanced", parseInt(document.getElementById('sumAdvanced').innerText, 10) || 0, (sumAp + sumAn), 350);
+      animateValue("grandTotal", parseInt(document.getElementById('grandTotal').innerText, 10) || 0, grandTotal, 350);
 
       const statusEl = document.getElementById('validationStatus');
       const diff = grandTotal - totalQ;
@@ -912,7 +1102,9 @@
       setTimeout(() => { obj.innerHTML = end; clearInterval(timer); }, duration);
     }
 
-    // --- LOGIC UPDATES ---
+    // ---------------------------
+    // LOGIC UPDATES
+    // ---------------------------
     function updateCalculations() {
       renderProblemsList();
       renderMatrix();
@@ -920,13 +1112,8 @@
 
     function updateProblemWeight(index, val) {
       problems[index].weight = parseInt(val, 10) || 0;
-
-      if (lockBloom) {
-        applyBloomDefaultsToMatrix(true);
-      } else {
-        renderProblemsList();
-        renderMatrix();
-      }
+      if (lockBloom) applyBloomDefaultsToMatrix(true);
+      else updateCalculations();
     }
 
     function updateProblemName(index, val) {
@@ -941,7 +1128,6 @@
         weight: 0,
         specialties: [{ name: "Phân môn 1", cloId: CLOs[0].id, levels: [0, 0, 0, 0] }]
       });
-
       if (lockBloom) applyBloomDefaultsToMatrix(true);
       else updateCalculations();
 
@@ -959,10 +1145,27 @@
       }
     }
 
+    // Add specialty using library quick pick (per problem header)
     function addSpecialty(pIndex) {
-      problems[pIndex].specialties.push({ name: "", cloId: CLOs[0].id, levels: [0, 0, 0, 0] });
+      let name = "";
+      const sel = document.getElementById(`quickSpec_${pIndex}`);
+      if (sel && sel.value && sel.value !== "__custom__") {
+        name = sel.value;
+      } else {
+        name = prompt("Nhập tên phân môn:", "") || "";
+      }
+      name = name.trim();
+      if (!name) { showToast("❌ Chưa có tên phân môn"); return; }
+
+      // auto add to library if new
+      if (!specialtyLibrary.includes(name)) {
+        specialtyLibrary.push(name);
+        renderSpecialtyLibrary();
+      }
+
+      problems[pIndex].specialties.push({ name, cloId: CLOs[0].id, levels: [0, 0, 0, 0] });
       if (lockBloom) applyBloomDefaultsToMatrix(true);
-      else renderMatrix();
+      else updateCalculations();
     }
 
     function removeSpecialty(pIndex, sIndex) {
@@ -972,7 +1175,14 @@
     }
 
     function updateSpecialtyName(pIndex, sIndex, val) {
-      problems[pIndex].specialties[sIndex].name = val;
+      const v = (val || "").trim();
+      problems[pIndex].specialties[sIndex].name = v;
+
+      // if user renames and it's new, add to library
+      if (v && !specialtyLibrary.includes(v)) {
+        specialtyLibrary.push(v);
+        renderSpecialtyLibrary();
+      }
     }
 
     function updateSpecialtyCLO(pIndex, sIndex, val) {
@@ -983,20 +1193,200 @@
       const parsed = parseInt(val, 10) || 0;
       if (parsed >= 0) {
         problems[pIndex].specialties[sIndex].levels[levelIndex] = parsed;
-        // Nếu khóa bloom thì không cho “lệch”
         if (lockBloom) applyBloomDefaultsToMatrix(true);
         else updateCalculations();
       }
     }
 
-    function exportData() {
-      alert("Tính năng đang phát triển: Xuất dữ liệu ra file Excel/PDF.");
+    // ---------------------------
+    // REPORT: counts per problem -> specialty
+    // ---------------------------
+    function openReportModal() {
+      buildReport();
+      document.getElementById('reportModal').classList.add('active');
+    }
+    function closeReportModal() {
+      document.getElementById('reportModal').classList.remove('active');
     }
 
-    // --- INIT ---
+    function buildReport() {
+      const reportBody = document.getElementById('reportBody');
+      const reportText = document.getElementById('reportText');
+      reportBody.innerHTML = "";
+
+      const rows = [];
+      problems.forEach(p => {
+        (p.specialties || []).forEach(s => {
+          const lv = s.levels || [0,0,0,0];
+          const total = lv.reduce((a,b)=>a+b,0);
+          rows.push({
+            problem: p.name || "",
+            specialty: s.name || "",
+            r: lv[0]||0, u: lv[1]||0, ap: lv[2]||0, an: lv[3]||0,
+            total
+          });
+        });
+      });
+
+      // render table
+      rows.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="px-4 py-2 text-slate-700 font-medium">${escapeHtml(r.problem)}</td>
+          <td class="px-4 py-2 text-slate-700">${escapeHtml(r.specialty)}</td>
+          <td class="px-4 py-2 text-center">${r.r}</td>
+          <td class="px-4 py-2 text-center">${r.u}</td>
+          <td class="px-4 py-2 text-center">${r.ap}</td>
+          <td class="px-4 py-2 text-center">${r.an}</td>
+          <td class="px-4 py-2 text-center font-bold bg-gray-50">${r.total}</td>
+        `;
+        reportBody.appendChild(tr);
+      });
+
+      // TSV for copy/paste
+      const header = ["Vấn đề", "Phân môn", "Nhớ", "Hiểu", "V.Dụng", "P.Tích", "Tổng"];
+      const tsv = [
+        header.join("\t"),
+        ...rows.map(r => [r.problem, r.specialty, r.r, r.u, r.ap, r.an, r.total].join("\t"))
+      ].join("\n");
+
+      reportText.value = tsv;
+    }
+
+    async function copyReportTSV() {
+      try {
+        const text = document.getElementById('reportText').value || "";
+        await navigator.clipboard.writeText(text);
+        showToast("✅ Đã copy TSV");
+      } catch {
+        // fallback select
+        const ta = document.getElementById('reportText');
+        ta.select(); document.execCommand("copy");
+        showToast("✅ Đã copy TSV");
+      }
+    }
+
+    function downloadReportCSV() {
+      const rows = (document.getElementById('reportText').value || "").split("\n").map(line => line.split("\t"));
+      const csv = rows.map(cols => cols.map(c => `"${String(c).replaceAll('"','""')}"`).join(",")).join("\n");
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "medmatrix_report_specialty_counts.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast("✅ Đã tải CSV");
+    }
+
+    // ---------------------------
+    // SPLIT PANE RESIZE
+    // ---------------------------
+    function getSplitState() {
+      const left = document.getElementById('leftPane');
+      const right = document.getElementById('rightPane');
+      return { leftPct: pxToPct(left.getBoundingClientRect().width), rightPct: pxToPct(right.getBoundingClientRect().width) };
+    }
+
+    function setSplitState(state) {
+      const left = document.getElementById('leftPane');
+      const right = document.getElementById('rightPane');
+      const total = document.getElementById('split').getBoundingClientRect().width;
+      const gutterW = document.getElementById('gutter').getBoundingClientRect().width || 10;
+      const avail = total - gutterW;
+
+      const leftW = Math.max(260, Math.min(avail - 420, avail * (state.leftPct / 100)));
+      const rightW = Math.max(420, avail - leftW);
+
+      left.style.width = leftW + "px";
+      right.style.width = rightW + "px";
+    }
+
+    function pxToPct(px) {
+      const total = document.getElementById('split').getBoundingClientRect().width;
+      const gutterW = document.getElementById('gutter').getBoundingClientRect().width || 10;
+      const avail = total - gutterW;
+      return avail ? (px / avail) * 100 : 0;
+    }
+
+    function saveSplitSizes() {
+      const left = document.getElementById('leftPane').getBoundingClientRect().width;
+      localStorage.setItem("medmatrix_split_left_px", String(Math.round(left)));
+    }
+
+    function restoreSplitSizes() {
+      const px = parseInt(localStorage.getItem("medmatrix_split_left_px") || "0", 10);
+      if (!px) return;
+      const split = document.getElementById('split').getBoundingClientRect().width;
+      const gutterW = document.getElementById('gutter').getBoundingClientRect().width || 10;
+      const avail = split - gutterW;
+      const leftW = Math.max(260, Math.min(avail - 420, px));
+      const rightW = Math.max(420, avail - leftW);
+
+      document.getElementById('leftPane').style.width = leftW + "px";
+      document.getElementById('rightPane').style.width = rightW + "px";
+    }
+
+    function initSplitDrag() {
+      const gutter = document.getElementById('gutter');
+      const split = document.getElementById('split');
+      const left = document.getElementById('leftPane');
+      const right = document.getElementById('rightPane');
+
+      let dragging = false;
+
+      const onDown = (e) => {
+        dragging = true;
+        document.body.style.cursor = "col-resize";
+        e.preventDefault();
+      };
+
+      const onMove = (e) => {
+        if (!dragging) return;
+        const rect = split.getBoundingClientRect();
+        const gutterW = gutter.getBoundingClientRect().width || 10;
+        const x = e.clientX - rect.left;
+
+        const minLeft = 260;
+        const minRight = 420;
+
+        const avail = rect.width - gutterW;
+        const leftW = Math.max(minLeft, Math.min(avail - minRight, x));
+        const rightW = avail - leftW;
+
+        left.style.width = leftW + "px";
+        right.style.width = rightW + "px";
+      };
+
+      const onUp = () => {
+        if (!dragging) return;
+        dragging = false;
+        document.body.style.cursor = "";
+        saveSplitSizes();
+      };
+
+      gutter.addEventListener('mousedown', onDown);
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+
+      // touch support
+      gutter.addEventListener('touchstart', (e) => onDown(e.touches[0]), { passive: false });
+      window.addEventListener('touchmove', (e) => onMove(e.touches[0]), { passive: true });
+      window.addEventListener('touchend', onUp);
+    }
+
+    // ---------------------------
+    // INIT
+    // ---------------------------
     window.onload = function () {
       setExamUIFromState();
       setBloomUIFromState();
+      renderSpecialtyLibrary();
+
+      initSplitDrag();
+      restoreSplitSizes();
+
       updateCalculations();
     };
   </script>
