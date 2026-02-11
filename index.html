@@ -5,46 +5,68 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MedExam Graduation - Công cụ Thiết kế Ma trận Đề thi</title>
   <meta name="theme-color" content="#2563eb" />
-
-  <!-- UI -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <!-- Export Excel/Word -->
-  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
-
   <style>
-    body { font-family: 'Inter', sans-serif; background:#f8fafc; }
+    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; padding: 0; scroll-behavior: smooth; }
     .table-container::-webkit-scrollbar { height: 8px; width: 8px; }
     .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
+    /* Modal Animation */
     .modal { opacity: 0; visibility: hidden; transition: all 0.25s ease-in-out; }
     .modal.active { opacity: 1; visibility: visible; }
     .modal.active .modal-content { transform: scale(1); }
     .modal .modal-content { transform: scale(0.97); transition: all 0.25s ease-in-out; }
 
-    .toast{
-      position:fixed;left:50%;bottom:18px;transform:translateX(-50%);
-      z-index:9999;background:#0f172a;color:#fff;padding:10px 14px;border-radius:10px;
-      font-size:13px;box-shadow:0 10px 20px rgba(0,0,0,.2);
-      opacity:0;pointer-events:none;transition:opacity .2s ease;
+    /* Tiny toast */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      z-index: 9999;
+      background: #0f172a;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      box-shadow: 0 10px 20px rgba(0,0,0,.2);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
     }
-    .toast.show{opacity:1}
+    .toast.show { opacity: 1; }
 
-    .resizable-y{resize:vertical;overflow:auto;min-height:140px;max-height:70vh;}
-    .resize-hint{position:sticky;bottom:0;background:linear-gradient(to top, rgba(255,255,255,0.95), rgba(255,255,255,0));padding-top:10px;margin-top:10px;pointer-events:none;}
-    .suffix-wrap{position:relative;}
-    .suffix{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:#94a3b8;pointer-events:none;}
-    .num-input{padding-right:44px !important;text-align:right;}
-    .group-header{
-      position:sticky;top:0;z-index:5;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:12px;
-      padding:10px 12px;display:flex;justify-content:space-between;align-items:center;
-      box-shadow:0 1px 0 rgba(0,0,0,0.03);
+    /* Resizable left cards */
+    .resizable-y { resize: vertical; overflow: auto; min-height: 140px; max-height: 70vh; }
+    .resize-hint {
+      position: sticky;
+      bottom: 0;
+      background: linear-gradient(to top, rgba(255,255,255,0.95), rgba(255,255,255,0));
+      padding-top: 10px;
+      margin-top: 10px;
+      pointer-events: none;
+    }
+
+    /* Better number inputs with suffix */
+    .suffix-wrap { position: relative; }
+    .suffix {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      font-size: 11px; color: #94a3b8; pointer-events: none;
+    }
+    .num-input { padding-right: 44px !important; text-align: right; }
+
+    /* Group header pill */
+    .group-header {
+      position: sticky; top: 0; z-index: 5;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.03);
     }
   </style>
 </head>
@@ -87,8 +109,8 @@
 
         <div class="flex items-center space-x-2 sm:space-x-3">
           <div class="text-right mr-2 hidden lg:block">
-            <div id="examTitleTop" class="text-sm font-medium text-gray-900"></div>
-            <div id="examYearTop" class="text-xs text-gray-500"></div>
+            <div id="examTitleTop" class="text-sm font-medium text-gray-900">Kỳ thi Tốt nghiệp Bác sĩ Đa khoa</div>
+            <div id="examYearTop" class="text-xs text-gray-500">Niên khóa 2023-2024</div>
           </div>
 
           <button onclick="toggleExamSettings(true)" class="bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 px-3 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
@@ -96,14 +118,14 @@
           </button>
 
           <button onclick="loadBlueprint()" class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
-            <i class="fa-solid fa-cloud-arrow-down mr-2"></i> Tải (Local)
+            <i class="fa-solid fa-cloud-arrow-down mr-2"></i> Tải
           </button>
 
           <button onclick="saveBlueprint()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
-            <i class="fa-solid fa-floppy-disk mr-2"></i> Lưu (Local)
+            <i class="fa-solid fa-floppy-disk mr-2"></i> Lưu
           </button>
 
-          <button onclick="openExportChooser()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
+          <button onclick="exportReport()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
             <i class="fa-solid fa-file-export mr-2"></i> Xuất báo cáo
           </button>
         </div>
@@ -111,14 +133,14 @@
     </div>
   </nav>
 
-  <!-- Main -->
+  <!-- Main Content -->
   <main class="flex-grow w-full px-4 sm:px-6 lg:px-8 py-6 max-w-[1920px] mx-auto">
     <div class="grid grid-cols-12 gap-6 h-[calc(100vh-140px)]">
 
-      <!-- Left -->
+      <!-- Left Sidebar -->
       <div class="col-span-12 lg:col-span-4 xl:col-span-3 flex flex-col gap-6 overflow-hidden h-full">
 
-        <!-- General -->
+        <!-- Exam Settings (quick) -->
         <div id="cardGeneral" class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 shrink-0 resizable-y">
           <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4 flex items-center">
             <i class="fa-solid fa-sliders mr-2 text-blue-500"></i> Thông số chung
@@ -128,11 +150,8 @@
             <div class="flex justify-between items-center gap-3">
               <label class="text-sm text-slate-600 font-medium">Tổng số câu hỏi</label>
               <div class="suffix-wrap w-[120px]">
-                <input
-                  type="number" id="totalQuestions" value="100" min="0"
-                  onchange="updateCalculations()"
-                  class="num-input w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm font-bold text-blue-600"
-                />
+                <input type="number" id="totalQuestions" value="100" min="0" onchange="updateCalculations()"
+                  class="num-input w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm font-bold text-blue-600" />
                 <span class="suffix">câu</span>
               </div>
             </div>
@@ -140,11 +159,8 @@
             <div class="flex justify-between items-center gap-3">
               <label class="text-sm text-slate-600 font-medium">Thời gian làm bài</label>
               <div class="suffix-wrap w-[120px]">
-                <input
-                  type="number" id="durationMinutes" value="90" min="0"
-                  onchange="persistExamSettingsFromQuick()"
-                  class="num-input w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm font-semibold text-slate-700"
-                />
+                <input type="number" id="durationMinutes" value="90" min="0" onchange="persistExamSettingsFromQuick()"
+                  class="num-input w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm font-semibold text-slate-700" />
                 <span class="suffix">phút</span>
               </div>
             </div>
@@ -161,7 +177,7 @@
           </div>
         </div>
 
-        <!-- Bloom -->
+        <!-- Bloom default (%) -->
         <div id="cardBloom" class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 shrink-0 resizable-y">
           <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4 flex items-center">
             <i class="fa-solid fa-sitemap mr-2 text-purple-500"></i> BLOOM MẶC ĐỊNH (%)
@@ -170,19 +186,27 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="text-xs text-gray-500 font-semibold">Nhớ</label>
-              <input id="bloomRecall" type="number" min="0" max="100" class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 text-sm font-bold" value="30" onchange="onBloomChange()">
+              <input id="bloomRecall" type="number" min="0" max="100"
+                class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 text-sm font-bold"
+                value="30" onchange="onBloomChange()">
             </div>
             <div>
               <label class="text-xs text-gray-500 font-semibold">Hiểu</label>
-              <input id="bloomUnderstand" type="number" min="0" max="100" class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 text-sm font-bold" value="30" onchange="onBloomChange()">
+              <input id="bloomUnderstand" type="number" min="0" max="100"
+                class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 text-sm font-bold"
+                value="30" onchange="onBloomChange()">
             </div>
             <div>
               <label class="text-xs text-gray-500 font-semibold">Vận dụng</label>
-              <input id="bloomApply" type="number" min="0" max="100" class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 text-sm font-bold" value="25" onchange="onBloomChange()">
+              <input id="bloomApply" type="number" min="0" max="100"
+                class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 text-sm font-bold"
+                value="25" onchange="onBloomChange()">
             </div>
             <div>
               <label class="text-xs text-gray-500 font-semibold">Phân tích</label>
-              <input id="bloomAnalyze" type="number" min="0" max="100" class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 text-sm font-bold" value="15" onchange="onBloomChange()">
+              <input id="bloomAnalyze" type="number" min="0" max="100"
+                class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 text-sm font-bold"
+                value="15" onchange="onBloomChange()">
             </div>
           </div>
 
@@ -196,27 +220,41 @@
             </button>
           </div>
 
-          <p id="bloomHint" class="text-[11px] text-gray-500 mt-3"></p>
+          <p id="bloomHint" class="text-[11px] text-gray-500 mt-3">
+            Khi bật “Khóa Bloom”, hệ thống sẽ tự phân bổ số câu theo % Bloom dựa trên tổng số câu của từng phân môn.
+          </p>
 
           <div class="resize-hint text-[11px] text-slate-400">
             <i class="fa-solid fa-up-down-left-right mr-1"></i> Kéo góc phải-dưới để đổi chiều cao khung
           </div>
         </div>
 
-        <!-- Problems -->
+        <!-- Clinical Problems Allocation -->
         <div id="cardProblems" class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col flex-grow overflow-hidden resizable-y">
           <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
             <div>
               <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide">
                 <i class="fa-solid fa-stethoscope mr-2 text-rose-500"></i> Vấn đề Lâm sàng
               </h3>
-              <p class="text-[11px] text-gray-500 mt-0.5">Phân bổ % trọng số (nhóm theo hệ cơ quan)</p>
+              <p class="text-[11px] text-gray-500 mt-0.5">Phân bổ % trọng số (nhóm theo hệ cơ quan) • Có Min/Max + gợi ý</p>
             </div>
-            <div class="flex items-center gap-2">
+
+            <div class="flex items-center gap-2 flex-wrap justify-end">
+              <label class="text-xs flex items-center gap-2 select-none bg-white border border-gray-200 px-3 py-1.5 rounded shadow-sm">
+                <input type="checkbox" checked onchange="enforceMinMax=this.checked; updateCalculations();" />
+                <span class="font-medium text-slate-700">Khóa Min/Max</span>
+              </label>
+
+              <button onclick="applySuggestedWeights()"
+                class="text-xs bg-amber-50 border border-amber-200 hover:bg-amber-100 text-amber-800 px-3 py-1.5 rounded shadow-sm transition font-medium">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Tự tính (Min/Max)
+              </button>
+
               <button onclick="toggleSystemsModal(true)"
                 class="text-xs bg-white border border-gray-300 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 text-gray-700 px-3 py-1.5 rounded shadow-sm transition font-medium">
                 <i class="fa-solid fa-diagram-project"></i> Hệ cơ quan
               </button>
+
               <button onclick="addProblem()"
                 class="text-xs bg-white border border-gray-300 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 text-gray-700 px-3 py-1.5 rounded shadow-sm transition font-medium">
                 <i class="fa-solid fa-plus"></i> Thêm
@@ -236,10 +274,9 @@
             </div>
           </div>
         </div>
-
       </div>
 
-      <!-- Right -->
+      <!-- Right Panel -->
       <div class="col-span-12 lg:col-span-8 xl:col-span-9 flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 shrink-0">
           <div>
@@ -252,12 +289,11 @@
             <div class="hidden md:flex items-center space-x-4 text-xs bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm">
               <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 mr-1.5"></span> Nhớ (1)</span>
               <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500 mr-1.5"></span> Hiểu (2)</span>
-              <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500 mr-1.5"></span> V.Dụng (3)</span>
-              <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 mr-1.5"></span> P.Tích (4)</span>
+              <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500 mr-1.5"></span> Vận dụng (3)</span>
+              <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 mr-1.5"></span> Phân tích (4)</span>
             </div>
 
-            <button onclick="exportSpecialtyChooser()"
-              class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-2 rounded-lg text-sm font-semibold transition flex items-center">
+            <button onclick="exportSpecialtyChooser()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-2 rounded-lg text-sm font-semibold transition flex items-center">
               <i class="fa-solid fa-download mr-2"></i> Xuất theo phân môn
             </button>
           </div>
@@ -315,40 +351,12 @@
           </div>
         </div>
 
-      </div><!-- /Right -->
+      </div><!-- /Right Panel -->
     </div>
   </main>
 
-  <!-- Toast -->
+  <!-- Modals -->
   <div id="toast" class="toast"></div>
-
-  <!-- Export chooser modal -->
-  <div id="exportModal" class="modal fixed inset-0 z-[80] flex items-center justify-center">
-    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="toggleExportModal(false)"></div>
-    <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-md relative z-10 flex flex-col">
-      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-        <h3 class="text-lg font-bold text-slate-800">Xuất báo cáo</h3>
-        <button onclick="toggleExportModal(false)" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
-      </div>
-      <div class="p-6 bg-slate-50">
-        <p class="text-sm text-slate-700 mb-4">Chọn định dạng bạn muốn xuất:</p>
-        <div class="grid grid-cols-2 gap-3">
-          <button onclick="exportReportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-lg font-semibold flex items-center justify-center">
-            <i class="fa-solid fa-file-excel mr-2"></i> Excel (.xlsx)
-          </button>
-          <button onclick="exportReportWord()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-3 rounded-lg font-semibold flex items-center justify-center">
-            <i class="fa-solid fa-file-word mr-2"></i> Word (.docx)
-          </button>
-        </div>
-        <div class="mt-4 text-[12px] text-slate-500">
-          Gợi ý: Excel phù hợp tổng hợp/đếm số câu; Word phù hợp in báo cáo.
-        </div>
-      </div>
-      <div class="px-6 py-4 border-t border-gray-100 flex justify-end bg-white rounded-b-xl">
-        <button onclick="toggleExportModal(false)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-lg font-medium transition">Đóng</button>
-      </div>
-    </div>
-  </div>
 
   <!-- Exam settings modal -->
   <div id="examModal" class="modal fixed inset-0 z-[70] flex items-center justify-center">
@@ -365,25 +373,30 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="text-xs font-semibold text-gray-600">Tên kỳ thi</label>
-            <input id="examTitleInput" type="text" class="mt-1 w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm" placeholder="VD: Kỳ thi Tốt nghiệp Bác sĩ Đa khoa">
+            <input id="examTitleInput" type="text" class="mt-1 w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
+              placeholder="VD: Kỳ thi Tốt nghiệp Bác sĩ Đa khoa">
           </div>
           <div>
             <label class="text-xs font-semibold text-gray-600">Niên khóa / Năm</label>
-            <input id="examYearInput" type="text" class="mt-1 w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm" placeholder="VD: 2023-2024">
+            <input id="examYearInput" type="text" class="mt-1 w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
+              placeholder="VD: 2023-2024">
           </div>
           <div>
             <label class="text-xs font-semibold text-gray-600">Thời gian làm bài (phút)</label>
-            <input id="examDurationInput" type="number" min="0" class="mt-1 w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm" placeholder="90">
+            <input id="examDurationInput" type="number" min="0" class="mt-1 w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
+              placeholder="90">
           </div>
           <div class="bg-white border border-gray-200 rounded-lg p-3">
             <div class="text-xs text-gray-500 font-semibold mb-1">Lưu ý</div>
-            <div class="text-sm text-slate-700">Thông tin này hiển thị trên navbar và trong báo cáo xuất.</div>
+            <div class="text-sm text-slate-700">Thông tin này sẽ hiển thị trên navbar và báo cáo xuất ra.</div>
           </div>
         </div>
       </div>
 
       <div class="px-6 py-4 border-t border-gray-100 flex justify-end bg-white rounded-b-xl">
-        <button onclick="toggleExamSettings(false)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-lg font-medium transition mr-3">Đóng</button>
+        <button onclick="toggleExamSettings(false)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-lg font-medium transition mr-3">
+          Đóng
+        </button>
         <button onclick="saveExamSettings()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium shadow-sm transition">
           <i class="fa-solid fa-save mr-2"></i> Lưu
         </button>
@@ -397,18 +410,23 @@
     <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-2xl relative z-10 flex flex-col max-h-[85vh]">
       <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
         <h3 class="text-lg font-bold text-slate-800">Quản lý Chuẩn đầu ra (CLO)</h3>
-        <button onclick="toggleCLOModal(false)" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+        <button onclick="toggleCLOModal(false)" class="text-gray-400 hover:text-gray-600">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
       </div>
 
       <div class="p-6 overflow-y-auto flex-grow bg-slate-50">
         <div id="cloListContainer" class="space-y-3"></div>
+
         <button onclick="addCLO()" class="mt-4 w-full py-2.5 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 font-medium hover:bg-blue-50 hover:border-blue-400 transition-colors flex items-center justify-center">
           <i class="fa-solid fa-plus mr-2"></i> Thêm Chuẩn đầu ra mới
         </button>
       </div>
 
       <div class="px-6 py-4 border-t border-gray-100 flex justify-end bg-white rounded-b-xl">
-        <button onclick="toggleCLOModal(false)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-lg font-medium transition mr-3">Đóng</button>
+        <button onclick="toggleCLOModal(false)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-lg font-medium transition mr-3">
+          Đóng
+        </button>
         <button onclick="saveCLOs()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium shadow-sm transition">
           <i class="fa-solid fa-save mr-2"></i> Lưu thay đổi
         </button>
@@ -422,10 +440,14 @@
     <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-2xl relative z-10 flex flex-col max-h-[85vh]">
       <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
         <h3 class="text-lg font-bold text-slate-800">Thư viện Phân môn</h3>
-        <button onclick="toggleSpecialtyLibrary(false)" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+        <button onclick="toggleSpecialtyLibrary(false)" class="text-gray-400 hover:text-gray-600">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
       </div>
       <div class="p-6 overflow-y-auto flex-grow bg-slate-50">
-        <div class="text-sm text-slate-700 mb-3">Nhập sẵn danh sách phân môn để chọn nhanh trong từng vấn đề.</div>
+        <div class="text-sm text-slate-700 mb-3">
+          Nhập sẵn danh sách phân môn để chọn nhanh trong từng vấn đề.
+        </div>
         <div id="specListContainer" class="space-y-2"></div>
         <button onclick="addSpecItem()" class="mt-4 w-full py-2.5 border-2 border-dashed border-emerald-300 rounded-lg text-emerald-700 font-medium hover:bg-emerald-50 hover:border-emerald-400 transition-colors flex items-center justify-center">
           <i class="fa-solid fa-plus mr-2"></i> Thêm phân môn
@@ -440,16 +462,20 @@
     </div>
   </div>
 
-  <!-- Systems modal -->
+  <!-- Systems (organ systems) modal -->
   <div id="systemsModal" class="modal fixed inset-0 z-[66] flex items-center justify-center">
     <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="toggleSystemsModal(false)"></div>
     <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-2xl relative z-10 flex flex-col max-h-[85vh]">
       <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
         <h3 class="text-lg font-bold text-slate-800">Nhóm Hệ cơ quan</h3>
-        <button onclick="toggleSystemsModal(false)" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+        <button onclick="toggleSystemsModal(false)" class="text-gray-400 hover:text-gray-600">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
       </div>
       <div class="p-6 overflow-y-auto flex-grow bg-slate-50">
-        <div class="text-sm text-slate-700 mb-3">Tạo/đổi tên hệ cơ quan để nhóm “Vấn đề lâm sàng”.</div>
+        <div class="text-sm text-slate-700 mb-3">
+          Tạo/đổi tên hệ cơ quan để nhóm “Vấn đề lâm sàng”.
+        </div>
         <div id="systemsListContainer" class="space-y-2"></div>
         <button onclick="addSystem()" class="mt-4 w-full py-2.5 border-2 border-dashed border-indigo-300 rounded-lg text-indigo-700 font-medium hover:bg-indigo-50 hover:border-indigo-400 transition-colors flex items-center justify-center">
           <i class="fa-solid fa-plus mr-2"></i> Thêm hệ cơ quan
@@ -476,6 +502,8 @@
 
     let bloomDefault = { recall: 30, understand: 30, apply: 25, analyze: 15 };
 
+    let enforceMinMax = true; // ✅ ép min/max cho trọng số cuối cùng (tắt => min/max chỉ tham khảo)
+
     let CLOs = [
       { id: 'clo1', code: 'CLO1', name: 'Chẩn đoán xác định & phân biệt' },
       { id: 'clo2', code: 'CLO2', name: 'Điều trị & Xử trí cấp cứu' },
@@ -483,10 +511,16 @@
       { id: 'clo4', code: 'CLO4', name: 'Cơ chế bệnh sinh & Sinh lý bệnh' }
     ];
 
+    // Thư viện phân môn (để chọn nhanh)
     let specialtyLibrary = [
-      "Nội Tim mạch", "Nội Hô hấp", "Cấp cứu", "Nội Tiêu hóa", "Ngoại Tiêu hóa"
+      "Nội Tim mạch",
+      "Nội Hô hấp",
+      "Cấp cứu",
+      "Nội Tiêu hóa",
+      "Ngoại Tiêu hóa"
     ];
 
+    // Hệ cơ quan (nhóm vấn đề lâm sàng)
     let organSystems = [
       { id: "sys1", name: "Tim mạch" },
       { id: "sys2", name: "Hô hấp" },
@@ -495,9 +529,15 @@
       { id: "sys5", name: "Khác" }
     ];
 
+    // ✅ problems có thêm minWeight/maxWeight (mặc định)
     let problems = [
       {
-        id: 1, systemId: "sys1", name: "Đau ngực cấp", weight: 20,
+        id: 1,
+        systemId: "sys1",
+        name: "Đau ngực cấp",
+        weight: 20,
+        minWeight: 10,
+        maxWeight: 30,
         specialties: [
           { name: "Nội Tim mạch", cloId: "clo1", levels: [2, 3, 2, 1] },
           { name: "Nội Hô hấp", cloId: "clo1", levels: [1, 2, 1, 0] },
@@ -505,14 +545,24 @@
         ]
       },
       {
-        id: 2, systemId: "sys2", name: "Khó thở", weight: 15,
+        id: 2,
+        systemId: "sys2",
+        name: "Khó thở",
+        weight: 15,
+        minWeight: 5,
+        maxWeight: 25,
         specialties: [
           { name: "Nội Hô hấp", cloId: "clo1", levels: [2, 3, 1, 0] },
           { name: "Nội Tim mạch", cloId: "clo4", levels: [1, 2, 0, 0] }
         ]
       },
       {
-        id: 3, systemId: "sys3", name: "Đau bụng cấp", weight: 25,
+        id: 3,
+        systemId: "sys3",
+        name: "Đau bụng cấp",
+        weight: 25,
+        minWeight: 10,
+        maxWeight: 40,
         specialties: [
           { name: "Nội Tiêu hóa", cloId: "clo1", levels: [3, 4, 2, 1] },
           { name: "Ngoại Tiêu hóa", cloId: "clo2", levels: [2, 3, 3, 2] }
@@ -531,7 +581,7 @@
     }
 
     // =========================
-    //  CARD HEIGHTS
+    //  PERSIST UI CARD HEIGHTS
     // =========================
     function persistCardHeights() {
       const ids = ["cardGeneral", "cardBloom", "cardProblems"];
@@ -542,6 +592,7 @@
       });
       localStorage.setItem("leftCardHeights", JSON.stringify(heights));
     }
+
     function restoreCardHeights() {
       try {
         const raw = localStorage.getItem("leftCardHeights");
@@ -553,6 +604,7 @@
         });
       } catch {}
     }
+
     function attachResizeObservers() {
       const ids = ["cardGeneral", "cardBloom", "cardProblems"];
       ids.forEach(id => {
@@ -569,8 +621,10 @@
     function syncExamUI() {
       document.getElementById("examTitleTop").textContent = examSettings.title || "";
       document.getElementById("examYearTop").textContent = examSettings.year || "";
+
       document.getElementById("examTitleLeft").textContent = examSettings.title || "";
       document.getElementById("examYearLeft").textContent = examSettings.year || "";
+
       const dur = document.getElementById("durationMinutes");
       if (dur) dur.value = examSettings.durationMinutes ?? 0;
     }
@@ -582,14 +636,18 @@
         document.getElementById("examYearInput").value = examSettings.year || "";
         document.getElementById("examDurationInput").value = examSettings.durationMinutes ?? 0;
         modal.classList.add('active');
-      } else modal.classList.remove('active');
+      } else {
+        modal.classList.remove('active');
+      }
     }
 
     function saveExamSettings() {
       examSettings.title = document.getElementById("examTitleInput").value.trim() || "Kỳ thi";
       examSettings.year = document.getElementById("examYearInput").value.trim() || "";
       examSettings.durationMinutes = parseInt(document.getElementById("examDurationInput").value || "0", 10) || 0;
+
       document.getElementById("durationMinutes").value = examSettings.durationMinutes;
+
       persistAllLocal();
       syncExamUI();
       showToast("✅ Đã lưu thông tin kỳ thi");
@@ -605,13 +663,6 @@
     // =========================
     //  BLOOM
     // =========================
-    function clampPercent(v) {
-      let n = parseInt(v || "0", 10) || 0;
-      if (n < 0) n = 0;
-      if (n > 100) n = 100;
-      return n;
-    }
-
     function onBloomChange() {
       bloomDefault.recall = clampPercent(document.getElementById("bloomRecall").value);
       bloomDefault.understand = clampPercent(document.getElementById("bloomUnderstand").value);
@@ -631,6 +682,26 @@
         hint.className = "text-[11px] text-orange-600 mt-3";
         hint.textContent = "⚠️ Tổng Bloom hiện = " + total + "%. Nên chỉnh về 100% để phân bổ chính xác.";
       }
+    }
+
+    function clampPercent(v) {
+      let n = parseInt(v || "0", 10) || 0;
+      if (n < 0) n = 0;
+      if (n > 100) n = 100;
+      return n;
+    }
+
+    function applyBloomToAll() {
+      problems.forEach(p => {
+        p.specialties.forEach(s => {
+          const sTotal = s.levels.reduce((a,b)=>a+b,0);
+          if (sTotal <= 0) return;
+          const dist = distributeByBloom(sTotal);
+          s.levels = dist;
+        });
+      });
+      updateCalculations();
+      showToast("✅ Đã áp Bloom cho các phân môn (theo tổng câu hiện tại)");
     }
 
     function distributeByBloom(total) {
@@ -657,20 +728,120 @@
       return parts;
     }
 
-    function applyBloomToAll() {
+    // =========================
+    //  MIN/MAX WEIGHT SUGGEST
+    // =========================
+    function ensureMinMaxFields() {
       problems.forEach(p => {
-        p.specialties.forEach(s => {
-          const sTotal = s.levels.reduce((a,b)=>a+b,0);
-          if (sTotal <= 0) return;
-          s.levels = distributeByBloom(sTotal);
-        });
+        if (typeof p.minWeight !== "number") p.minWeight = 0;
+        if (typeof p.maxWeight !== "number") p.maxWeight = 100;
+
+        p.minWeight = Math.max(0, Math.min(100, parseInt(p.minWeight || 0, 10)));
+        p.maxWeight = Math.max(0, Math.min(100, parseInt(p.maxWeight || 100, 10)));
+
+        if (p.minWeight > p.maxWeight) {
+          const t = p.minWeight;
+          p.minWeight = p.maxWeight;
+          p.maxWeight = t;
+        }
+
+        if (enforceMinMax) {
+          p.weight = Math.max(p.minWeight, Math.min(p.maxWeight, parseInt(p.weight || 0, 10)));
+        }
       });
+    }
+
+    function computeSuggestedWeights(targetSum = 100) {
+      ensureMinMaxFields();
+      const n = problems.length;
+      if (n === 0) return;
+
+      const mins = problems.map(p => p.minWeight);
+      const maxs = problems.map(p => p.maxWeight);
+      const mids = problems.map(p => Math.round((p.minWeight + p.maxWeight) / 2));
+
+      const sumMin = mins.reduce((a,b)=>a+b,0);
+      const sumMax = maxs.reduce((a,b)=>a+b,0);
+
+      let T = targetSum;
+      if (T < sumMin) T = sumMin;
+      if (T > sumMax) T = sumMax;
+
+      const w = mins.slice();
+      let remaining = T - sumMin;
+
+      const needToMid = problems.map((p,i) => Math.max(0, mids[i] - mins[i]));
+      const order = [...Array(n).keys()].sort((i,j) => needToMid[j] - needToMid[i]);
+
+      for (const i of order) {
+        if (remaining <= 0) break;
+        const capToMid = Math.min(needToMid[i], maxs[i] - w[i]);
+        const add = Math.min(capToMid, remaining);
+        w[i] += add;
+        remaining -= add;
+      }
+
+      while (remaining > 0) {
+        let progressed = false;
+        const candidates = [];
+        for (let i=0;i<n;i++){
+          const room = maxs[i] - w[i];
+          if (room > 0) candidates.push({i, room});
+        }
+        if (candidates.length === 0) break;
+
+        const per = Math.max(1, Math.floor(remaining / candidates.length));
+        for (const c of candidates) {
+          if (remaining <= 0) break;
+          const add = Math.min(c.room, per, remaining);
+          if (add > 0) {
+            w[c.i] += add;
+            remaining -= add;
+            progressed = true;
+          }
+        }
+        if (!progressed) {
+          for (const c of candidates) {
+            if (remaining <= 0) break;
+            w[c.i] += 1;
+            remaining -= 1;
+          }
+        }
+      }
+
+      problems.forEach((p,i) => { p.weight = w[i]; });
+    }
+
+    function applySuggestedWeights() {
+      computeSuggestedWeights(100);
       updateCalculations();
-      showToast("✅ Đã áp Bloom cho các phân môn");
+      showToast("✅ Đã áp trọng số gợi ý (Min/Max) và chuẩn hóa tổng = 100%");
+    }
+
+    function updateProblemMinMax(index, type, val) {
+      ensureMinMaxFields();
+      const v = Math.max(0, Math.min(100, parseInt(val || "0", 10) || 0));
+      const p = problems[index];
+      if (!p) return;
+
+      if (type === "min") p.minWeight = v;
+      if (type === "max") p.maxWeight = v;
+
+      if (p.minWeight > p.maxWeight) {
+        const t = p.minWeight;
+        p.minWeight = p.maxWeight;
+        p.maxWeight = t;
+      }
+
+      if (enforceMinMax) {
+        p.weight = Math.max(p.minWeight, Math.min(p.maxWeight, parseInt(p.weight || 0, 10)));
+      }
+
+      updateCalculations();
     }
 
     // =========================
-    //  SAVE / LOAD LOCAL
+    //  SAVE / LOAD (Local first + optional API)
     // =========================
     function persistAllLocal() {
       const payload = {
@@ -680,6 +851,7 @@
         specialtyLibrary,
         CLOs,
         problems,
+        enforceMinMax,
         totalQuestions: parseInt(document.getElementById('totalQuestions')?.value || "0", 10),
         savedAt: new Date().toISOString()
       };
@@ -698,6 +870,7 @@
         if (Array.isArray(data.specialtyLibrary)) specialtyLibrary = data.specialtyLibrary;
         if (Array.isArray(data.CLOs)) CLOs = data.CLOs;
         if (Array.isArray(data.problems)) problems = data.problems;
+        if (typeof data.enforceMinMax === "boolean") enforceMinMax = data.enforceMinMax;
 
         if (data.totalQuestions != null) document.getElementById('totalQuestions').value = data.totalQuestions;
 
@@ -705,31 +878,99 @@
         document.getElementById("bloomUnderstand").value = bloomDefault.understand ?? 30;
         document.getElementById("bloomApply").value = bloomDefault.apply ?? 25;
         document.getElementById("bloomAnalyze").value = bloomDefault.analyze ?? 15;
+
       } catch {}
     }
 
-    function saveBlueprint() {
-      persistAllLocal();
-      showToast("✅ Đã lưu Local");
+    async function saveBlueprint() {
+      try {
+        persistAllLocal();
+        const payload = {
+          examSettings,
+          bloomDefault,
+          enforceMinMax,
+          totalQuestions: parseInt(document.getElementById('totalQuestions')?.value || "0", 10),
+          CLOs, organSystems, specialtyLibrary, problems,
+          savedAt: new Date().toISOString()
+        };
+
+        const res = await fetch("/api/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: "MedExam Blueprint - " + new Date().toLocaleString(), data: payload })
+        });
+
+        const json = await res.json();
+        if (!res.ok) throw new Error(json?.error || "Save failed");
+
+        const id = json.id;
+        localStorage.setItem("lastBlueprintId", id);
+
+        const url = new URL(window.location.href);
+        url.searchParams.set("id", id);
+        window.history.replaceState({}, "", url.toString());
+
+        showToast("✅ Đã lưu! ID: " + id);
+      } catch (e) {
+        persistAllLocal();
+        alert("❌ Lưu DB thất bại (đã lưu Local): " + (e?.message || e));
+      }
     }
 
-    function loadBlueprint() {
-      restoreAllLocal();
-      syncExamUI();
-      updateBloomHint();
-      updateCalculations();
-      showToast("✅ Đã tải Local");
+    async function loadBlueprint() {
+      try {
+        const url = new URL(window.location.href);
+        const idFromUrl = url.searchParams.get("id");
+        const idFromLocal = localStorage.getItem("lastBlueprintId");
+        const id = idFromUrl || idFromLocal;
+
+        if (!id) {
+          restoreAllLocal();
+          syncExamUI();
+          updateBloomHint();
+          updateCalculations();
+          showToast("✅ Đã tải từ Local");
+          return;
+        }
+
+        const res = await fetch("/api/load?id=" + encodeURIComponent(id));
+        const json = await res.json();
+        if (!res.ok) throw new Error(json?.error || "Load failed");
+        if (!json || !json.data) throw new Error("Không có dữ liệu trong bản lưu");
+
+        const d = json.data;
+
+        if (d.totalQuestions != null) document.getElementById('totalQuestions').value = d.totalQuestions;
+        if (d.examSettings) examSettings = d.examSettings;
+        if (d.bloomDefault) bloomDefault = d.bloomDefault;
+        if (typeof d.enforceMinMax === "boolean") enforceMinMax = d.enforceMinMax;
+        CLOs = d.CLOs || CLOs;
+        organSystems = d.organSystems || organSystems;
+        specialtyLibrary = d.specialtyLibrary || specialtyLibrary;
+        problems = d.problems || problems;
+
+        document.getElementById("bloomRecall").value = bloomDefault.recall ?? 30;
+        document.getElementById("bloomUnderstand").value = bloomDefault.understand ?? 30;
+        document.getElementById("bloomApply").value = bloomDefault.apply ?? 25;
+        document.getElementById("bloomAnalyze").value = bloomDefault.analyze ?? 15;
+
+        persistAllLocal();
+        syncExamUI();
+        updateBloomHint();
+        updateCalculations();
+        showToast("✅ Đã tải dữ liệu từ DB!");
+      } catch (e) {
+        restoreAllLocal();
+        syncExamUI();
+        updateBloomHint();
+        updateCalculations();
+        alert("❌ Tải DB thất bại (đã tải Local nếu có): " + (e?.message || e));
+      }
     }
 
     // =========================
-    //  MODALS
+    //  CLO MANAGEMENT
     // =========================
-    function toggleExportModal(show){
-      const modal = document.getElementById('exportModal');
-      if(show) modal.classList.add('active'); else modal.classList.remove('active');
-    }
-    function openExportChooser(){ toggleExportModal(true); }
-
     function toggleCLOModal(show) {
       const modal = document.getElementById('cloModal');
       if (show) {
@@ -741,21 +982,6 @@
       }
     }
 
-    function toggleSpecialtyLibrary(show) {
-      const modal = document.getElementById('specModal');
-      if (show) { renderSpecLibrary(); modal.classList.add('active'); }
-      else modal.classList.remove('active');
-    }
-
-    function toggleSystemsModal(show) {
-      const modal = document.getElementById('systemsModal');
-      if (show) { renderSystems(); modal.classList.add('active'); }
-      else modal.classList.remove('active');
-    }
-
-    // =========================
-    //  CLO MANAGER
-    // =========================
     function renderCLOManager() {
       const container = document.getElementById('cloListContainer');
       container.innerHTML = '';
@@ -806,6 +1032,12 @@
     // =========================
     //  SPECIALTY LIBRARY
     // =========================
+    function toggleSpecialtyLibrary(show) {
+      const modal = document.getElementById('specModal');
+      if (show) { renderSpecLibrary(); modal.classList.add('active'); }
+      else modal.classList.remove('active');
+    }
+
     function renderSpecLibrary() {
       const c = document.getElementById("specListContainer");
       c.innerHTML = "";
@@ -824,6 +1056,7 @@
         c.appendChild(row);
       });
     }
+
     function addSpecItem() { specialtyLibrary.push("Phân môn mới"); renderSpecLibrary(); }
     function updateSpecItem(idx, val) { specialtyLibrary[idx] = val.trim() || "Phân môn"; }
     function removeSpecItem(idx) { specialtyLibrary.splice(idx, 1); renderSpecLibrary(); }
@@ -838,8 +1071,14 @@
     }
 
     // =========================
-    //  SYSTEMS
+    //  ORGAN SYSTEMS
     // =========================
+    function toggleSystemsModal(show) {
+      const modal = document.getElementById('systemsModal');
+      if (show) { renderSystems(); modal.classList.add('active'); }
+      else modal.classList.remove('active');
+    }
+
     function renderSystems() {
       const c = document.getElementById("systemsListContainer");
       c.innerHTML = "";
@@ -862,11 +1101,7 @@
       });
     }
 
-    function addSystem() {
-      const newId = "sys" + Date.now();
-      organSystems.push({ id: newId, name: "Hệ cơ quan mới" });
-      renderSystems();
-    }
+    function addSystem() { organSystems.push({ id: "sys" + Date.now(), name: "Hệ cơ quan mới" }); renderSystems(); }
     function updateSystem(idx, val) { organSystems[idx].name = val.trim() || "Hệ cơ quan"; }
 
     function removeSystem(idx) {
@@ -877,6 +1112,7 @@
       organSystems.splice(idx, 1);
       const fallback = organSystems.find(s => s.name.toLowerCase().includes("khác"))?.id || organSystems[0].id;
       problems.forEach(p => { if (p.systemId === removedId) p.systemId = fallback; });
+
       renderSystems();
       updateCalculations();
     }
@@ -929,7 +1165,7 @@
         container.appendChild(header);
 
         list.forEach(({p, idx}) => {
-          totalWeight += p.weight;
+          totalWeight += (parseInt(p.weight || 0, 10) || 0);
 
           const targetQ = Math.round((p.weight / 100) * totalQ);
           let currentActual = 0;
@@ -965,6 +1201,22 @@
                 class="text-xs bg-white border border-blue-200 text-blue-600 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-md font-medium transition shadow-sm flex items-center">
                 <i class="fa-solid fa-plus mr-1.5"></i> Thêm phân môn
               </button>
+            </div>
+
+            <!-- ✅ Min/Max inputs -->
+            <div class="grid grid-cols-2 gap-2 mb-2">
+              <div class="suffix-wrap">
+                <input type="number" min="0" max="100" value="${p.minWeight ?? 0}"
+                  onchange="updateProblemMinMax(${idx}, 'min', this.value)"
+                  class="num-input w-full border-gray-200 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 text-xs font-semibold" />
+                <span class="suffix">Min%</span>
+              </div>
+              <div class="suffix-wrap">
+                <input type="number" min="0" max="100" value="${p.maxWeight ?? 100}"
+                  onchange="updateProblemMinMax(${idx}, 'max', this.value)"
+                  class="num-input w-full border-gray-200 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 text-xs font-semibold" />
+                <span class="suffix">Max%</span>
+              </div>
             </div>
 
             <div class="flex items-center space-x-3 mb-3">
@@ -1053,12 +1305,6 @@
                 <button onclick="addSpecialty(${pIndex})" class="text-xs bg-white border border-blue-200 text-blue-600 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-md font-medium transition shadow-sm flex items-center">
                   <i class="fa-solid fa-plus mr-1.5"></i> Thêm
                 </button>
-
-                <button onclick="exportProblemSummaryExcel(${pIndex})"
-                  class="text-xs bg-white border border-slate-200 text-slate-700 hover:bg-slate-800 hover:text-white px-3 py-1.5 rounded-md font-medium transition shadow-sm flex items-center"
-                  title="Xuất tổng hợp theo vấn đề (Excel)">
-                  <i class="fa-solid fa-file-excel mr-1.5"></i> Vấn đề
-                </button>
               </div>
             </div>
           </td>
@@ -1090,15 +1336,9 @@
                   placeholder="Nhập tên phân môn...">
               </div>
               <div class="mt-1 flex items-center gap-2">
-                <button class="text-[11px] px-2 py-1 rounded border border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-                  onclick="exportSpecialtyExcel('${escapeJs(s.name)}')"
-                  title="Xuất riêng phân môn này (Excel)">
-                  <i class="fa-solid fa-file-excel mr-1"></i> Excel
-                </button>
                 <button class="text-[11px] px-2 py-1 rounded border border-slate-200 text-slate-700 hover:bg-slate-50"
-                  onclick="exportSpecialtyWord('${escapeJs(s.name)}')"
-                  title="Xuất riêng phân môn này (Word)">
-                  <i class="fa-solid fa-file-word mr-1"></i> Word
+                  onclick="exportSpecialtyJSON('${escapeJs(s.name)}')" title="Xuất riêng phân môn này (JSON)">
+                  <i class="fa-solid fa-code mr-1"></i> JSON
                 </button>
                 ${lockBloom ? `<span class="text-[11px] text-purple-600 font-semibold"><i class="fa-solid fa-lock mr-1"></i>Khóa Bloom</span>` : ``}
               </div>
@@ -1131,19 +1371,13 @@
             <td class="px-4 py-2 text-center font-black text-slate-800 bg-gray-50 border-l border-gray-100">${sTotal}</td>
 
             <td class="px-2 py-2 text-center">
-              <button onclick="exportSpecialtyOnlyRowExcel(${pIndex}, ${sIndex})"
-                class="text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50 w-9 h-9 rounded-full inline-flex items-center justify-center transition"
-                title="Xuất riêng dòng (Excel)">
-                <i class="fa-solid fa-file-arrow-down"></i>
-              </button>
-            </td>
-
-            <td class="px-2 py-2 text-center">
               <button onclick="removeSpecialty(${pIndex}, ${sIndex})"
                 class="text-gray-300 hover:text-red-500 hover:bg-red-50 w-8 h-8 rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100">
                 <i class="fa-solid fa-trash-can"></i>
               </button>
             </td>
+
+            <td class="px-2 py-2"></td>
           `;
           tbody.appendChild(tr);
         });
@@ -1188,6 +1422,8 @@
     //  LOGIC UPDATES
     // =========================
     function updateCalculations() {
+      if (enforceMinMax) ensureMinMaxFields();
+
       if (document.getElementById("lockBloom").checked) {
         problems.forEach(p => {
           p.specialties.forEach(s => {
@@ -1196,12 +1432,28 @@
           });
         });
       }
+
       renderProblemsList();
       renderMatrix();
       persistAllLocal();
     }
 
-    function updateProblemWeight(index, val) { problems[index].weight = parseInt(val) || 0; updateCalculations(); }
+    function updateProblemWeight(index, val) {
+      const p = problems[index];
+      if (!p) return;
+
+      let w = parseInt(val || "0", 10) || 0;
+      w = Math.max(0, Math.min(100, w));
+
+      if (enforceMinMax) {
+        ensureMinMaxFields();
+        w = Math.max(p.minWeight, Math.min(p.maxWeight, w));
+      }
+
+      p.weight = w;
+      updateCalculations();
+    }
+
     function updateProblemName(index, val) { problems[index].name = val; updateCalculations(); }
     function updateProblemSystem(index, systemId) { problems[index].systemId = systemId; updateCalculations(); }
 
@@ -1212,6 +1464,8 @@
         systemId: fallback,
         name: "Vấn đề mới",
         weight: 0,
+        minWeight: 0,
+        maxWeight: 100,
         specialties: [{ name: "", cloId: CLOs[0].id, levels: [0, 0, 0, 0] }]
       });
       updateCalculations();
@@ -1256,241 +1510,69 @@
     }
 
     // =========================
-    //  EXPORTS (EXCEL / WORD)
+    //  EXPORTS (JSON only; you can extend)
     // =========================
-    async function exportExcelWorkbook(filename, sheets) {
-      const wb = new ExcelJS.Workbook();
-      wb.creator = "MedExam Graduation Tool";
-      wb.created = new Date();
-
-      sheets.forEach(sh => {
-        const ws = wb.addWorksheet(sh.name || "Sheet");
-        (sh.rows || []).forEach(r => ws.addRow(r));
-
-        ws.columns.forEach(col => {
-          let max = 10;
-          col.eachCell({ includeEmpty: true }, (cell) => {
-            const v = cell.value == null ? "" : String(cell.value);
-            max = Math.max(max, Math.min(60, v.length + 2));
-          });
-          col.width = max;
-        });
-
-        if ((sh.rows || []).length >= 1) {
-          ws.getRow(1).font = { bold: true };
-        }
-      });
-
-      const buf = await wb.xlsx.writeBuffer();
-      saveAs(new Blob([buf], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      }), filename);
-
-      showToast("✅ Đã xuất: " + filename);
-    }
-
-    async function exportWordDoc(filename, title, rows) {
-      const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType } = docx;
-
-      const doc = new Document({
-        sections: [{
-          children: [
-            new Paragraph({
-              children: [new TextRun({ text: title || "MedExam Report", bold: true, size: 32 })],
-              spacing: { after: 300 }
-            }),
-            new Table({
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              rows: (rows || []).map((r, idx) => new TableRow({
-                children: (r || []).map(cell => new TableCell({
-                  children: [new Paragraph({
-                    children: [new TextRun({ text: String(cell ?? ""), bold: idx === 0 })]
-                  })]
-                }))
-              }))
-            })
-          ]
-        }]
-      });
-
-      const blob = await Packer.toBlob(doc);
-      saveAs(blob, filename);
-      showToast("✅ Đã xuất: " + filename);
-    }
-
-    function buildFullReportRows() {
-      const rows = [];
-      rows.push(["ExamTitle", examSettings.title]);
-      rows.push(["ExamYear", examSettings.year]);
-      rows.push(["DurationMinutes", String(examSettings.durationMinutes ?? 0)]);
-      rows.push([]);
-      rows.push(["System","Problem","Weight%","Specialty","CLO","Recall","Understand","Apply","Analyze","Total"]);
-
-      problems.forEach(p => {
-        const sysName = getSystemName(p.systemId);
-        p.specialties.forEach(s => {
-          const clo = CLOs.find(c => c.id === s.cloId);
-          rows.push([
-            sysName,
-            p.name,
-            String(p.weight),
-            s.name,
-            clo ? `${clo.code}: ${clo.name}` : "",
-            String(s.levels[0]||0),
-            String(s.levels[1]||0),
-            String(s.levels[2]||0),
-            String(s.levels[3]||0),
-            String((s.levels||[]).reduce((a,b)=>a+b,0))
-          ]);
-        });
-      });
-
-      return rows;
-    }
-
-    async function exportReportExcel(){
-      const rows = buildFullReportRows();
-      await exportExcelWorkbook("MedExam_FullReport.xlsx", [{ name: "FullReport", rows }]);
-      toggleExportModal(false);
-    }
-
-    async function exportReportWord(){
-      const rows = buildFullReportRows();
-      await exportWordDoc("MedExam_FullReport.docx", "MedExam Full Report", rows);
-      toggleExportModal(false);
+    function exportReport() {
+      const data = {
+        examSettings,
+        totalQuestions: parseInt(document.getElementById("totalQuestions").value || "0", 10) || 0,
+        enforceMinMax,
+        bloomDefault,
+        organSystems,
+        CLOs,
+        specialtyLibrary,
+        problems
+      };
+      downloadText("MedExam_FullReport.json", JSON.stringify(data, null, 2), "application/json;charset=utf-8");
     }
 
     function exportSpecialtyChooser() {
       const allSpecs = listAllSpecialtiesUnique();
       if (allSpecs.length === 0) { alert("Chưa có phân môn nào."); return; }
-
       const pick = prompt("Nhập đúng tên phân môn cần xuất (copy/paste):\n\n" + allSpecs.map(x => "• " + x).join("\n"));
       if (!pick) return;
-
-      // mặc định xuất Excel; bạn muốn Word thì đổi sang exportSpecialtyWord(pick.trim())
-      exportSpecialtyExcel(pick.trim());
+      exportSpecialtyJSON(pick.trim());
     }
 
-    function buildSpecialtyExportRows(specialtyName) {
+    function exportSpecialtyJSON(specialtyName) {
+      const data = buildSpecialtyExportJSON(specialtyName);
+      if (!data) { alert("Không tìm thấy phân môn: " + specialtyName); return; }
+      const safe = filenameSafe(specialtyName);
+      downloadText(`PhanMon_${safe}.json`, JSON.stringify(data, null, 2), "application/json;charset=utf-8");
+    }
+
+    function buildSpecialtyExportJSON(specialtyName) {
       const target = specialtyName.trim().toLowerCase();
-      const matches = [];
+      const items = [];
 
       problems.forEach(p => {
         p.specialties.forEach(s => {
           if ((s.name||"").trim().toLowerCase() === target) {
             const clo = CLOs.find(c => c.id === s.cloId);
-            matches.push({ p, s, clo });
+            items.push({
+              system: getSystemName(p.systemId),
+              problem: p.name,
+              weightPercent: p.weight,
+              clo: clo ? { code: clo.code, name: clo.name } : null,
+              bloom: {
+                recall: s.levels[0]||0,
+                understand: s.levels[1]||0,
+                apply: s.levels[2]||0,
+                analyze: s.levels[3]||0
+              },
+              total: (s.levels||[]).reduce((a,b)=>a+b,0)
+            });
           }
         });
       });
 
-      if (matches.length === 0) return null;
+      if (items.length === 0) return null;
 
-      const rows = [];
-      rows.push(["ExamTitle", examSettings.title]);
-      rows.push(["ExamYear", examSettings.year]);
-      rows.push(["Specialty", specialtyName]);
-      rows.push([]);
-      rows.push(["System","Problem","Weight%","CLO","Recall","Understand","Apply","Analyze","Total"]);
-
-      matches.forEach(m => {
-        rows.push([
-          getSystemName(m.p.systemId),
-          m.p.name,
-          String(m.p.weight),
-          m.clo ? `${m.clo.code}: ${m.clo.name}` : "",
-          String(m.s.levels[0]||0),
-          String(m.s.levels[1]||0),
-          String(m.s.levels[2]||0),
-          String(m.s.levels[3]||0),
-          String(m.s.levels.reduce((a,b)=>a+b,0))
-        ]);
-      });
-
-      rows.push([]);
-      const tot = matches.reduce((acc, m) => {
-        acc.recall += (m.s.levels[0]||0);
-        acc.understand += (m.s.levels[1]||0);
-        acc.apply += (m.s.levels[2]||0);
-        acc.analyze += (m.s.levels[3]||0);
-        return acc;
-      }, {recall:0, understand:0, apply:0, analyze:0});
-      const sum = tot.recall + tot.understand + tot.apply + tot.analyze;
-      rows.push(["TOTAL","","","",String(tot.recall),String(tot.understand),String(tot.apply),String(tot.analyze),String(sum)]);
-      return rows;
-    }
-
-    async function exportSpecialtyExcel(specialtyName) {
-      const rows = buildSpecialtyExportRows(specialtyName);
-      if (!rows) { alert("Không tìm thấy phân môn: " + specialtyName); return; }
-      const safe = filenameSafe(specialtyName);
-      await exportExcelWorkbook(`PhanMon_${safe}.xlsx`, [{ name: "Specialty", rows }]);
-    }
-
-    async function exportSpecialtyWord(specialtyName) {
-      const rows = buildSpecialtyExportRows(specialtyName);
-      if (!rows) { alert("Không tìm thấy phân môn: " + specialtyName); return; }
-      const safe = filenameSafe(specialtyName);
-      await exportWordDoc(`PhanMon_${safe}.docx`, `Phân môn: ${specialtyName}`, rows);
-    }
-
-    async function exportSpecialtyOnlyRowExcel(pIndex, sIndex) {
-      const p = problems[pIndex];
-      const s = p?.specialties?.[sIndex];
-      if (!p || !s) return;
-
-      const clo = CLOs.find(c => c.id === s.cloId);
-      const rows = [];
-      rows.push(["ExamTitle", examSettings.title]);
-      rows.push(["ExamYear", examSettings.year]);
-      rows.push(["System", getSystemName(p.systemId)]);
-      rows.push(["Problem", p.name]);
-      rows.push([]);
-      rows.push(["Specialty","CLO","Recall","Understand","Apply","Analyze","Total"]);
-      rows.push([
-        s.name,
-        clo ? `${clo.code}: ${clo.name}` : "",
-        String(s.levels[0]||0),
-        String(s.levels[1]||0),
-        String(s.levels[2]||0),
-        String(s.levels[3]||0),
-        String(s.levels.reduce((a,b)=>a+b,0))
-      ]);
-
-      await exportExcelWorkbook(`Row_${filenameSafe(s.name)}_${filenameSafe(p.name)}.xlsx`, [
-        { name: "Row", rows }
-      ]);
-    }
-
-    async function exportProblemSummaryExcel(pIndex) {
-      const p = problems[pIndex];
-      if (!p) return;
-
-      const rows = [];
-      rows.push(["ExamTitle", examSettings.title]);
-      rows.push(["ExamYear", examSettings.year]);
-      rows.push(["System", getSystemName(p.systemId)]);
-      rows.push(["Problem", p.name]);
-      rows.push(["Weight%", String(p.weight)]);
-      rows.push([]);
-      rows.push(["Specialty","TotalQuestions","Recall","Understand","Apply","Analyze","CLO"]);
-
-      p.specialties.forEach(s => {
-        const clo = CLOs.find(c => c.id === s.cloId);
-        rows.push([
-          s.name,
-          String(s.levels.reduce((a,b)=>a+b,0)),
-          String(s.levels[0]||0),
-          String(s.levels[1]||0),
-          String(s.levels[2]||0),
-          String(s.levels[3]||0),
-          clo ? `${clo.code}: ${clo.name}` : ""
-        ]);
-      });
-
-      await exportExcelWorkbook(`VanDe_${filenameSafe(p.name)}.xlsx`, [
-        { name: "Problem", rows }
-      ]);
+      return {
+        exam: { ...examSettings, totalQuestions: parseInt(document.getElementById("totalQuestions").value||"0",10) || 0 },
+        specialty: specialtyName,
+        items
+      };
     }
 
     function listAllSpecialtiesUnique() {
@@ -1529,6 +1611,19 @@
         .slice(0, 80);
     }
 
+    function downloadText(filename, content, mime) {
+      const blob = new Blob([content], { type: mime || "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast("✅ Đã xuất: " + filename);
+    }
+
     // =========================
     //  INIT
     // =========================
@@ -1537,6 +1632,13 @@
       attachResizeObservers();
 
       restoreAllLocal();
+      ensureMinMaxFields();
+
+      document.getElementById("bloomRecall").value = bloomDefault.recall ?? 30;
+      document.getElementById("bloomUnderstand").value = bloomDefault.understand ?? 30;
+      document.getElementById("bloomApply").value = bloomDefault.apply ?? 25;
+      document.getElementById("bloomAnalyze").value = bloomDefault.analyze ?? 15;
+
       syncExamUI();
       updateBloomHint();
       updateCalculations();
