@@ -5,92 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MedExam Graduation - Công cụ Thiết kế Ma trận Đề thi</title>
   <meta name="theme-color" content="#2563eb" />
+
+  <!-- UI -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Export Excel/Word -->
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f8fafc;
-      margin: 0;
-      padding: 0;
-      scroll-behavior: smooth;
-    }
+    body { font-family: 'Inter', sans-serif; background:#f8fafc; }
     .table-container::-webkit-scrollbar { height: 8px; width: 8px; }
     .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     input[type=number]::-webkit-inner-spin-button,
     input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
-    /* Modal Animation */
     .modal { opacity: 0; visibility: hidden; transition: all 0.25s ease-in-out; }
     .modal.active { opacity: 1; visibility: visible; }
     .modal.active .modal-content { transform: scale(1); }
     .modal .modal-content { transform: scale(0.97); transition: all 0.25s ease-in-out; }
 
-    /* Tiny toast */
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: 18px;
-      transform: translateX(-50%);
-      z-index: 9999;
-      background: #0f172a;
-      color: white;
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 13px;
-      box-shadow: 0 10px 20px rgba(0,0,0,.2);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .2s ease;
+    .toast{
+      position:fixed;left:50%;bottom:18px;transform:translateX(-50%);
+      z-index:9999;background:#0f172a;color:#fff;padding:10px 14px;border-radius:10px;
+      font-size:13px;box-shadow:0 10px 20px rgba(0,0,0,.2);
+      opacity:0;pointer-events:none;transition:opacity .2s ease;
     }
-    .toast.show { opacity: 1; }
+    .toast.show{opacity:1}
 
-    /* Resizable left cards */
-    .resizable-y {
-      resize: vertical;
-      overflow: auto;
-      min-height: 140px;
-      max-height: 70vh;
-    }
-    .resize-hint {
-      position: sticky;
-      bottom: 0;
-      background: linear-gradient(to top, rgba(255,255,255,0.95), rgba(255,255,255,0));
-      padding-top: 10px;
-      margin-top: 10px;
-      pointer-events: none;
-    }
-
-    /* Better number inputs with suffix */
-    .suffix-wrap { position: relative; }
-    .suffix {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 11px;
-      color: #94a3b8;
-      pointer-events: none;
-    }
-    .num-input {
-      padding-right: 44px !important;
-      text-align: right;
-    }
-
-    /* Group header pill */
-    .group-header {
-      position: sticky;
-      top: 0;
-      z-index: 5;
-      background: #f1f5f9;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 10px 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+    .resizable-y{resize:vertical;overflow:auto;min-height:140px;max-height:70vh;}
+    .resize-hint{position:sticky;bottom:0;background:linear-gradient(to top, rgba(255,255,255,0.95), rgba(255,255,255,0));padding-top:10px;margin-top:10px;pointer-events:none;}
+    .suffix-wrap{position:relative;}
+    .suffix{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:#94a3b8;pointer-events:none;}
+    .num-input{padding-right:44px !important;text-align:right;}
+    .group-header{
+      position:sticky;top:0;z-index:5;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:12px;
+      padding:10px 12px;display:flex;justify-content:space-between;align-items:center;
+      box-shadow:0 1px 0 rgba(0,0,0,0.03);
     }
   </style>
 </head>
@@ -133,8 +87,8 @@
 
         <div class="flex items-center space-x-2 sm:space-x-3">
           <div class="text-right mr-2 hidden lg:block">
-            <div id="examTitleTop" class="text-sm font-medium text-gray-900">Kỳ thi Tốt nghiệp Bác sĩ Đa khoa</div>
-            <div id="examYearTop" class="text-xs text-gray-500">Niên khóa 2023-2024</div>
+            <div id="examTitleTop" class="text-sm font-medium text-gray-900"></div>
+            <div id="examYearTop" class="text-xs text-gray-500"></div>
           </div>
 
           <button onclick="toggleExamSettings(true)" class="bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 px-3 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
@@ -142,14 +96,14 @@
           </button>
 
           <button onclick="loadBlueprint()" class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
-            <i class="fa-solid fa-cloud-arrow-down mr-2"></i> Tải
+            <i class="fa-solid fa-cloud-arrow-down mr-2"></i> Tải (Local)
           </button>
 
           <button onclick="saveBlueprint()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
-            <i class="fa-solid fa-floppy-disk mr-2"></i> Lưu
+            <i class="fa-solid fa-floppy-disk mr-2"></i> Lưu (Local)
           </button>
 
-          <button onclick="exportReport()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
+          <button onclick="openExportChooser()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition flex items-center">
             <i class="fa-solid fa-file-export mr-2"></i> Xuất báo cáo
           </button>
         </div>
@@ -157,14 +111,14 @@
     </div>
   </nav>
 
-  <!-- Main Content -->
+  <!-- Main -->
   <main class="flex-grow w-full px-4 sm:px-6 lg:px-8 py-6 max-w-[1920px] mx-auto">
     <div class="grid grid-cols-12 gap-6 h-[calc(100vh-140px)]">
 
-      <!-- Left Sidebar -->
+      <!-- Left -->
       <div class="col-span-12 lg:col-span-4 xl:col-span-3 flex flex-col gap-6 overflow-hidden h-full">
 
-        <!-- Exam Settings (quick) -->
+        <!-- General -->
         <div id="cardGeneral" class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 shrink-0 resizable-y">
           <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4 flex items-center">
             <i class="fa-solid fa-sliders mr-2 text-blue-500"></i> Thông số chung
@@ -175,10 +129,7 @@
               <label class="text-sm text-slate-600 font-medium">Tổng số câu hỏi</label>
               <div class="suffix-wrap w-[120px]">
                 <input
-                  type="number"
-                  id="totalQuestions"
-                  value="100"
-                  min="0"
+                  type="number" id="totalQuestions" value="100" min="0"
                   onchange="updateCalculations()"
                   class="num-input w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm font-bold text-blue-600"
                 />
@@ -190,10 +141,7 @@
               <label class="text-sm text-slate-600 font-medium">Thời gian làm bài</label>
               <div class="suffix-wrap w-[120px]">
                 <input
-                  type="number"
-                  id="durationMinutes"
-                  value="90"
-                  min="0"
+                  type="number" id="durationMinutes" value="90" min="0"
                   onchange="persistExamSettingsFromQuick()"
                   class="num-input w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm font-semibold text-slate-700"
                 />
@@ -213,7 +161,7 @@
           </div>
         </div>
 
-        <!-- Bloom default (%) -->
+        <!-- Bloom -->
         <div id="cardBloom" class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 shrink-0 resizable-y">
           <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4 flex items-center">
             <i class="fa-solid fa-sitemap mr-2 text-purple-500"></i> BLOOM MẶC ĐỊNH (%)
@@ -248,16 +196,14 @@
             </button>
           </div>
 
-          <p id="bloomHint" class="text-[11px] text-gray-500 mt-3">
-            Khi bật “Khóa Bloom”, hệ thống sẽ tự phân bổ số câu theo % Bloom dựa trên tổng số câu của từng phân môn.
-          </p>
+          <p id="bloomHint" class="text-[11px] text-gray-500 mt-3"></p>
 
           <div class="resize-hint text-[11px] text-slate-400">
             <i class="fa-solid fa-up-down-left-right mr-1"></i> Kéo góc phải-dưới để đổi chiều cao khung
           </div>
         </div>
 
-        <!-- Clinical Problems Allocation -->
+        <!-- Problems -->
         <div id="cardProblems" class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col flex-grow overflow-hidden resizable-y">
           <div class="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
             <div>
@@ -290,9 +236,10 @@
             </div>
           </div>
         </div>
+
       </div>
 
-      <!-- Right Panel -->
+      <!-- Right -->
       <div class="col-span-12 lg:col-span-8 xl:col-span-9 flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 shrink-0">
           <div>
@@ -305,11 +252,12 @@
             <div class="hidden md:flex items-center space-x-4 text-xs bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm">
               <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 mr-1.5"></span> Nhớ (1)</span>
               <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500 mr-1.5"></span> Hiểu (2)</span>
-              <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500 mr-1.5"></span> Vận dụng (3)</span>
-              <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 mr-1.5"></span> Phân tích (4)</span>
+              <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500 mr-1.5"></span> V.Dụng (3)</span>
+              <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 mr-1.5"></span> P.Tích (4)</span>
             </div>
 
-            <button onclick="exportSpecialtyChooser()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-2 rounded-lg text-sm font-semibold transition flex items-center">
+            <button onclick="exportSpecialtyChooser()"
+              class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-2 rounded-lg text-sm font-semibold transition flex items-center">
               <i class="fa-solid fa-download mr-2"></i> Xuất theo phân môn
             </button>
           </div>
@@ -367,12 +315,40 @@
           </div>
         </div>
 
-      </div><!-- /Right Panel -->
+      </div><!-- /Right -->
     </div>
   </main>
 
-  <!-- Modals -->
+  <!-- Toast -->
   <div id="toast" class="toast"></div>
+
+  <!-- Export chooser modal -->
+  <div id="exportModal" class="modal fixed inset-0 z-[80] flex items-center justify-center">
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="toggleExportModal(false)"></div>
+    <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-md relative z-10 flex flex-col">
+      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+        <h3 class="text-lg font-bold text-slate-800">Xuất báo cáo</h3>
+        <button onclick="toggleExportModal(false)" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+      </div>
+      <div class="p-6 bg-slate-50">
+        <p class="text-sm text-slate-700 mb-4">Chọn định dạng bạn muốn xuất:</p>
+        <div class="grid grid-cols-2 gap-3">
+          <button onclick="exportReportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-lg font-semibold flex items-center justify-center">
+            <i class="fa-solid fa-file-excel mr-2"></i> Excel (.xlsx)
+          </button>
+          <button onclick="exportReportWord()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-3 rounded-lg font-semibold flex items-center justify-center">
+            <i class="fa-solid fa-file-word mr-2"></i> Word (.docx)
+          </button>
+        </div>
+        <div class="mt-4 text-[12px] text-slate-500">
+          Gợi ý: Excel phù hợp tổng hợp/đếm số câu; Word phù hợp in báo cáo.
+        </div>
+      </div>
+      <div class="px-6 py-4 border-t border-gray-100 flex justify-end bg-white rounded-b-xl">
+        <button onclick="toggleExportModal(false)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-lg font-medium transition">Đóng</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Exam settings modal -->
   <div id="examModal" class="modal fixed inset-0 z-[70] flex items-center justify-center">
@@ -401,17 +377,13 @@
           </div>
           <div class="bg-white border border-gray-200 rounded-lg p-3">
             <div class="text-xs text-gray-500 font-semibold mb-1">Lưu ý</div>
-            <div class="text-sm text-slate-700">
-              Thông tin này sẽ hiển thị trên navbar và báo cáo xuất ra.
-            </div>
+            <div class="text-sm text-slate-700">Thông tin này hiển thị trên navbar và trong báo cáo xuất.</div>
           </div>
         </div>
       </div>
 
       <div class="px-6 py-4 border-t border-gray-100 flex justify-end bg-white rounded-b-xl">
-        <button onclick="toggleExamSettings(false)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-lg font-medium transition mr-3">
-          Đóng
-        </button>
+        <button onclick="toggleExamSettings(false)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-lg font-medium transition mr-3">Đóng</button>
         <button onclick="saveExamSettings()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium shadow-sm transition">
           <i class="fa-solid fa-save mr-2"></i> Lưu
         </button>
@@ -425,23 +397,18 @@
     <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-2xl relative z-10 flex flex-col max-h-[85vh]">
       <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
         <h3 class="text-lg font-bold text-slate-800">Quản lý Chuẩn đầu ra (CLO)</h3>
-        <button onclick="toggleCLOModal(false)" class="text-gray-400 hover:text-gray-600">
-          <i class="fa-solid fa-xmark text-xl"></i>
-        </button>
+        <button onclick="toggleCLOModal(false)" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
       </div>
 
       <div class="p-6 overflow-y-auto flex-grow bg-slate-50">
         <div id="cloListContainer" class="space-y-3"></div>
-
         <button onclick="addCLO()" class="mt-4 w-full py-2.5 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 font-medium hover:bg-blue-50 hover:border-blue-400 transition-colors flex items-center justify-center">
           <i class="fa-solid fa-plus mr-2"></i> Thêm Chuẩn đầu ra mới
         </button>
       </div>
 
       <div class="px-6 py-4 border-t border-gray-100 flex justify-end bg-white rounded-b-xl">
-        <button onclick="toggleCLOModal(false)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-lg font-medium transition mr-3">
-          Đóng
-        </button>
+        <button onclick="toggleCLOModal(false)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-lg font-medium transition mr-3">Đóng</button>
         <button onclick="saveCLOs()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium shadow-sm transition">
           <i class="fa-solid fa-save mr-2"></i> Lưu thay đổi
         </button>
@@ -455,14 +422,10 @@
     <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-2xl relative z-10 flex flex-col max-h-[85vh]">
       <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
         <h3 class="text-lg font-bold text-slate-800">Thư viện Phân môn</h3>
-        <button onclick="toggleSpecialtyLibrary(false)" class="text-gray-400 hover:text-gray-600">
-          <i class="fa-solid fa-xmark text-xl"></i>
-        </button>
+        <button onclick="toggleSpecialtyLibrary(false)" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
       </div>
       <div class="p-6 overflow-y-auto flex-grow bg-slate-50">
-        <div class="text-sm text-slate-700 mb-3">
-          Nhập sẵn danh sách phân môn để chọn nhanh trong từng vấn đề.
-        </div>
+        <div class="text-sm text-slate-700 mb-3">Nhập sẵn danh sách phân môn để chọn nhanh trong từng vấn đề.</div>
         <div id="specListContainer" class="space-y-2"></div>
         <button onclick="addSpecItem()" class="mt-4 w-full py-2.5 border-2 border-dashed border-emerald-300 rounded-lg text-emerald-700 font-medium hover:bg-emerald-50 hover:border-emerald-400 transition-colors flex items-center justify-center">
           <i class="fa-solid fa-plus mr-2"></i> Thêm phân môn
@@ -477,20 +440,16 @@
     </div>
   </div>
 
-  <!-- Systems (organ systems) modal -->
+  <!-- Systems modal -->
   <div id="systemsModal" class="modal fixed inset-0 z-[66] flex items-center justify-center">
     <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="toggleSystemsModal(false)"></div>
     <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-2xl relative z-10 flex flex-col max-h-[85vh]">
       <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
         <h3 class="text-lg font-bold text-slate-800">Nhóm Hệ cơ quan</h3>
-        <button onclick="toggleSystemsModal(false)" class="text-gray-400 hover:text-gray-600">
-          <i class="fa-solid fa-xmark text-xl"></i>
-        </button>
+        <button onclick="toggleSystemsModal(false)" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
       </div>
       <div class="p-6 overflow-y-auto flex-grow bg-slate-50">
-        <div class="text-sm text-slate-700 mb-3">
-          Tạo/đổi tên hệ cơ quan để nhóm “Vấn đề lâm sàng”.
-        </div>
+        <div class="text-sm text-slate-700 mb-3">Tạo/đổi tên hệ cơ quan để nhóm “Vấn đề lâm sàng”.</div>
         <div id="systemsListContainer" class="space-y-2"></div>
         <button onclick="addSystem()" class="mt-4 w-full py-2.5 border-2 border-dashed border-indigo-300 rounded-lg text-indigo-700 font-medium hover:bg-indigo-50 hover:border-indigo-400 transition-colors flex items-center justify-center">
           <i class="fa-solid fa-plus mr-2"></i> Thêm hệ cơ quan
@@ -505,7 +464,6 @@
     </div>
   </div>
 
-  <!-- Script -->
   <script>
     // =========================
     //  DATA MODEL
@@ -525,16 +483,10 @@
       { id: 'clo4', code: 'CLO4', name: 'Cơ chế bệnh sinh & Sinh lý bệnh' }
     ];
 
-    // Thư viện phân môn (để chọn nhanh)
     let specialtyLibrary = [
-      "Nội Tim mạch",
-      "Nội Hô hấp",
-      "Cấp cứu",
-      "Nội Tiêu hóa",
-      "Ngoại Tiêu hóa"
+      "Nội Tim mạch", "Nội Hô hấp", "Cấp cứu", "Nội Tiêu hóa", "Ngoại Tiêu hóa"
     ];
 
-    // Hệ cơ quan (nhóm vấn đề lâm sàng)
     let organSystems = [
       { id: "sys1", name: "Tim mạch" },
       { id: "sys2", name: "Hô hấp" },
@@ -545,10 +497,7 @@
 
     let problems = [
       {
-        id: 1,
-        systemId: "sys1",
-        name: "Đau ngực cấp",
-        weight: 20,
+        id: 1, systemId: "sys1", name: "Đau ngực cấp", weight: 20,
         specialties: [
           { name: "Nội Tim mạch", cloId: "clo1", levels: [2, 3, 2, 1] },
           { name: "Nội Hô hấp", cloId: "clo1", levels: [1, 2, 1, 0] },
@@ -556,20 +505,14 @@
         ]
       },
       {
-        id: 2,
-        systemId: "sys2",
-        name: "Khó thở",
-        weight: 15,
+        id: 2, systemId: "sys2", name: "Khó thở", weight: 15,
         specialties: [
           { name: "Nội Hô hấp", cloId: "clo1", levels: [2, 3, 1, 0] },
           { name: "Nội Tim mạch", cloId: "clo4", levels: [1, 2, 0, 0] }
         ]
       },
       {
-        id: 3,
-        systemId: "sys3",
-        name: "Đau bụng cấp",
-        weight: 25,
+        id: 3, systemId: "sys3", name: "Đau bụng cấp", weight: 25,
         specialties: [
           { name: "Nội Tiêu hóa", cloId: "clo1", levels: [3, 4, 2, 1] },
           { name: "Ngoại Tiêu hóa", cloId: "clo2", levels: [2, 3, 3, 2] }
@@ -588,7 +531,7 @@
     }
 
     // =========================
-    //  PERSIST UI CARD HEIGHTS
+    //  CARD HEIGHTS
     // =========================
     function persistCardHeights() {
       const ids = ["cardGeneral", "cardBloom", "cardProblems"];
@@ -599,7 +542,6 @@
       });
       localStorage.setItem("leftCardHeights", JSON.stringify(heights));
     }
-
     function restoreCardHeights() {
       try {
         const raw = localStorage.getItem("leftCardHeights");
@@ -611,13 +553,11 @@
         });
       } catch {}
     }
-
     function attachResizeObservers() {
       const ids = ["cardGeneral", "cardBloom", "cardProblems"];
       ids.forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
-        // save on mouseup after resizing
         el.addEventListener("mouseup", () => persistCardHeights());
         el.addEventListener("touchend", () => persistCardHeights());
       });
@@ -629,10 +569,8 @@
     function syncExamUI() {
       document.getElementById("examTitleTop").textContent = examSettings.title || "";
       document.getElementById("examYearTop").textContent = examSettings.year || "";
-
       document.getElementById("examTitleLeft").textContent = examSettings.title || "";
       document.getElementById("examYearLeft").textContent = examSettings.year || "";
-
       const dur = document.getElementById("durationMinutes");
       if (dur) dur.value = examSettings.durationMinutes ?? 0;
     }
@@ -644,19 +582,14 @@
         document.getElementById("examYearInput").value = examSettings.year || "";
         document.getElementById("examDurationInput").value = examSettings.durationMinutes ?? 0;
         modal.classList.add('active');
-      } else {
-        modal.classList.remove('active');
-      }
+      } else modal.classList.remove('active');
     }
 
     function saveExamSettings() {
       examSettings.title = document.getElementById("examTitleInput").value.trim() || "Kỳ thi";
       examSettings.year = document.getElementById("examYearInput").value.trim() || "";
       examSettings.durationMinutes = parseInt(document.getElementById("examDurationInput").value || "0", 10) || 0;
-
-      // sync quick input
       document.getElementById("durationMinutes").value = examSettings.durationMinutes;
-
       persistAllLocal();
       syncExamUI();
       showToast("✅ Đã lưu thông tin kỳ thi");
@@ -672,6 +605,13 @@
     // =========================
     //  BLOOM
     // =========================
+    function clampPercent(v) {
+      let n = parseInt(v || "0", 10) || 0;
+      if (n < 0) n = 0;
+      if (n > 100) n = 100;
+      return n;
+    }
+
     function onBloomChange() {
       bloomDefault.recall = clampPercent(document.getElementById("bloomRecall").value);
       bloomDefault.understand = clampPercent(document.getElementById("bloomUnderstand").value);
@@ -693,27 +633,6 @@
       }
     }
 
-    function clampPercent(v) {
-      let n = parseInt(v || "0", 10) || 0;
-      if (n < 0) n = 0;
-      if (n > 100) n = 100;
-      return n;
-    }
-
-    function applyBloomToAll() {
-      // Áp Bloom cho từng phân môn theo tổng câu của phân môn (sTotal)
-      problems.forEach(p => {
-        p.specialties.forEach(s => {
-          const sTotal = s.levels.reduce((a,b)=>a+b,0);
-          if (sTotal <= 0) return;
-          const dist = distributeByBloom(sTotal);
-          s.levels = dist;
-        });
-      });
-      updateCalculations();
-      showToast("✅ Đã áp Bloom cho các phân môn (theo tổng câu hiện tại)");
-    }
-
     function distributeByBloom(total) {
       const p = bloomDefault;
       const parts = [
@@ -722,18 +641,15 @@
         Math.round(total * (p.apply/100)),
         Math.round(total * (p.analyze/100))
       ];
-      // fix rounding to match total
       let sum = parts.reduce((a,b)=>a+b,0);
       let diff = total - sum;
-      // distribute diff
-      const order = [1,0,2,3]; // ưu tiên hiểu/nhớ trước
+      const order = [1,0,2,3];
       let idx = 0;
       while (diff !== 0) {
         const k = order[idx % order.length];
         parts[k] += diff > 0 ? 1 : -1;
         diff += diff > 0 ? -1 : 1;
         idx++;
-        // prevent negatives
         parts.forEach((x,i)=>{ if (x<0) parts[i]=0; });
         sum = parts.reduce((a,b)=>a+b,0);
         diff = total - sum;
@@ -741,8 +657,20 @@
       return parts;
     }
 
+    function applyBloomToAll() {
+      problems.forEach(p => {
+        p.specialties.forEach(s => {
+          const sTotal = s.levels.reduce((a,b)=>a+b,0);
+          if (sTotal <= 0) return;
+          s.levels = distributeByBloom(sTotal);
+        });
+      });
+      updateCalculations();
+      showToast("✅ Đã áp Bloom cho các phân môn");
+    }
+
     // =========================
-    //  SAVE / LOAD (Local first + optional API)
+    //  SAVE / LOAD LOCAL
     // =========================
     function persistAllLocal() {
       const payload = {
@@ -773,112 +701,35 @@
 
         if (data.totalQuestions != null) document.getElementById('totalQuestions').value = data.totalQuestions;
 
-        // bloom inputs
         document.getElementById("bloomRecall").value = bloomDefault.recall ?? 30;
         document.getElementById("bloomUnderstand").value = bloomDefault.understand ?? 30;
         document.getElementById("bloomApply").value = bloomDefault.apply ?? 25;
         document.getElementById("bloomAnalyze").value = bloomDefault.analyze ?? 15;
-
       } catch {}
     }
 
-    // ✅ SAVE to DB (Vercel Postgres via /api/save) - optional
-    async function saveBlueprint() {
-      try {
-        persistAllLocal();
-        const payload = {
-          examSettings,
-          bloomDefault,
-          totalQuestions: parseInt(document.getElementById('totalQuestions')?.value || "0", 10),
-          CLOs, organSystems, specialtyLibrary, problems,
-          savedAt: new Date().toISOString()
-        };
-
-        // If you have API, uncomment:
-        const res = await fetch("/api/save", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: "MedExam Blueprint - " + new Date().toLocaleString(),
-            data: payload
-          })
-        });
-
-        const json = await res.json();
-        if (!res.ok) throw new Error(json?.error || "Save failed");
-
-        const id = json.id;
-        localStorage.setItem("lastBlueprintId", id);
-
-        const url = new URL(window.location.href);
-        url.searchParams.set("id", id);
-        window.history.replaceState({}, "", url.toString());
-
-        showToast("✅ Đã lưu! ID: " + id);
-      } catch (e) {
-        // fallback only local
-        persistAllLocal();
-        alert("❌ Lưu DB thất bại (đã lưu Local): " + (e?.message || e));
-      }
+    function saveBlueprint() {
+      persistAllLocal();
+      showToast("✅ Đã lưu Local");
     }
 
-    // ✅ LOAD from DB (via /api/load?id=...) - optional
-    async function loadBlueprint() {
-      try {
-        const url = new URL(window.location.href);
-        const idFromUrl = url.searchParams.get("id");
-        const idFromLocal = localStorage.getItem("lastBlueprintId");
-        const id = idFromUrl || idFromLocal;
-
-        if (!id) {
-          // fallback local
-          restoreAllLocal();
-          syncExamUI();
-          updateBloomHint();
-          updateCalculations();
-          showToast("✅ Đã tải từ Local");
-          return;
-        }
-
-        const res = await fetch("/api/load?id=" + encodeURIComponent(id));
-        const json = await res.json();
-        if (!res.ok) throw new Error(json?.error || "Load failed");
-        if (!json || !json.data) throw new Error("Không có dữ liệu trong bản lưu");
-
-        const d = json.data;
-
-        if (d.totalQuestions != null) document.getElementById('totalQuestions').value = d.totalQuestions;
-        if (d.examSettings) examSettings = d.examSettings;
-        if (d.bloomDefault) bloomDefault = d.bloomDefault;
-        CLOs = d.CLOs || CLOs;
-        organSystems = d.organSystems || organSystems;
-        specialtyLibrary = d.specialtyLibrary || specialtyLibrary;
-        problems = d.problems || problems;
-
-        // update inputs
-        document.getElementById("bloomRecall").value = bloomDefault.recall ?? 30;
-        document.getElementById("bloomUnderstand").value = bloomDefault.understand ?? 30;
-        document.getElementById("bloomApply").value = bloomDefault.apply ?? 25;
-        document.getElementById("bloomAnalyze").value = bloomDefault.analyze ?? 15;
-
-        persistAllLocal();
-        syncExamUI();
-        updateBloomHint();
-        updateCalculations();
-        showToast("✅ Đã tải dữ liệu từ DB!");
-      } catch (e) {
-        // fallback local
-        restoreAllLocal();
-        syncExamUI();
-        updateBloomHint();
-        updateCalculations();
-        alert("❌ Tải DB thất bại (đã tải Local nếu có): " + (e?.message || e));
-      }
+    function loadBlueprint() {
+      restoreAllLocal();
+      syncExamUI();
+      updateBloomHint();
+      updateCalculations();
+      showToast("✅ Đã tải Local");
     }
 
     // =========================
-    //  CLO MANAGEMENT
+    //  MODALS
     // =========================
+    function toggleExportModal(show){
+      const modal = document.getElementById('exportModal');
+      if(show) modal.classList.add('active'); else modal.classList.remove('active');
+    }
+    function openExportChooser(){ toggleExportModal(true); }
+
     function toggleCLOModal(show) {
       const modal = document.getElementById('cloModal');
       if (show) {
@@ -890,6 +741,21 @@
       }
     }
 
+    function toggleSpecialtyLibrary(show) {
+      const modal = document.getElementById('specModal');
+      if (show) { renderSpecLibrary(); modal.classList.add('active'); }
+      else modal.classList.remove('active');
+    }
+
+    function toggleSystemsModal(show) {
+      const modal = document.getElementById('systemsModal');
+      if (show) { renderSystems(); modal.classList.add('active'); }
+      else modal.classList.remove('active');
+    }
+
+    // =========================
+    //  CLO MANAGER
+    // =========================
     function renderCLOManager() {
       const container = document.getElementById('cloListContainer');
       container.innerHTML = '';
@@ -929,32 +795,17 @@
       if (confirm("Xóa CLO này? Các câu hỏi liên quan sẽ bị ảnh hưởng.")) {
         const removed = CLOs[index].id;
         CLOs.splice(index, 1);
-        // fallback: map any used cloId to first CLO
         problems.forEach(p => p.specialties.forEach(s => { if (s.cloId === removed) s.cloId = CLOs[0].id; }));
         renderCLOManager();
       }
     }
 
-    function updateCLOData(index, field, value) {
-      CLOs[index][field] = value;
-    }
-
-    function saveCLOs() {
-      persistAllLocal();
-      toggleCLOModal(false);
-    }
+    function updateCLOData(index, field, value) { CLOs[index][field] = value; }
+    function saveCLOs() { persistAllLocal(); toggleCLOModal(false); }
 
     // =========================
     //  SPECIALTY LIBRARY
     // =========================
-    function toggleSpecialtyLibrary(show) {
-      const modal = document.getElementById('specModal');
-      if (show) {
-        renderSpecLibrary();
-        modal.classList.add('active');
-      } else modal.classList.remove('active');
-    }
-
     function renderSpecLibrary() {
       const c = document.getElementById("specListContainer");
       c.innerHTML = "";
@@ -973,20 +824,11 @@
         c.appendChild(row);
       });
     }
+    function addSpecItem() { specialtyLibrary.push("Phân môn mới"); renderSpecLibrary(); }
+    function updateSpecItem(idx, val) { specialtyLibrary[idx] = val.trim() || "Phân môn"; }
+    function removeSpecItem(idx) { specialtyLibrary.splice(idx, 1); renderSpecLibrary(); }
 
-    function addSpecItem() {
-      specialtyLibrary.push("Phân môn mới");
-      renderSpecLibrary();
-    }
-    function updateSpecItem(idx, val) {
-      specialtyLibrary[idx] = val.trim() || "Phân môn";
-    }
-    function removeSpecItem(idx) {
-      specialtyLibrary.splice(idx, 1);
-      renderSpecLibrary();
-    }
     function saveSpecLibrary() {
-      // remove duplicates / empty
       specialtyLibrary = specialtyLibrary.map(x => x.trim()).filter(Boolean);
       specialtyLibrary = [...new Set(specialtyLibrary)];
       persistAllLocal();
@@ -996,16 +838,8 @@
     }
 
     // =========================
-    //  ORGAN SYSTEMS
+    //  SYSTEMS
     // =========================
-    function toggleSystemsModal(show) {
-      const modal = document.getElementById('systemsModal');
-      if (show) {
-        renderSystems();
-        modal.classList.add('active');
-      } else modal.classList.remove('active');
-    }
-
     function renderSystems() {
       const c = document.getElementById("systemsListContainer");
       c.innerHTML = "";
@@ -1033,10 +867,7 @@
       organSystems.push({ id: newId, name: "Hệ cơ quan mới" });
       renderSystems();
     }
-
-    function updateSystem(idx, val) {
-      organSystems[idx].name = val.trim() || "Hệ cơ quan";
-    }
+    function updateSystem(idx, val) { organSystems[idx].name = val.trim() || "Hệ cơ quan"; }
 
     function removeSystem(idx) {
       if (organSystems.length <= 1) { alert("Cần ít nhất 1 hệ cơ quan!"); return; }
@@ -1044,10 +875,8 @@
       if (!confirm("Xóa hệ cơ quan này? Các vấn đề đang thuộc hệ này sẽ chuyển sang 'Khác' (nếu có) hoặc hệ đầu tiên.")) return;
 
       organSystems.splice(idx, 1);
-
       const fallback = organSystems.find(s => s.name.toLowerCase().includes("khác"))?.id || organSystems[0].id;
       problems.forEach(p => { if (p.systemId === removedId) p.systemId = fallback; });
-
       renderSystems();
       updateCalculations();
     }
@@ -1067,7 +896,6 @@
       const totalQ = parseInt(document.getElementById('totalQuestions').value) || 0;
       container.innerHTML = '';
 
-      // group problems by systemId
       const sysMap = new Map(organSystems.map(s => [s.id, s.name]));
       const grouped = {};
       problems.forEach((p, idx) => {
@@ -1076,7 +904,6 @@
         grouped[sid].push({ p, idx });
       });
 
-      // stable order by organSystems list, then unknown
       const orderedSysIds = organSystems.map(s => s.id);
       const extraSysIds = Object.keys(grouped).filter(k => !orderedSysIds.includes(k));
       const finalSysIds = [...orderedSysIds, ...extraSysIds];
@@ -1087,7 +914,6 @@
         const list = grouped[sid];
         if (!list || list.length === 0) return;
 
-        // system header
         const header = document.createElement("div");
         header.className = "group-header";
         header.innerHTML = `
@@ -1102,7 +928,6 @@
         `;
         container.appendChild(header);
 
-        // problems in system
         list.forEach(({p, idx}) => {
           totalWeight += p.weight;
 
@@ -1167,7 +992,6 @@
         container.appendChild(divider);
       });
 
-      // Update Weight Progress
       const weightDisplay = document.getElementById('totalWeightDisplay');
       const weightBar = document.getElementById('weightProgressBar');
       weightDisplay.innerText = totalWeight + '%';
@@ -1230,10 +1054,10 @@
                   <i class="fa-solid fa-plus mr-1.5"></i> Thêm
                 </button>
 
-                <button onclick="exportProblemSummaryCSV(${pIndex})"
+                <button onclick="exportProblemSummaryExcel(${pIndex})"
                   class="text-xs bg-white border border-slate-200 text-slate-700 hover:bg-slate-800 hover:text-white px-3 py-1.5 rounded-md font-medium transition shadow-sm flex items-center"
-                  title="Xuất tổng hợp theo vấn đề (CSV)">
-                  <i class="fa-solid fa-file-csv mr-1.5"></i> Vấn đề
+                  title="Xuất tổng hợp theo vấn đề (Excel)">
+                  <i class="fa-solid fa-file-excel mr-1.5"></i> Vấn đề
                 </button>
               </div>
             </div>
@@ -1242,8 +1066,6 @@
         tbody.appendChild(trHeader);
 
         p.specialties.forEach((s, sIndex) => {
-          // lock bloom: auto distribute based on row total when user changes total or weight? (here just keep numbers; lock mode is applied when we detect row total differs and totalQ changed)
-          // We'll handle in updateCalculations() by applying to each specialty based on specialty total if lockBloom on AND row has a "rowTotalHint".
           const sTotal = s.levels.reduce((a, b) => a + b, 0);
 
           grandTotal += sTotal;
@@ -1269,14 +1091,14 @@
               </div>
               <div class="mt-1 flex items-center gap-2">
                 <button class="text-[11px] px-2 py-1 rounded border border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-                  onclick="exportSpecialtyCSV('${escapeJs(s.name)}')"
-                  title="Xuất riêng phân môn này (CSV)">
-                  <i class="fa-solid fa-download mr-1"></i> CSV
+                  onclick="exportSpecialtyExcel('${escapeJs(s.name)}')"
+                  title="Xuất riêng phân môn này (Excel)">
+                  <i class="fa-solid fa-file-excel mr-1"></i> Excel
                 </button>
                 <button class="text-[11px] px-2 py-1 rounded border border-slate-200 text-slate-700 hover:bg-slate-50"
-                  onclick="exportSpecialtyJSON('${escapeJs(s.name)}')"
-                  title="Xuất riêng phân môn này (JSON)">
-                  <i class="fa-solid fa-code mr-1"></i> JSON
+                  onclick="exportSpecialtyWord('${escapeJs(s.name)}')"
+                  title="Xuất riêng phân môn này (Word)">
+                  <i class="fa-solid fa-file-word mr-1"></i> Word
                 </button>
                 ${lockBloom ? `<span class="text-[11px] text-purple-600 font-semibold"><i class="fa-solid fa-lock mr-1"></i>Khóa Bloom</span>` : ``}
               </div>
@@ -1309,9 +1131,9 @@
             <td class="px-4 py-2 text-center font-black text-slate-800 bg-gray-50 border-l border-gray-100">${sTotal}</td>
 
             <td class="px-2 py-2 text-center">
-              <button onclick="exportSpecialtyOnlyForThisRow(${pIndex}, ${sIndex})"
+              <button onclick="exportSpecialtyOnlyRowExcel(${pIndex}, ${sIndex})"
                 class="text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50 w-9 h-9 rounded-full inline-flex items-center justify-center transition"
-                title="Xuất riêng phân môn (chỉ dòng này)">
+                title="Xuất riêng dòng (Excel)">
                 <i class="fa-solid fa-file-arrow-down"></i>
               </button>
             </td>
@@ -1366,7 +1188,6 @@
     //  LOGIC UPDATES
     // =========================
     function updateCalculations() {
-      // If lock bloom: for each specialty, keep total of row and redistribute by bloom.
       if (document.getElementById("lockBloom").checked) {
         problems.forEach(p => {
           p.specialties.forEach(s => {
@@ -1375,26 +1196,14 @@
           });
         });
       }
-
       renderProblemsList();
       renderMatrix();
       persistAllLocal();
     }
 
-    function updateProblemWeight(index, val) {
-      problems[index].weight = parseInt(val) || 0;
-      updateCalculations();
-    }
-
-    function updateProblemName(index, val) {
-      problems[index].name = val;
-      updateCalculations();
-    }
-
-    function updateProblemSystem(index, systemId) {
-      problems[index].systemId = systemId;
-      updateCalculations();
-    }
+    function updateProblemWeight(index, val) { problems[index].weight = parseInt(val) || 0; updateCalculations(); }
+    function updateProblemName(index, val) { problems[index].name = val; updateCalculations(); }
+    function updateProblemSystem(index, systemId) { problems[index].systemId = systemId; updateCalculations(); }
 
     function addProblem() {
       const fallback = organSystems[0]?.id || "sys";
@@ -1435,15 +1244,8 @@
       updateCalculations();
     }
 
-    function updateSpecialtyName(pIndex, sIndex, val) {
-      problems[pIndex].specialties[sIndex].name = val;
-      persistAllLocal();
-    }
-
-    function updateSpecialtyCLO(pIndex, sIndex, val) {
-      problems[pIndex].specialties[sIndex].cloId = val;
-      persistAllLocal();
-    }
+    function updateSpecialtyName(pIndex, sIndex, val) { problems[pIndex].specialties[sIndex].name = val; persistAllLocal(); }
+    function updateSpecialtyCLO(pIndex, sIndex, val) { problems[pIndex].specialties[sIndex].cloId = val; persistAllLocal(); }
 
     function updateLevel(pIndex, sIndex, levelIndex, val) {
       const parsed = parseInt(val) || 0;
@@ -1454,10 +1256,69 @@
     }
 
     // =========================
-    //  EXPORTS
+    //  EXPORTS (EXCEL / WORD)
     // =========================
-    function exportReport() {
-      // full report (CSV)
+    async function exportExcelWorkbook(filename, sheets) {
+      const wb = new ExcelJS.Workbook();
+      wb.creator = "MedExam Graduation Tool";
+      wb.created = new Date();
+
+      sheets.forEach(sh => {
+        const ws = wb.addWorksheet(sh.name || "Sheet");
+        (sh.rows || []).forEach(r => ws.addRow(r));
+
+        ws.columns.forEach(col => {
+          let max = 10;
+          col.eachCell({ includeEmpty: true }, (cell) => {
+            const v = cell.value == null ? "" : String(cell.value);
+            max = Math.max(max, Math.min(60, v.length + 2));
+          });
+          col.width = max;
+        });
+
+        if ((sh.rows || []).length >= 1) {
+          ws.getRow(1).font = { bold: true };
+        }
+      });
+
+      const buf = await wb.xlsx.writeBuffer();
+      saveAs(new Blob([buf], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      }), filename);
+
+      showToast("✅ Đã xuất: " + filename);
+    }
+
+    async function exportWordDoc(filename, title, rows) {
+      const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType } = docx;
+
+      const doc = new Document({
+        sections: [{
+          children: [
+            new Paragraph({
+              children: [new TextRun({ text: title || "MedExam Report", bold: true, size: 32 })],
+              spacing: { after: 300 }
+            }),
+            new Table({
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              rows: (rows || []).map((r, idx) => new TableRow({
+                children: (r || []).map(cell => new TableCell({
+                  children: [new Paragraph({
+                    children: [new TextRun({ text: String(cell ?? ""), bold: idx === 0 })]
+                  })]
+                }))
+              }))
+            })
+          ]
+        }]
+      });
+
+      const blob = await Packer.toBlob(doc);
+      saveAs(blob, filename);
+      showToast("✅ Đã xuất: " + filename);
+    }
+
+    function buildFullReportRows() {
       const rows = [];
       rows.push(["ExamTitle", examSettings.title]);
       rows.push(["ExamYear", examSettings.year]);
@@ -1484,92 +1345,30 @@
         });
       });
 
-      downloadText("MedExam_FullReport.csv", toCSV(rows), "text/csv;charset=utf-8");
+      return rows;
     }
 
-    // Xuất chọn phân môn (ẩn cấu trúc chung nếu chỉ chia theo phân môn)
+    async function exportReportExcel(){
+      const rows = buildFullReportRows();
+      await exportExcelWorkbook("MedExam_FullReport.xlsx", [{ name: "FullReport", rows }]);
+      toggleExportModal(false);
+    }
+
+    async function exportReportWord(){
+      const rows = buildFullReportRows();
+      await exportWordDoc("MedExam_FullReport.docx", "MedExam Full Report", rows);
+      toggleExportModal(false);
+    }
+
     function exportSpecialtyChooser() {
       const allSpecs = listAllSpecialtiesUnique();
       if (allSpecs.length === 0) { alert("Chưa có phân môn nào."); return; }
 
-      const pick = prompt(
-        "Nhập đúng tên phân môn cần xuất (copy/paste):\n\n" + allSpecs.map(x => "• " + x).join("\n")
-      );
+      const pick = prompt("Nhập đúng tên phân môn cần xuất (copy/paste):\n\n" + allSpecs.map(x => "• " + x).join("\n"));
       if (!pick) return;
 
-      exportSpecialtyCSV(pick.trim());
-    }
-
-    // Xuất riêng phân môn: chỉ gồm các vấn đề có phân môn đó
-    function exportSpecialtyCSV(specialtyName) {
-      const rows = buildSpecialtyExportRows(specialtyName);
-      if (!rows) { alert("Không tìm thấy phân môn: " + specialtyName); return; }
-      const safe = filenameSafe(specialtyName);
-      downloadText(`PhanMon_${safe}.csv`, toCSV(rows), "text/csv;charset=utf-8");
-    }
-
-    function exportSpecialtyJSON(specialtyName) {
-      const data = buildSpecialtyExportJSON(specialtyName);
-      if (!data) { alert("Không tìm thấy phân môn: " + specialtyName); return; }
-      const safe = filenameSafe(specialtyName);
-      downloadText(`PhanMon_${safe}.json`, JSON.stringify(data, null, 2), "application/json;charset=utf-8");
-    }
-
-    // Xuất chỉ dòng này (không lộ cấu trúc khác)
-    function exportSpecialtyOnlyForThisRow(pIndex, sIndex) {
-      const p = problems[pIndex];
-      const s = p?.specialties?.[sIndex];
-      if (!p || !s) return;
-
-      const clo = CLOs.find(c => c.id === s.cloId);
-      const rows = [];
-      rows.push(["ExamTitle", examSettings.title]);
-      rows.push(["ExamYear", examSettings.year]);
-      rows.push(["System", getSystemName(p.systemId)]);
-      rows.push(["Problem", p.name]);
-      rows.push([]);
-      rows.push(["Specialty","CLO","Recall","Understand","Apply","Analyze","Total"]);
-      rows.push([
-        s.name,
-        clo ? `${clo.code}: ${clo.name}` : "",
-        String(s.levels[0]||0),
-        String(s.levels[1]||0),
-        String(s.levels[2]||0),
-        String(s.levels[3]||0),
-        String(s.levels.reduce((a,b)=>a+b,0))
-      ]);
-
-      downloadText(`Row_${filenameSafe(s.name)}_${filenameSafe(p.name)}.csv`, toCSV(rows), "text/csv;charset=utf-8");
-    }
-
-    // Xuất số lượng câu vấn đề cho từng phân môn (CSV theo vấn đề)
-    function exportProblemSummaryCSV(pIndex) {
-      const p = problems[pIndex];
-      if (!p) return;
-
-      const rows = [];
-      rows.push(["ExamTitle", examSettings.title]);
-      rows.push(["ExamYear", examSettings.year]);
-      rows.push(["System", getSystemName(p.systemId)]);
-      rows.push(["Problem", p.name]);
-      rows.push(["Weight%", String(p.weight)]);
-      rows.push([]);
-
-      rows.push(["Specialty","TotalQuestions","Recall","Understand","Apply","Analyze","CLO"]);
-      p.specialties.forEach(s => {
-        const clo = CLOs.find(c => c.id === s.cloId);
-        rows.push([
-          s.name,
-          String(s.levels.reduce((a,b)=>a+b,0)),
-          String(s.levels[0]||0),
-          String(s.levels[1]||0),
-          String(s.levels[2]||0),
-          String(s.levels[3]||0),
-          clo ? `${clo.code}: ${clo.name}` : ""
-        ]);
-      });
-
-      downloadText(`VanDe_${filenameSafe(p.name)}.csv`, toCSV(rows), "text/csv;charset=utf-8");
+      // mặc định xuất Excel; bạn muốn Word thì đổi sang exportSpecialtyWord(pick.trim())
+      exportSpecialtyExcel(pick.trim());
     }
 
     function buildSpecialtyExportRows(specialtyName) {
@@ -1592,7 +1391,6 @@
       rows.push(["ExamYear", examSettings.year]);
       rows.push(["Specialty", specialtyName]);
       rows.push([]);
-      // Quan trọng: chỉ lộ số câu cho phân môn này theo vấn đề (không lộ các phân môn khác)
       rows.push(["System","Problem","Weight%","CLO","Recall","Understand","Apply","Analyze","Total"]);
 
       matches.forEach(m => {
@@ -1609,7 +1407,7 @@
         ]);
       });
 
-      // add totals
+      rows.push([]);
       const tot = matches.reduce((acc, m) => {
         acc.recall += (m.s.levels[0]||0);
         acc.understand += (m.s.levels[1]||0);
@@ -1618,51 +1416,85 @@
         return acc;
       }, {recall:0, understand:0, apply:0, analyze:0});
       const sum = tot.recall + tot.understand + tot.apply + tot.analyze;
-
-      rows.push([]);
       rows.push(["TOTAL","","","",String(tot.recall),String(tot.understand),String(tot.apply),String(tot.analyze),String(sum)]);
       return rows;
     }
 
-    function buildSpecialtyExportJSON(specialtyName) {
-      const target = specialtyName.trim().toLowerCase();
-      const items = [];
+    async function exportSpecialtyExcel(specialtyName) {
+      const rows = buildSpecialtyExportRows(specialtyName);
+      if (!rows) { alert("Không tìm thấy phân môn: " + specialtyName); return; }
+      const safe = filenameSafe(specialtyName);
+      await exportExcelWorkbook(`PhanMon_${safe}.xlsx`, [{ name: "Specialty", rows }]);
+    }
 
-      problems.forEach(p => {
-        p.specialties.forEach(s => {
-          if ((s.name||"").trim().toLowerCase() === target) {
-            const clo = CLOs.find(c => c.id === s.cloId);
-            items.push({
-              system: getSystemName(p.systemId),
-              problem: p.name,
-              weightPercent: p.weight,
-              clo: clo ? { code: clo.code, name: clo.name } : null,
-              bloom: {
-                recall: s.levels[0]||0,
-                understand: s.levels[1]||0,
-                apply: s.levels[2]||0,
-                analyze: s.levels[3]||0
-              },
-              total: (s.levels||[]).reduce((a,b)=>a+b,0)
-            });
-          }
-        });
+    async function exportSpecialtyWord(specialtyName) {
+      const rows = buildSpecialtyExportRows(specialtyName);
+      if (!rows) { alert("Không tìm thấy phân môn: " + specialtyName); return; }
+      const safe = filenameSafe(specialtyName);
+      await exportWordDoc(`PhanMon_${safe}.docx`, `Phân môn: ${specialtyName}`, rows);
+    }
+
+    async function exportSpecialtyOnlyRowExcel(pIndex, sIndex) {
+      const p = problems[pIndex];
+      const s = p?.specialties?.[sIndex];
+      if (!p || !s) return;
+
+      const clo = CLOs.find(c => c.id === s.cloId);
+      const rows = [];
+      rows.push(["ExamTitle", examSettings.title]);
+      rows.push(["ExamYear", examSettings.year]);
+      rows.push(["System", getSystemName(p.systemId)]);
+      rows.push(["Problem", p.name]);
+      rows.push([]);
+      rows.push(["Specialty","CLO","Recall","Understand","Apply","Analyze","Total"]);
+      rows.push([
+        s.name,
+        clo ? `${clo.code}: ${clo.name}` : "",
+        String(s.levels[0]||0),
+        String(s.levels[1]||0),
+        String(s.levels[2]||0),
+        String(s.levels[3]||0),
+        String(s.levels.reduce((a,b)=>a+b,0))
+      ]);
+
+      await exportExcelWorkbook(`Row_${filenameSafe(s.name)}_${filenameSafe(p.name)}.xlsx`, [
+        { name: "Row", rows }
+      ]);
+    }
+
+    async function exportProblemSummaryExcel(pIndex) {
+      const p = problems[pIndex];
+      if (!p) return;
+
+      const rows = [];
+      rows.push(["ExamTitle", examSettings.title]);
+      rows.push(["ExamYear", examSettings.year]);
+      rows.push(["System", getSystemName(p.systemId)]);
+      rows.push(["Problem", p.name]);
+      rows.push(["Weight%", String(p.weight)]);
+      rows.push([]);
+      rows.push(["Specialty","TotalQuestions","Recall","Understand","Apply","Analyze","CLO"]);
+
+      p.specialties.forEach(s => {
+        const clo = CLOs.find(c => c.id === s.cloId);
+        rows.push([
+          s.name,
+          String(s.levels.reduce((a,b)=>a+b,0)),
+          String(s.levels[0]||0),
+          String(s.levels[1]||0),
+          String(s.levels[2]||0),
+          String(s.levels[3]||0),
+          clo ? `${clo.code}: ${clo.name}` : ""
+        ]);
       });
 
-      if (items.length === 0) return null;
-
-      return {
-        exam: { ...examSettings, totalQuestions: parseInt(document.getElementById("totalQuestions").value||"0",10) || 0 },
-        specialty: specialtyName,
-        items
-      };
+      await exportExcelWorkbook(`VanDe_${filenameSafe(p.name)}.xlsx`, [
+        { name: "Problem", rows }
+      ]);
     }
 
     function listAllSpecialtiesUnique() {
       const set = new Set();
-      problems.forEach(p => p.specialties.forEach(s => set.add((s.name||"").trim()).trim));
-      // above line wrong; fix:
-      set.clear();
       problems.forEach(p => p.specialties.forEach(s => {
         const n = (s.name || "").trim();
         if (n) set.add(n);
@@ -1687,9 +1519,7 @@
         .replaceAll("'", "&#039;");
     }
 
-    function escapeJs(str) {
-      return String(str ?? "").replaceAll("\\", "\\\\").replaceAll("'", "\\'");
-    }
+    function escapeJs(str) { return String(str ?? "").replaceAll("\\", "\\\\").replaceAll("'", "\\'"); }
 
     function filenameSafe(str) {
       return String(str ?? "export")
@@ -1699,27 +1529,6 @@
         .slice(0, 80);
     }
 
-    function toCSV(rows) {
-      return rows.map(r => r.map(cell => {
-        const s = String(cell ?? "");
-        if (s.includes('"') || s.includes(",") || s.includes("\n")) return '"' + s.replaceAll('"','""') + '"';
-        return s;
-      }).join(",")).join("\n");
-    }
-
-    function downloadText(filename, content, mime) {
-      const blob = new Blob([content], { type: mime || "text/plain;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      showToast("✅ Đã xuất: " + filename);
-    }
-
     // =========================
     //  INIT
     // =========================
@@ -1727,18 +1536,8 @@
       restoreCardHeights();
       attachResizeObservers();
 
-      // restore local data (if any)
       restoreAllLocal();
-
-      // apply bloom inputs if restored
-      document.getElementById("bloomRecall").value = bloomDefault.recall ?? 30;
-      document.getElementById("bloomUnderstand").value = bloomDefault.understand ?? 30;
-      document.getElementById("bloomApply").value = bloomDefault.apply ?? 25;
-      document.getElementById("bloomAnalyze").value = bloomDefault.analyze ?? 15;
-
-      // sync exam info
       syncExamUI();
-
       updateBloomHint();
       updateCalculations();
     };
