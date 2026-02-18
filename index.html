@@ -7,6 +7,7 @@
   <meta name="theme-color" content="#2563eb" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
     body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
     .table-scroll::-webkit-scrollbar { height: 10px; width: 10px; }
@@ -28,15 +29,36 @@
     .input { border: 1px solid #e2e8f0; background: white; }
     .input:focus { outline: 2px solid rgba(37,99,235,.25); border-color: #93c5fd; }
     .tab-active { background: #2563eb; color: white; border-color: #2563eb; }
+
+    /* ===== Split pane (kéo dãn vùng làm việc) ===== */
+    .split-wrap { display:flex; gap:12px; align-items:stretch; }
+    .pane-left { width: 420px; min-width: 320px; max-width: 700px; }
+    .pane-right { flex:1; min-width: 360px; }
+    .splitter {
+      width: 10px;
+      cursor: col-resize;
+      border-radius: 999px;
+      background: #e2e8f0;
+      position: relative;
+    }
+    .splitter::after{
+      content:"";
+      position:absolute; inset: 6px 3px;
+      border-radius: 999px;
+      background:#cbd5e1;
+    }
+    .splitter:hover{ background:#cbd5e1; }
+    .noselect { user-select:none; }
   </style>
 </head>
+
 <body class="bg-slate-50 text-slate-900">
   <div class="max-w-[1400px] mx-auto p-4 md:p-6">
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
       <div>
         <div class="text-2xl font-bold">MedMatrix – VDLS & Bloom</div>
-        <div class="text-sm text-slate-600">Tách tab “CLO & Bloom” riêng để dễ quan sát</div>
+        <div class="text-sm text-slate-600">Tách tab “CLO & Bloom” riêng để dễ quan sát + thêm chức năng nhập CLO</div>
       </div>
       <div class="flex flex-wrap gap-2">
         <button id="btnExportJson" class="btn rounded-xl px-4 py-2 text-sm font-semibold">Xuất JSON</button>
@@ -52,10 +74,10 @@
       <button data-tab="tabData" class="tab btn rounded-xl px-4 py-2 text-sm font-semibold">Dữ liệu nhúng</button>
     </div>
 
-    <!-- Main grid -->
-    <div class="grid grid-cols-12 gap-4">
-      <!-- Left column controls -->
-      <div class="col-span-12 lg:col-span-4 space-y-4">
+    <!-- Split Layout -->
+    <div class="split-wrap">
+      <!-- Left -->
+      <div id="paneLeft" class="pane-left space-y-4">
         <!-- Thông số chung -->
         <div class="bg-white rounded-2xl p-4 shadow-soft border border-slate-200">
           <div class="flex items-center gap-2 mb-3">
@@ -128,7 +150,7 @@
           <div class="mt-3 flex items-center justify-between gap-3">
             <label class="flex items-center gap-2 text-sm">
               <input id="chkLockBloom" type="checkbox" class="w-4 h-4">
-              Khóa Bloom (tự phân bổ)
+              Khóa Bloom (tự phân bổ tổng)
             </label>
             <button id="btnApplyBloom" class="btn-purple rounded-xl px-4 py-2 text-sm font-semibold">Áp dụng Bloom</button>
           </div>
@@ -186,13 +208,16 @@
           </div>
 
           <div class="mt-2 text-xs text-slate-500">
-            Nếu dữ liệu CLO bạn dán chưa đầy đủ, tổng CLO có thể lệch — nhưng app vẫn chạy.
+            Nếu CLO bạn dán chưa đầy đủ, tổng CLO có thể lệch — nhưng app vẫn chạy.
           </div>
         </div>
       </div>
 
-      <!-- Right column content -->
-      <div class="col-span-12 lg:col-span-8">
+      <!-- Splitter -->
+      <div id="splitter" class="splitter"></div>
+
+      <!-- Right -->
+      <div id="paneRight" class="pane-right">
         <!-- Tab: Overview -->
         <div id="tabOverview" class="tabPanel bg-white rounded-2xl shadow-soft border border-slate-200 p-4">
           <div class="flex items-center justify-between">
@@ -259,7 +284,7 @@
         <div id="tabBloom" class="tabPanel hidden bg-white rounded-2xl shadow-soft border border-slate-200 p-4">
           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
-              <div class="text-lg font-bold">Chi tiết CLO & Bloom (tách tab riêng)</div>
+              <div class="text-lg font-bold">Chi tiết CLO & Bloom</div>
               <div class="text-sm text-slate-600">Tính số câu theo từng CLO × Bloom từ phân bổ VDLS</div>
             </div>
             <div class="flex flex-wrap gap-2 items-center">
@@ -269,6 +294,71 @@
               <input id="searchCLO" class="input rounded-xl px-3 py-2 text-sm w-[260px]" placeholder="Tìm CLO / VDLS...">
             </div>
           </div>
+
+          <!-- ===== FORM NHẬP CLO (ADD) ===== -->
+          <div class="mt-3 bg-slate-50 border border-slate-200 rounded-2xl p-3">
+            <div class="font-semibold mb-2">Nhập CLO nhanh</div>
+
+            <div class="grid grid-cols-1 md:grid-cols-6 gap-2 items-end">
+              <div class="md:col-span-2">
+                <label class="text-xs text-slate-600">Phân nhóm</label>
+                <select id="addCloGroup" class="input w-full rounded-xl px-3 py-2 text-sm mt-1"></select>
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="text-xs text-slate-600">VDLS</label>
+                <select id="addCloProblem" class="input w-full rounded-xl px-3 py-2 text-sm mt-1"></select>
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="text-xs text-slate-600">CLO</label>
+                <input id="addCloName" class="input w-full rounded-xl px-3 py-2 text-sm mt-1" placeholder="VD: Chẩn đoán YHHĐ">
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="text-xs text-slate-600">Bloom</label>
+                <select id="addCloBloom" class="input w-full rounded-xl px-3 py-2 text-sm mt-1">
+                  <option>Nhớ</option>
+                  <option>Hiểu</option>
+                  <option>Vận dụng</option>
+                  <option>Phân tích</option>
+                  <option>Đánh giá</option>
+                  <option>Sáng tạo</option>
+                </select>
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="text-xs text-slate-600">Trạng thái</label>
+                <select id="addCloInclude" class="input w-full rounded-xl px-3 py-2 text-sm mt-1">
+                  <option value="Có">Có</option>
+                  <option value="Không">Không</option>
+                </select>
+              </div>
+
+              <div class="md:col-span-1">
+                <label class="text-xs text-slate-600">Trọng số</label>
+                <input id="addCloWeight" type="number" min="0" step="0.1"
+                      class="input w-full rounded-xl px-3 py-2 text-sm mt-1" value="1">
+              </div>
+
+              <div class="md:col-span-1 flex gap-2">
+                <button id="btnAddCLO" class="btn-primary rounded-xl px-4 py-2 text-sm font-semibold w-full">
+                  Thêm CLO
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-2 flex flex-wrap gap-2">
+              <button id="btnAutoCLO" class="btn rounded-xl px-4 py-2 text-sm font-semibold">
+                Tạo khung CLO/Bloom từ VDLS (tự sinh)
+              </button>
+              <button id="btnRebuildCLO_TSV" class="btn rounded-xl px-4 py-2 text-sm font-semibold">
+                Xuất lại CLO_TSV từ dữ liệu hiện có
+              </button>
+              <div id="addCloMsg" class="text-xs text-slate-600 self-center"></div>
+            </div>
+          </div>
+          <!-- ===== END FORM NHẬP CLO ===== -->
 
           <div class="mt-4 table-scroll overflow-auto border border-slate-200 rounded-2xl">
             <table class="min-w-[1600px] w-full text-sm">
@@ -291,7 +381,7 @@
         <!-- Tab: Embedded data -->
         <div id="tabData" class="tabPanel hidden bg-white rounded-2xl shadow-soft border border-slate-200 p-4">
           <div class="text-lg font-bold">Dữ liệu nhúng (TSV)</div>
-          <div class="text-sm text-slate-600">Bạn có thể chỉnh dữ liệu trực tiếp trong các biến GROUP_TSV / VDLS_TSV / CLO_TSV</div>
+          <div class="text-sm text-slate-600">Bạn có thể chỉnh dữ liệu trực tiếp trong GROUP_TSV / VDLS_TSV / CLO_TSV</div>
 
           <div class="grid grid-cols-1 gap-4 mt-4">
             <div>
@@ -457,27 +547,27 @@ function yesNoToBool(s){
 function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
 
 function largestRemainderAllocate(targetTotal, items, getRaw){
-  // items: array, getRaw(item) returns raw float
-  // returns array integers sum=targetTotal
   const raws = items.map(getRaw);
   const floors = raws.map(x => Math.floor(x));
   let sum = floors.reduce((a,b)=>a+b,0);
   let remain = targetTotal - sum;
+
   const fracs = raws.map((x,i)=>({i, frac: x - floors[i]})).sort((a,b)=>b.frac-a.frac);
   const out = floors.slice();
   let k=0;
-  while(remain>0 && k<fracs.length){
+  while(remain>0 && fracs.length){
     out[fracs[k].i] += 1;
     remain--;
     k++;
     if (k>=fracs.length) k=0;
   }
-  // if negative (rare)
+
   if (remain<0){
     const fracsAsc = raws.map((x,i)=>({i, frac: x - floors[i]})).sort((a,b)=>a.frac-b.frac);
     let kk=0;
-    while(remain<0 && kk<fracsAsc.length){
-      if(out[fracsAsc[kk].i]>0){ out[fracsAsc[kk].i]-=1; remain++; }
+    remain = -remain;
+    while(remain>0 && fracsAsc.length){
+      if(out[fracsAsc[kk].i]>0){ out[fracsAsc[kk].i]-=1; remain--; }
       kk++;
       if (kk>=fracsAsc.length) kk=0;
     }
@@ -643,7 +733,6 @@ function computeAll(){
 
   // apply min/max if NOT locked
   if (!APP.lockMinMaxGroup){
-    // clamp then re-balance
     groupQ = applyMinMaxAndRebalance(APP.meta.totalQuestions, groupQ, APP.groups.map(g=>g.min), APP.groups.map(g=>g.max));
   }
 
@@ -661,12 +750,10 @@ function computeAll(){
   });
 
   const vdlsComputed = [];
-  const vdlsQMap = new Map(); // key group|problem -> q
+  const vdlsQMap = new Map(); // key group|||problem -> q
 
   for (const g of groupsComputed){
     const list = (vdlsByGroup.get(g.name) || []).slice();
-
-    // if group has no VDLS rows, skip
     if (list.length===0) continue;
 
     const included = list.filter(x=>x.include);
@@ -682,17 +769,12 @@ function computeAll(){
 
     base.forEach((v,i)=>{
       const q = qs[i];
-      vdlsComputed.push({
-        ...v,
-        q,
-        groupQ: g.q
-      });
+      vdlsComputed.push({...v, q, groupQ: g.q});
       vdlsQMap.set(`${v.group}|||${v.problem}`, q);
     });
   }
 
   // 3) CLO allocations within each VDLS problem
-  // For each VDLS problem, allocate its q among CLO rows (included)
   const rowsByProblem = new Map();
   APP.allocations.forEach(r=>{
     const k = `${r.group}|||${r.problem}`;
@@ -720,18 +802,10 @@ function computeAll(){
       const bk = bloomKeyFromLabel(r.bloom);
       if (bk) bloomTotals[bk] += q;
       totalCLO += q;
-
-      cloComputed.push({
-        ...r,
-        q,
-        bloomKey: bk
-      });
+      cloComputed.push({...r, q, bloomKey: bk});
     });
   }
 
-  // 4) Nếu khóa Bloom (tự phân bổ): ép tổng Bloom theo tỷ lệ mặc định
-  // Cách làm: chỉ thống kê bloom totals theo default (để user xem), KHÔNG ép từng CLO vì CLO đã cố định Bloom theo dòng.
-  // (Nếu bạn muốn ép từng dòng, cần mapping lại Bloom của từng CLO theo default — mình giữ logic "khóa bloom" cho tổng phân bổ)
   let bloomByDefault = null;
   if (APP.lockBloom){
     bloomByDefault = allocateBloomTotals(APP.meta.totalQuestions, APP.bloomDefault);
@@ -752,52 +826,42 @@ function computeAll(){
 }
 
 function applyMinMaxAndRebalance(total, qs, mins, maxs){
-  // mins/maxs are possibly null
   const out = qs.slice();
   const n = out.length;
   const minA = mins.map(x => (x==null? null : Math.max(0, Math.floor(x))));
   const maxA = maxs.map(x => (x==null? null : Math.max(0, Math.floor(x))));
 
-  // 1) apply min
-  let sum = out.reduce((a,b)=>a+b,0);
+  // apply min
   for (let i=0;i<n;i++){
     if (minA[i]!=null && out[i] < minA[i]) out[i]=minA[i];
   }
-
-  // 2) apply max
+  // apply max
   for (let i=0;i<n;i++){
     if (maxA[i]!=null && out[i] > maxA[i]) out[i]=maxA[i];
   }
 
-  // 3) rebalance to total
-  sum = out.reduce((a,b)=>a+b,0);
+  // rebalance
+  let sum = out.reduce((a,b)=>a+b,0);
   let diff = total - sum;
 
-  // If need add
   if (diff>0){
-    // add to those not hitting max
     while(diff>0){
       let changed=false;
       for (let i=0;i<n && diff>0;i++){
         if (maxA[i]==null || out[i] < maxA[i]){
-          out[i] += 1;
-          diff -= 1;
-          changed=true;
+          out[i] += 1; diff -= 1; changed=true;
         }
       }
       if(!changed) break;
     }
   }
-  // If need remove
   if (diff<0){
     diff = -diff;
     while(diff>0){
       let changed=false;
       for (let i=0;i<n && diff>0;i++){
         if (out[i]>0 && (minA[i]==null || out[i] > minA[i])){
-          out[i] -= 1;
-          diff -= 1;
-          changed=true;
+          out[i] -= 1; diff -= 1; changed=true;
         }
       }
       if(!changed) break;
@@ -867,20 +931,20 @@ function render(){
   const vbody = document.getElementById("tblVDLS");
   vbody.innerHTML = APP.computed.vdls
     .filter(v => !q || v.problem.toLowerCase().includes(q) || v.group.toLowerCase().includes(q))
-    .map((v,i)=>`
+    .map((v)=>`
       <tr>
         <td class="p-3 sticky-left font-semibold">${escapeHtml(v.group)}</td>
         <td class="p-3 sticky-left-2">${escapeHtml(v.problem)}</td>
         <td class="p-3 text-center">${badgeYesNo(v.include)}</td>
         <td class="p-3 text-right">
-          <input data-vw="${v.group}|||${v.problem}" class="input w-20 rounded-xl px-2 py-1 text-right" type="number" min="0" value="${v.weight ?? 1}">
+          <input data-vw="${escapeHtml(v.group)}|||${escapeHtml(v.problem)}" class="input w-20 rounded-xl px-2 py-1 text-right" type="number" min="0" value="${v.weight ?? 1}">
         </td>
         <td class="p-3 text-right">
-          <input data-vmin="${v.group}|||${v.problem}" ${APP.lockMinMaxVDLS?'disabled':''}
+          <input data-vmin="${escapeHtml(v.group)}|||${escapeHtml(v.problem)}" ${APP.lockMinMaxVDLS?'disabled':''}
             class="input w-20 rounded-xl px-2 py-1 text-right" type="number" min="0" value="${v.min ?? ''}" placeholder="—">
         </td>
         <td class="p-3 text-right">
-          <input data-vmax="${v.group}|||${v.problem}" ${APP.lockMinMaxVDLS?'disabled':''}
+          <input data-vmax="${escapeHtml(v.group)}|||${escapeHtml(v.problem)}" ${APP.lockMinMaxVDLS?'disabled':''}
             class="input w-20 rounded-xl px-2 py-1 text-right" type="number" min="0" value="${v.max ?? ''}" placeholder="—">
         </td>
         <td class="p-3 text-right font-bold">${v.q}</td>
@@ -907,11 +971,12 @@ function render(){
       </tr>
     `).join("");
 
-  // filterGroup options
+  // filterGroup options (từ allocations)
   const sel = document.getElementById("filterGroup");
   const current = sel.value;
   const uniqueGroups = Array.from(new Set(APP.allocations.map(x=>x.group))).filter(Boolean);
-  sel.innerHTML = `<option value="">Tất cả phân nhóm</option>` + uniqueGroups.map(g=>`<option ${g===current?'selected':''} value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join("");
+  sel.innerHTML = `<option value="">Tất cả phân nhóm</option>` +
+    uniqueGroups.map(g=>`<option ${g===current?'selected':''} value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join("");
 
   // Summary
   document.getElementById("sumGroups").textContent = APP.computed.totals.groups;
@@ -933,10 +998,148 @@ function render(){
   // badge calc
   const ok = APP.computed.totals.groups === APP.meta.totalQuestions;
   document.getElementById("badgeCalc").textContent = ok ? "OK" : "Đang tính…";
+
+  // keep CLO Add selectors in sync
+  syncAddCloSelectors();
 }
 
 /* =========================================================
-   G) EVENTS
+   G) CLO INPUT (ADD) - UI → APP.allocations → CLO_TSV
+   ========================================================= */
+
+function unique(list){ return Array.from(new Set(list)); }
+
+function getGroupOptions(){
+  const g1 = APP.groups.map(x=>x.name).filter(Boolean);
+  const g2 = APP.allocations.map(x=>x.group).filter(Boolean);
+  return unique([...g1, ...g2]);
+}
+
+function getProblemOptionsByGroup(group){
+  const probs = APP.vdls.filter(x=>x.group===group).map(x=>x.problem).filter(Boolean);
+  const probs2 = APP.allocations.filter(x=>x.group===group).map(x=>x.problem).filter(Boolean);
+  return unique([...probs, ...probs2]);
+}
+
+function syncAddCloSelectors(){
+  const selG = document.getElementById("addCloGroup");
+  const selP = document.getElementById("addCloProblem");
+  if (!selG || !selP) return;
+
+  const groups = getGroupOptions();
+  const prevG = selG.value || groups[0] || "";
+  selG.innerHTML = groups.map(g=>`<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join("");
+  if (prevG) selG.value = prevG;
+
+  const probs = getProblemOptionsByGroup(selG.value);
+  const prevP = selP.value || probs[0] || "";
+  selP.innerHTML = probs.map(p=>`<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("");
+  if (prevP) selP.value = prevP;
+}
+
+function rebuildCLO_TSV_FromAllocations(){
+  const header = "Phân nhóm VDLS\tCLO\tBLOOM\tTrạng thái\tTrọng số\t% thô\tSố câu cần\tSố câu soạn";
+  const lines = [header];
+
+  const groups = unique(APP.allocations.map(x=>x.group).filter(Boolean));
+  for(const g of groups){
+    lines.push(`${g}\t\t\t\t\t\t\t`);
+    const problems = unique(APP.allocations.filter(x=>x.group===g).map(x=>x.problem).filter(Boolean));
+    for(const p of problems){
+      lines.push(`${p}\t\t\t\t\t\t\t`);
+      const rows = APP.allocations.filter(x=>x.group===g && x.problem===p);
+      for(const r of rows){
+        const st = r.include ? "Có" : "Không";
+        lines.push(`\t${r.clo}\t${r.bloom}\t${st}\t${r.weight ?? 1}\t\t\t`);
+      }
+    }
+  }
+  return lines.join("\n");
+}
+
+function addCLO_Row({group, problem, clo, bloom, include, weight}){
+  if(!group || !problem || !clo || !bloom) return {ok:false, msg:"❌ Thiếu Group/VDLS/CLO/Bloom"};
+
+  APP.allocations.push({
+    group,
+    problem,
+    clo,
+    bloom,
+    include: yesNoToBool(include),
+    weight: toNum(weight) ?? 1
+  });
+
+  const txtCLO = document.getElementById("txtCLO");
+  const newTSV = rebuildCLO_TSV_FromAllocations();
+  if (txtCLO) txtCLO.value = newTSV;
+  CLO_TSV = newTSV.trim();
+
+  render();
+  return {ok:true, msg:"✅ Đã thêm CLO (đã cập nhật CLO_TSV)."};
+}
+
+function autoGenerateCLOFromVDLS(){
+  const templates = [
+    { clo:"Chẩn đoán YHHĐ", bloom:"Đánh giá", include:"Có", weight:1 },
+    { clo:"Chẩn đoán YHCT", bloom:"Đánh giá", include:"Có", weight:1 },
+    { clo:"Điều trị YHHĐ",  bloom:"Đánh giá", include:"Có", weight:1 },
+    { clo:"Điều trị YHCT",  bloom:"Đánh giá", include:"Có", weight:1 },
+    { clo:"Dự phòng YHHĐ",  bloom:"Phân tích", include:"Có", weight:1 },
+    { clo:"Dự phòng YHCT",  bloom:"Phân tích", include:"Không", weight:1 },
+  ];
+
+  // reset allocations
+  APP.allocations = [];
+
+  const groups = unique(APP.vdls.map(x=>x.group).filter(Boolean));
+  for(const g of groups){
+    const probs = unique(APP.vdls.filter(x=>x.group===g && x.include).map(x=>x.problem).filter(Boolean));
+    for(const p of probs){
+      for(const t of templates){
+        APP.allocations.push({
+          group: g,
+          problem: p,
+          clo: t.clo,
+          bloom: t.bloom,
+          include: yesNoToBool(t.include),
+          weight: t.weight
+        });
+      }
+    }
+  }
+
+  const txtCLO = document.getElementById("txtCLO");
+  const newTSV = rebuildCLO_TSV_FromAllocations();
+  if(txtCLO) txtCLO.value = newTSV;
+  CLO_TSV = newTSV.trim();
+
+  render();
+}
+
+/* =========================================================
+   H) EXPORT + UI HELPERS
+   ========================================================= */
+
+function csvEscape(v){
+  const s = String(v ?? "");
+  if (s.includes(",") || s.includes('"') || s.includes("\n")) return `"${s.replaceAll('"','""')}"`;
+  return s;
+}
+
+function downloadFile(filename, content, mime){
+  const blob = new Blob([content], {type: mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/* =========================================================
+   I) EVENTS
    ========================================================= */
 
 function bind(){
@@ -1000,7 +1203,7 @@ function bind(){
     render();
   });
 
-  // delegation for min/max group
+  // delegation for min/max + vdls weight
   document.addEventListener("input", (e)=>{
     const t = e.target;
 
@@ -1065,7 +1268,7 @@ function bind(){
     });
   });
 
-  // export
+  // export JSON
   document.getElementById("btnExportJson").addEventListener("click", ()=>{
     const payload = {
       meta: APP.meta,
@@ -1081,8 +1284,8 @@ function bind(){
     downloadFile(`medmatrix_${Date.now()}.json`, JSON.stringify(payload, null, 2), "application/json");
   });
 
+  // export CSV
   document.getElementById("btnExportCsv").addEventListener("click", ()=>{
-    // CSV theo CLO (mỗi dòng: Group, VDLS, CLO, Bloom, Q)
     const rows = [["Phân nhóm","VDLS","CLO","Bloom","Số câu"]];
     (APP.computed?.clo || []).forEach(r=>{
       rows.push([r.group, r.problem, r.clo, r.bloom, String(r.q)]);
@@ -1106,24 +1309,82 @@ function bind(){
 
     render();
   });
+
+  // ===== CLO ADD FORM =====
+  syncAddCloSelectors();
+
+  const selAddG = document.getElementById("addCloGroup");
+  const msgAdd = document.getElementById("addCloMsg");
+
+  if (selAddG){
+    selAddG.addEventListener("change", ()=>{
+      syncAddCloSelectors();
+    });
+  }
+
+  const btnAdd = document.getElementById("btnAddCLO");
+  if (btnAdd){
+    btnAdd.addEventListener("click", ()=>{
+      const group = document.getElementById("addCloGroup").value;
+      const problem = document.getElementById("addCloProblem").value;
+      const clo = (document.getElementById("addCloName").value || "").trim();
+      const bloom = document.getElementById("addCloBloom").value;
+      const include = document.getElementById("addCloInclude").value;
+      const weight = document.getElementById("addCloWeight").value;
+
+      const res = addCLO_Row({group, problem, clo, bloom, include, weight});
+      if (msgAdd) msgAdd.textContent = res.msg;
+      if (res.ok) document.getElementById("addCloName").value = "";
+    });
+  }
+
+  const btnAuto = document.getElementById("btnAutoCLO");
+  if (btnAuto){
+    btnAuto.addEventListener("click", ()=>{
+      autoGenerateCLOFromVDLS();
+      if (msgAdd) msgAdd.textContent = "✅ Đã tạo khung CLO/Bloom từ VDLS.";
+    });
+  }
+
+  const btnRebuild = document.getElementById("btnRebuildCLO_TSV");
+  if (btnRebuild){
+    btnRebuild.addEventListener("click", ()=>{
+      const txtCLO = document.getElementById("txtCLO");
+      const tsv = rebuildCLO_TSV_FromAllocations();
+      if (txtCLO) txtCLO.value = tsv;
+      CLO_TSV = tsv.trim();
+      if (msgAdd) msgAdd.textContent = "✅ Đã xuất lại CLO_TSV từ dữ liệu hiện có.";
+      render();
+    });
+  }
 }
 
-function csvEscape(v){
-  const s = String(v ?? "");
-  if (s.includes(",") || s.includes('"') || s.includes("\n")) return `"${s.replaceAll('"','""')}"`;
-  return s;
-}
+/* =========================================================
+   J) Splitter init
+   ========================================================= */
+function initSplitter(){
+  const splitter = document.getElementById("splitter");
+  const left = document.getElementById("paneLeft");
+  let dragging = false;
 
-function downloadFile(filename, content, mime){
-  const blob = new Blob([content], {type: mime});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  splitter.addEventListener("mousedown", (e)=>{
+    dragging = true;
+    document.body.classList.add("noselect");
+    e.preventDefault();
+  });
+
+  window.addEventListener("mousemove", (e)=>{
+    if(!dragging) return;
+    const x = e.clientX;
+    const wrapLeft = left.parentElement.getBoundingClientRect().left;
+    const newW = Math.max(320, Math.min(700, x - wrapLeft));
+    left.style.width = newW + "px";
+  });
+
+  window.addEventListener("mouseup", ()=>{
+    dragging = false;
+    document.body.classList.remove("noselect");
+  });
 }
 
 /* =========================================================
@@ -1131,6 +1392,7 @@ function downloadFile(filename, content, mime){
    ========================================================= */
 bind();
 render();
+initSplitter();
 
 </script>
 </body>
