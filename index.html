@@ -2,1064 +2,1136 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MedMatrix Graduation - Blueprint MCQ (VDLS + CLO/Bloom)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MedMatrix VDLS + Bloom (Tách trang)</title>
   <meta name="theme-color" content="#2563eb" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
-  <!-- SheetJS for Excel export -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    .card { border-radius: 16px; background: #fff; box-shadow: 0 10px 22px rgba(15,23,42,0.06); border: 1px solid rgba(15,23,42,0.06); }
-    .muted { color: rgb(100 116 139); }
-    .tiny { font-size: 12px; }
-    .stickyHead thead th { position: sticky; top: 0; z-index: 5; background: #f8fafc; }
-    .scrollbar::-webkit-scrollbar { height: 10px; width: 10px; }
-    .scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
-    .scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-    .pill { border: 1px solid rgba(15,23,42,0.10); background: rgba(15,23,42,0.04); padding: 2px 10px; border-radius: 999px; font-size: 12px; }
-    .btn { border-radius: 12px; padding: 10px 12px; font-weight: 600; border: 1px solid rgba(15,23,42,0.10); background: #fff; }
-    .btnPrimary { background: #7c3aed; color: #fff; border-color: rgba(124,58,237,0.25); }
-    .btnGreen { background: #10b981; color: #06281f; border-color: rgba(16,185,129,0.25); }
-    .btnBlue { background: #2563eb; color: #fff; border-color: rgba(37,99,235,0.25); }
-    .btn:hover { filter: brightness(0.98); }
-    .input { border-radius: 12px; border: 1px solid rgba(15,23,42,0.12); padding: 10px 12px; width: 100%; outline: none; background: #fff; }
-    .input:focus { border-color: rgba(37,99,235,0.45); box-shadow: 0 0 0 4px rgba(37,99,235,0.08); }
-    .select { border-radius: 12px; border: 1px solid rgba(15,23,42,0.12); padding: 10px 12px; width: 100%; background: #fff; }
-    .tab { padding: 10px 12px; border-radius: 12px; font-weight: 700; }
-    .tabActive { background: rgba(37,99,235,0.12); color: #1d4ed8; border: 1px solid rgba(37,99,235,0.25); }
-    .tabIdle { background: #fff; border: 1px solid rgba(15,23,42,0.10); color: rgb(30 41 59); }
-    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; padding: 1px 6px; border-radius: 8px; border: 1px solid rgba(15,23,42,0.12); background: #fff; }
+    .table-scroll::-webkit-scrollbar { height: 10px; width: 10px; }
+    .table-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+    .sticky-top { position: sticky; top: 0; z-index: 20; }
+    .sticky-left { position: sticky; left: 0; z-index: 10; background: white; }
+    .sticky-left-2 { position: sticky; left: 280px; z-index: 10; background: white; }
+    .shadow-soft { box-shadow: 0 10px 30px rgba(2, 6, 23, 0.08); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .chip { border: 1px solid #e2e8f0; background: #f8fafc; }
+    .btn { border: 1px solid #e2e8f0; background: white; }
+    .btn:hover { background: #f8fafc; }
+    .btn-primary { background: #2563eb; color: white; border-color: #2563eb; }
+    .btn-primary:hover { filter: brightness(0.95); }
+    .btn-green { background: #10b981; color: white; border-color: #10b981; }
+    .btn-green:hover { filter: brightness(0.95); }
+    .btn-purple { background: #7c3aed; color: white; border-color: #7c3aed; }
+    .btn-purple:hover { filter: brightness(0.95); }
+    .input { border: 1px solid #e2e8f0; background: white; }
+    .input:focus { outline: 2px solid rgba(37,99,235,.25); border-color: #93c5fd; }
+    .tab-active { background: #2563eb; color: white; border-color: #2563eb; }
   </style>
 </head>
-
 <body class="bg-slate-50 text-slate-900">
-  <div class="max-w-[1400px] mx-auto px-4 py-5">
+  <div class="max-w-[1400px] mx-auto p-4 md:p-6">
     <!-- Header -->
-    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
       <div>
-        <div class="text-2xl font-extrabold tracking-tight">MedMatrix Graduation</div>
-        <div class="muted">Blueprint MCQ theo VDLS + phân bổ CLO & Bloom (tách tab riêng để dễ quan sát)</div>
+        <div class="text-2xl font-bold">MedMatrix – VDLS & Bloom</div>
+        <div class="text-sm text-slate-600">Tách tab “CLO & Bloom” riêng để dễ quan sát</div>
       </div>
-
-      <div class="flex items-center gap-2 flex-wrap">
-        <button id="tabOverview" class="tab tabActive">Tổng quan</button>
-        <button id="tabDetail" class="tab tabIdle">Chi tiết CLO & Bloom</button>
-
-        <span class="pill">Excel logic: <b>Phan nhom</b> → <b>VDLS</b> → <b>CLO</b></span>
-        <button id="btnExportJson" class="btn btnBlue">Xuất JSON</button>
-        <button id="btnExportExcel" class="btn btnGreen">Xuất Excel</button>
+      <div class="flex flex-wrap gap-2">
+        <button id="btnExportJson" class="btn rounded-xl px-4 py-2 text-sm font-semibold">Xuất JSON</button>
+        <button id="btnExportCsv" class="btn-green rounded-xl px-4 py-2 text-sm font-semibold">Xuất theo mục (CSV)</button>
       </div>
     </div>
 
-    <!-- Main -->
-    <div id="pageOverview" class="mt-5 grid grid-cols-1 xl:grid-cols-12 gap-4">
-      <!-- Left column -->
-      <div class="xl:col-span-4 flex flex-col gap-4">
+    <!-- Tabs -->
+    <div class="flex flex-wrap gap-2 mb-4">
+      <button data-tab="tabOverview" class="tab btn tab-active rounded-xl px-4 py-2 text-sm font-semibold">Tổng quan</button>
+      <button data-tab="tabGroups" class="tab btn rounded-xl px-4 py-2 text-sm font-semibold">Phân nhóm & VDLS</button>
+      <button data-tab="tabBloom" class="tab btn rounded-xl px-4 py-2 text-sm font-semibold">Chi tiết CLO & Bloom</button>
+      <button data-tab="tabData" class="tab btn rounded-xl px-4 py-2 text-sm font-semibold">Dữ liệu nhúng</button>
+    </div>
+
+    <!-- Main grid -->
+    <div class="grid grid-cols-12 gap-4">
+      <!-- Left column controls -->
+      <div class="col-span-12 lg:col-span-4 space-y-4">
         <!-- Thông số chung -->
-        <div class="card p-4">
-          <div class="flex items-center justify-between">
-            <div class="font-extrabold">THÔNG SỐ CHUNG</div>
-            <span class="pill">Tự tính theo file</span>
+        <div class="bg-white rounded-2xl p-4 shadow-soft border border-slate-200">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="inline-flex w-9 h-9 rounded-xl items-center justify-center bg-slate-100">⚙️</span>
+            <div class="font-bold">THÔNG SỐ CHUNG</div>
           </div>
 
-          <div class="mt-3 grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="tiny muted font-semibold">Tổng số câu hỏi</label>
-              <input id="inpTotalQ" type="number" min="1" class="input" />
+              <label class="text-xs text-slate-600">Tổng số câu hỏi</label>
+              <input id="inpTotalQ" type="number" class="input w-full rounded-xl px-3 py-2 mt-1" min="1" step="1">
             </div>
             <div>
-              <label class="tiny muted font-semibold">Thời gian làm bài (phút)</label>
-              <input id="inpDuration" type="number" min="1" class="input" />
-            </div>
-            <div class="col-span-2">
-              <label class="tiny muted font-semibold">Kỳ thi</label>
-              <input id="inpExam" type="text" class="input" placeholder="VD: Thi tốt nghiệp / OSCE / ..."/>
+              <label class="text-xs text-slate-600">Thời gian làm bài (phút)</label>
+              <input id="inpDuration" type="number" class="input w-full rounded-xl px-3 py-2 mt-1" min="1" step="1">
             </div>
           </div>
 
-          <div class="mt-4 tiny muted">
-            Mẹo: <span class="kbd">Ctrl</span> + <span class="kbd">F</span> để tìm nhanh tên vấn đề lâm sàng.
+          <div class="mt-3">
+            <label class="text-xs text-slate-600">Kỳ thi</label>
+            <input id="inpExamName" type="text" class="input w-full rounded-xl px-3 py-2 mt-1" placeholder="VD: Thi cuối kỳ...">
+          </div>
+
+          <div class="mt-4 grid grid-cols-2 gap-3">
+            <label class="flex items-center gap-2 text-sm">
+              <input id="chkLockMinMaxGroup" type="checkbox" class="w-4 h-4">
+              Khóa Min/Max theo Phân nhóm
+            </label>
+            <label class="flex items-center gap-2 text-sm">
+              <input id="chkLockMinMaxVDLS" type="checkbox" class="w-4 h-4">
+              Khóa Min/Max theo VDLS
+            </label>
           </div>
         </div>
 
-        <!-- Bloom mặc định -->
-        <div class="card p-4">
-          <div class="flex items-center justify-between">
-            <div class="font-extrabold">BLOOM MẶC ĐỊNH (%)</div>
-            <label class="flex items-center gap-2 tiny muted">
-              <input id="chkLockBloom" type="checkbox" class="w-4 h-4"/>
+        <!-- Bloom default -->
+        <div class="bg-white rounded-2xl p-4 shadow-soft border border-slate-200">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="inline-flex w-9 h-9 rounded-xl items-center justify-center bg-slate-100">🧠</span>
+            <div class="font-bold">BLOOM MẶC ĐỊNH (%)</div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-slate-600">Nhớ</label>
+              <input id="b_nho" type="number" class="input w-full rounded-xl px-3 py-2 mt-1" min="0" max="100">
+            </div>
+            <div>
+              <label class="text-xs text-slate-600">Hiểu</label>
+              <input id="b_hieu" type="number" class="input w-full rounded-xl px-3 py-2 mt-1" min="0" max="100">
+            </div>
+            <div>
+              <label class="text-xs text-slate-600">Vận dụng</label>
+              <input id="b_vd" type="number" class="input w-full rounded-xl px-3 py-2 mt-1" min="0" max="100">
+            </div>
+            <div>
+              <label class="text-xs text-slate-600">Phân tích</label>
+              <input id="b_pt" type="number" class="input w-full rounded-xl px-3 py-2 mt-1" min="0" max="100">
+            </div>
+            <div>
+              <label class="text-xs text-slate-600">Đánh giá</label>
+              <input id="b_dg" type="number" class="input w-full rounded-xl px-3 py-2 mt-1" min="0" max="100">
+            </div>
+            <div>
+              <label class="text-xs text-slate-600">Sáng tạo</label>
+              <input id="b_st" type="number" class="input w-full rounded-xl px-3 py-2 mt-1" min="0" max="100">
+            </div>
+          </div>
+
+          <div class="mt-3 flex items-center justify-between gap-3">
+            <label class="flex items-center gap-2 text-sm">
+              <input id="chkLockBloom" type="checkbox" class="w-4 h-4">
               Khóa Bloom (tự phân bổ)
             </label>
+            <button id="btnApplyBloom" class="btn-purple rounded-xl px-4 py-2 text-sm font-semibold">Áp dụng Bloom</button>
           </div>
 
-          <div class="mt-3 grid grid-cols-2 gap-3">
-            <div>
-              <label class="tiny muted font-semibold">Nhớ</label>
-              <input id="bNho" type="number" min="0" max="100" class="input" />
-            </div>
-            <div>
-              <label class="tiny muted font-semibold">Hiểu</label>
-              <input id="bHieu" type="number" min="0" max="100" class="input" />
-            </div>
-            <div>
-              <label class="tiny muted font-semibold">Vận dụng</label>
-              <input id="bVD" type="number" min="0" max="100" class="input" />
-            </div>
-            <div>
-              <label class="tiny muted font-semibold">Phân tích</label>
-              <input id="bPT" type="number" min="0" max="100" class="input" />
-            </div>
-            <div>
-              <label class="tiny muted font-semibold">Đánh giá</label>
-              <input id="bDG" type="number" min="0" max="100" class="input" />
-            </div>
-            <div>
-              <label class="tiny muted font-semibold">Sáng tạo</label>
-              <input id="bST" type="number" min="0" max="100" class="input" />
-            </div>
-          </div>
-
-          <div class="mt-3 flex gap-2">
-            <button id="btnApplyBloom" class="btn btnPrimary w-full">Áp dụng Bloom</button>
-          </div>
-
-          <div id="bloomWarn" class="mt-2 tiny text-rose-600 font-semibold hidden">
-            Tổng Bloom phải = 100%.
-          </div>
+          <div id="bloomSumHint" class="mt-2 text-xs text-slate-600"></div>
         </div>
 
-        <!-- Phân môn (Phan nhom) -->
-        <div class="card p-4">
+        <!-- Summary -->
+        <div class="bg-white rounded-2xl p-4 shadow-soft border border-slate-200">
+          <div class="flex items-center justify-between mb-2">
+            <div class="font-bold">KIỂM TRA TỔNG CÂU</div>
+            <span id="badgeCalc" class="chip rounded-full px-3 py-1 text-xs font-semibold">Đang tính…</span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 text-sm mt-2">
+            <div class="chip rounded-xl p-3">
+              <div class="text-xs text-slate-600">Tổng nhóm</div>
+              <div class="text-lg font-bold" id="sumGroups">0</div>
+            </div>
+            <div class="chip rounded-xl p-3">
+              <div class="text-xs text-slate-600">Tổng VDLS</div>
+              <div class="text-lg font-bold" id="sumVDLS">0</div>
+            </div>
+            <div class="chip rounded-xl p-3">
+              <div class="text-xs text-slate-600">Tổng CLO</div>
+              <div class="text-lg font-bold" id="sumCLO">0</div>
+            </div>
+          </div>
+
+          <div class="mt-3 grid grid-cols-6 gap-2 text-xs">
+            <div class="chip rounded-xl p-2">
+              <div class="text-slate-500">Nhớ</div>
+              <div class="font-bold text-base" id="t_nho">0</div>
+            </div>
+            <div class="chip rounded-xl p-2">
+              <div class="text-slate-500">Hiểu</div>
+              <div class="font-bold text-base" id="t_hieu">0</div>
+            </div>
+            <div class="chip rounded-xl p-2">
+              <div class="text-slate-500">V.Dụng</div>
+              <div class="font-bold text-base" id="t_vd">0</div>
+            </div>
+            <div class="chip rounded-xl p-2">
+              <div class="text-slate-500">P.Tích</div>
+              <div class="font-bold text-base" id="t_pt">0</div>
+            </div>
+            <div class="chip rounded-xl p-2">
+              <div class="text-slate-500">Đ.Giá</div>
+              <div class="font-bold text-base" id="t_dg">0</div>
+            </div>
+            <div class="chip rounded-xl p-2">
+              <div class="text-slate-500">S.Tạo</div>
+              <div class="font-bold text-base" id="t_st">0</div>
+            </div>
+          </div>
+
+          <div class="mt-2 text-xs text-slate-500">
+            Nếu dữ liệu CLO bạn dán chưa đầy đủ, tổng CLO có thể lệch — nhưng app vẫn chạy.
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column content -->
+      <div class="col-span-12 lg:col-span-8">
+        <!-- Tab: Overview -->
+        <div id="tabOverview" class="tabPanel bg-white rounded-2xl shadow-soft border border-slate-200 p-4">
           <div class="flex items-center justify-between">
-            <div class="font-extrabold">PHÂN MÔN (Phan nhom)</div>
-            <label class="flex items-center gap-2 tiny muted">
-              <input id="chkLockMinMaxGroup" type="checkbox" class="w-4 h-4" checked/>
-              Khóa Min/Max
-            </label>
-          </div>
-
-          <div class="mt-3 overflow-auto scrollbar max-h-[380px]">
-            <table class="w-full text-sm">
-              <thead class="stickyHead">
-                <tr class="text-left">
-                  <th class="py-2 pr-2">Phân môn</th>
-                  <th class="py-2 pr-2">TC</th>
-                  <th class="py-2 pr-2">HS</th>
-                  <th class="py-2 pr-2">% PM</th>
-                  <th class="py-2 pr-2">Câu</th>
-                </tr>
-              </thead>
-              <tbody id="tblGroups"></tbody>
-            </table>
-          </div>
-
-          <div class="mt-3 grid grid-cols-2 gap-2 tiny">
-            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
-              <div class="muted font-semibold">Tổng %</div>
-              <div id="sumGroupPct" class="text-lg font-extrabold">0%</div>
-            </div>
-            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
-              <div class="muted font-semibold">Tổng câu</div>
-              <div id="sumGroupQ" class="text-lg font-extrabold">0</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right column -->
-      <div class="xl:col-span-8 flex flex-col gap-4">
-        <!-- VDLS -->
-        <div class="card p-4">
-          <div class="flex items-center justify-between gap-3 flex-wrap">
             <div>
-              <div class="font-extrabold">VẤN ĐỀ LÂM SÀNG (VDLS)</div>
-              <div class="tiny muted">Tỷ trọng VDLS trong từng phân môn → % thô → số câu (theo Excel)</div>
+              <div class="text-lg font-bold">Tổng quan phân bổ</div>
+              <div class="text-sm text-slate-600">Tính từ Tín chỉ × Hệ số → % thô → phân bổ số câu</div>
             </div>
-            <div class="flex items-center gap-2">
-              <label class="flex items-center gap-2 tiny muted">
-                <input id="chkLockMinMaxVDLS" type="checkbox" class="w-4 h-4" checked/>
-                Khóa Min/Max
-              </label>
-              <select id="filterGroupVDLS" class="select text-sm w-[260px]"></select>
-              <input id="searchVDLS" class="input text-sm w-[280px]" placeholder="Tìm VDLS..."/>
-            </div>
+            <div class="text-xs text-slate-500 mono" id="metaLine"></div>
           </div>
 
-          <div class="mt-3 overflow-auto scrollbar max-h-[560px]">
-            <table class="w-full text-sm">
-              <thead class="stickyHead">
-                <tr class="text-left">
-                  <th class="py-2 pr-2 w-[36px]">Có</th>
-                  <th class="py-2 pr-2">Vấn đề</th>
-                  <th class="py-2 pr-2">Phân môn</th>
-                  <th class="py-2 pr-2 w-[90px]">Tỷ trọng</th>
-                  <th class="py-2 pr-2 w-[110px]">% thô</th>
-                  <th class="py-2 pr-2 w-[80px]">Min</th>
-                  <th class="py-2 pr-2 w-[80px]">Max</th>
-                  <th class="py-2 pr-2 w-[90px]">Câu</th>
+          <div class="mt-4 table-scroll overflow-auto border border-slate-200 rounded-2xl">
+            <table class="min-w-[980px] w-full text-sm">
+              <thead class="sticky-top bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th class="text-left p-3 w-[280px]">Phân nhóm</th>
+                  <th class="text-right p-3">Tín chỉ</th>
+                  <th class="text-right p-3">Hệ số</th>
+                  <th class="text-right p-3">% thô</th>
+                  <th class="text-right p-3">Min</th>
+                  <th class="text-right p-3">Max</th>
+                  <th class="text-right p-3">Số câu</th>
                 </tr>
               </thead>
-              <tbody id="tblVDLS"></tbody>
+              <tbody id="tblGroups" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
 
-          <div class="mt-3 grid grid-cols-3 gap-2 tiny">
-            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
-              <div class="muted font-semibold">VDLS đang chọn</div>
-              <div id="vdlsCount" class="text-lg font-extrabold">0</div>
-            </div>
-            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
-              <div class="muted font-semibold">Tổng % VDLS</div>
-              <div id="vdlsPct" class="text-lg font-extrabold">0%</div>
-            </div>
-            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
-              <div class="muted font-semibold">Tổng câu VDLS</div>
-              <div id="vdlsQ" class="text-lg font-extrabold">0</div>
-            </div>
+          <div class="mt-3 text-xs text-slate-500">
+            • Min/Max trống = không ràng buộc. • Làm tròn theo “largest remainder” để tổng đúng.
           </div>
         </div>
 
-        <!-- Gợi ý -->
-        <div class="card p-4">
-          <div class="font-extrabold">GỢI Ý SỬ DỤNG</div>
-          <ul class="mt-2 text-sm list-disc pl-5 muted">
-            <li>Tab <b>Chi tiết CLO & Bloom</b> đã tách riêng để bảng không “tràn ngang” làm khó quan sát.</li>
-            <li>Tất cả dữ liệu ban đầu được nhúng từ file Excel của bạn (Phan nhom/VDLS/CLO). Bạn có thể chỉnh sửa trực tiếp trong app.</li>
-            <li>Nếu muốn “giữ đúng Excel” tuyệt đối: bật <b>Khóa Min/Max</b> cho Phân môn và VDLS.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- Detail page -->
-    <div id="pageDetail" class="hidden mt-5">
-      <div class="card p-4">
-        <div class="flex items-center justify-between flex-wrap gap-3">
-          <div>
-            <div class="font-extrabold">CHI TIẾT CLO & BLOOM (TAB RIÊNG)</div>
-            <div class="tiny muted">
-              % thô từng dòng = (% VDLS của vấn đề) × (tỷ trọng dòng / tổng tỷ trọng các dòng “Có” trong cùng vấn đề).
+        <!-- Tab: Groups & VDLS -->
+        <div id="tabGroups" class="tabPanel hidden bg-white rounded-2xl shadow-soft border border-slate-200 p-4">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+              <div class="text-lg font-bold">Phân nhóm & VDLS</div>
+              <div class="text-sm text-slate-600">VDLS được chia theo số câu của từng phân nhóm</div>
+            </div>
+            <div class="flex gap-2">
+              <input id="searchVDLS" class="input rounded-xl px-3 py-2 text-sm w-[280px]" placeholder="Tìm VDLS...">
             </div>
           </div>
 
-          <div class="flex items-center gap-2 flex-wrap">
-            <select id="filterGroupCLO" class="select text-sm w-[220px]"></select>
-            <select id="filterProblemCLO" class="select text-sm w-[340px]"></select>
-            <select id="filterCLO" class="select text-sm w-[160px]"></select>
-            <select id="filterBloom" class="select text-sm w-[160px]"></select>
-            <select id="filterInclude" class="select text-sm w-[140px]">
-              <option value="all">Tất cả</option>
-              <option value="yes">Có</option>
-              <option value="no">Không</option>
-            </select>
-            <input id="searchCLO" class="input text-sm w-[260px]" placeholder="Tìm nhanh..."/>
+          <div class="mt-4 table-scroll overflow-auto border border-slate-200 rounded-2xl">
+            <table class="min-w-[1200px] w-full text-sm">
+              <thead class="sticky-top bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th class="text-left p-3 w-[280px] sticky-left">Phân nhóm</th>
+                  <th class="text-left p-3 w-[520px] sticky-left-2">VDLS</th>
+                  <th class="text-center p-3">Trạng thái</th>
+                  <th class="text-right p-3">Trọng số</th>
+                  <th class="text-right p-3">Min</th>
+                  <th class="text-right p-3">Max</th>
+                  <th class="text-right p-3">Số câu</th>
+                </tr>
+              </thead>
+              <tbody id="tblVDLS" class="divide-y divide-slate-100"></tbody>
+            </table>
           </div>
         </div>
 
-        <div class="mt-3 overflow-auto scrollbar max-h-[72vh]">
-          <table class="w-full text-sm stickyHead">
-            <thead>
-              <tr class="text-left">
-                <th class="py-2 pr-2 w-[36px]">Có</th>
-                <th class="py-2 pr-2 min-w-[320px]">Vấn đề & mục (VD phụ)</th>
-                <th class="py-2 pr-2 min-w-[210px]">Phân môn</th>
-                <th class="py-2 pr-2 min-w-[160px]">CLO</th>
-                <th class="py-2 pr-2 min-w-[140px]">Bloom</th>
-                <th class="py-2 pr-2 w-[110px]">Tỷ trọng</th>
-                <th class="py-2 pr-2 w-[110px]">% thô</th>
-                <th class="py-2 pr-2 w-[100px]">Câu</th>
-                <th class="py-2 pr-2 w-[120px]">Câu soạn</th>
-              </tr>
-            </thead>
-            <tbody id="tblCLO"></tbody>
-          </table>
+        <!-- Tab: CLO & Bloom -->
+        <div id="tabBloom" class="tabPanel hidden bg-white rounded-2xl shadow-soft border border-slate-200 p-4">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+              <div class="text-lg font-bold">Chi tiết CLO & Bloom (tách tab riêng)</div>
+              <div class="text-sm text-slate-600">Tính số câu theo từng CLO × Bloom từ phân bổ VDLS</div>
+            </div>
+            <div class="flex flex-wrap gap-2 items-center">
+              <select id="filterGroup" class="input rounded-xl px-3 py-2 text-sm">
+                <option value="">Tất cả phân nhóm</option>
+              </select>
+              <input id="searchCLO" class="input rounded-xl px-3 py-2 text-sm w-[260px]" placeholder="Tìm CLO / VDLS...">
+            </div>
+          </div>
+
+          <div class="mt-4 table-scroll overflow-auto border border-slate-200 rounded-2xl">
+            <table class="min-w-[1600px] w-full text-sm">
+              <thead class="sticky-top bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th class="text-left p-3 w-[280px] sticky-left">Phân nhóm</th>
+                  <th class="text-left p-3 w-[560px] sticky-left-2">VDLS</th>
+                  <th class="text-left p-3">CLO</th>
+                  <th class="text-center p-3">Bloom</th>
+                  <th class="text-center p-3">Trạng thái</th>
+                  <th class="text-right p-3">Trọng số</th>
+                  <th class="text-right p-3">Số câu</th>
+                </tr>
+              </thead>
+              <tbody id="tblCLO" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
         </div>
 
-        <div class="mt-3 grid grid-cols-4 gap-2 tiny">
-          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
-            <div class="muted font-semibold">Số dòng</div>
-            <div id="cloRows" class="text-lg font-extrabold">0</div>
-          </div>
-          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
-            <div class="muted font-semibold">Tổng %</div>
-            <div id="cloPct" class="text-lg font-extrabold">0%</div>
-          </div>
-          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
-            <div class="muted font-semibold">Tổng câu</div>
-            <div id="cloQ" class="text-lg font-extrabold">0</div>
-          </div>
-          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
-            <div class="muted font-semibold">Tổng câu soạn</div>
-            <div id="cloDraft" class="text-lg font-extrabold">0</div>
+        <!-- Tab: Embedded data -->
+        <div id="tabData" class="tabPanel hidden bg-white rounded-2xl shadow-soft border border-slate-200 p-4">
+          <div class="text-lg font-bold">Dữ liệu nhúng (TSV)</div>
+          <div class="text-sm text-slate-600">Bạn có thể chỉnh dữ liệu trực tiếp trong các biến GROUP_TSV / VDLS_TSV / CLO_TSV</div>
+
+          <div class="grid grid-cols-1 gap-4 mt-4">
+            <div>
+              <div class="text-sm font-semibold mb-2">GROUP_TSV</div>
+              <textarea id="txtGroup" class="input w-full rounded-2xl p-3 h-[220px] mono text-xs"></textarea>
+            </div>
+            <div>
+              <div class="text-sm font-semibold mb-2">VDLS_TSV</div>
+              <textarea id="txtVDLS" class="input w-full rounded-2xl p-3 h-[260px] mono text-xs"></textarea>
+            </div>
+            <div>
+              <div class="text-sm font-semibold mb-2">CLO_TSV</div>
+              <textarea id="txtCLO" class="input w-full rounded-2xl p-3 h-[320px] mono text-xs"></textarea>
+            </div>
+            <div class="flex gap-2">
+              <button id="btnReloadFromText" class="btn-primary rounded-xl px-4 py-2 text-sm font-semibold">Nạp lại dữ liệu từ textarea</button>
+              <div class="text-xs text-slate-500 self-center">* Nếu bạn sửa TSV ở đây và bấm nạp lại, app sẽ tính lại.</div>
+            </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
 
 <script>
 /* =========================================================
-   0) DỮ LIỆU NHÚNG TỪ EXCEL (Phan nhom / VDLS / CLO)
-   - Đây là dữ liệu trích từ file: "Du thao ty trong MCQ theo VDLS.xlsx"
+   A) DỮ LIỆU NHÚNG (TSV) — DÁN Y NGUYÊN
    ========================================================= */
+
+let GROUP_TSV = `
+Phân nhóm	Tín chỉ	Hệ số	% thô	Tỷ lệ (%) min	Tỷ lệ (%) max	Số câu	Số VDLS
+Bệnh Tạng phủ	4	2	9.09%			11	4
+Bệnh hệ thống Tim mạch – hô hấp 	6	2	13.64%			16	5
+Bệnh hệ thống Tiết niệu – Nội tiết - Huyết học	5	2	11.36%			14	5
+Bệnh hệ thống Tiêu hóa - gan mật	5	2	11.36%			14	5
+Bệnh hệ thống Ngũ quan – Lão khoa	4	1	4.55%			5	2
+Bệnh hệ thống Cơ - xương – khớp	4	3	13.64%			16	5
+Bệnh hệ thống Thần kinh	4	3	13.64%			16	5
+Bệnh hệ thống Nhiễm – Phụ	8	1	9.09%			11	4
+Bệnh hệ thống Nhi khoa	4	1	4.55%			5	2
+Bệnh hệ thống Ngoại khoa - Da liễu	8	1	9.09%			11	4
+Tổng	52	18	100%			120	40
+`.trim();
+
+let VDLS_TSV = `
+Phân nhóm VDLS	Tình trạng	Tỷ trọng	% thô	Tỷ lệ (%) min	Tỷ lệ (%) max	Số câu
+Bệnh Tạng phủ			9.09%	0%	0%
+Biện chứng tạng phủ	Có	1	9.09%			11
+Bệnh hệ thống Tim mạch – hô hấp 			13.64%	0%	0%
+YHHĐ: Bệnh mạch vành mạn. YHCT: Tâm thống.	Có	1	2.73%			3
+YHHĐ: Tăng huyết áp. YHCT: Huyễn vựng.	Có	1	2.73%			3
+YHHĐ: Suy tĩnh mạch mạn tính.	Có	1	2.73%			3
+YHHĐ: COPD. 	Có	1	2.73%			3
+YHHĐ: Hen phế quản. YHCT: Háo chứng, suyễn chứng.	Có	1	2.73%			3
+Bệnh hệ thống Tiết niệu – Nội tiết - Huyết học			11.36%	0%	0%
+YHHĐ: Nhiễm khuẩn tiết niệu. YHCT: Lâm chứng. 	Có	1	2.84%			3
+YHHĐ: Béo phì. YHCT: Phì bạng.	Có	1	2.84%			3
+YHHĐ: Đái tháo đường. YHCT: Tiêu khát.	Có	1	2.84%			3
+YHHĐ: Thiếu máu mạn.	Có	1	2.84%			3
+Bệnh hệ thống Tiêu hóa - gan mật			11.36%	0%	0%
+YHHĐ: Viêm loét dạ dày tá tràng. YHCT: Vị quản thống, Phúc mãn, Bĩ mãn, Chứng trướng.	Có	1	2.27%			3
+YHHĐ: GERD. YHCT: Hung thống, Ái khí. 	Có	1	2.27%			3
+YHHĐ: Hội chứng ruột kích thích. YHCT: Tiết tả, Phúc mãn, Tiện bí.	Có	1	2.27%			3
+YHHĐ: Viêm gan mạn. YHCT: Hoàng đản, chứng trướng.	Có	1	2.27%			3
+YHHĐ: Xơ gan. YHCT: Hoàng đản, Cổ trướng.	Có	1	2.27%			3
+Bệnh hệ thống Ngũ quan – Lão khoa			4.55%	0%	0%
+YHHĐ: Bệnh thận mạn. YHCT: Hư lao. 	Có	1	2.27%			3
+YHHĐ: Viêm mũi dị ứng.	Có	1	2.27%			3
+Bệnh hệ thống Cơ - xương – khớp			13.64%	0%	0%
+YHHĐ: Thoái hóa cột sống thắt lưng. YHCT: Tý chứng, Yêu thống.	Có	1	2.73%			3
+YHHĐ: Thoái hóa khớp gối. YHCT: Tý chứng, Hạc tất phong.	Có	1	2.73%			3
+YHHĐ: Loãng xương.	Có	1	2.73%			3
+YHHĐ: Viêm khớp dạng thấp. YHCT: Tý chứng.	Có	1	2.73%			3
+YHHĐ: Viêm khớp gout. YHCT: Tý chứng, Thống phong.	Có	1	2.73%			3
+Bệnh hệ thống Thần kinh			13.64%	0%	0%
+YHHĐ: Di chứng tai biến mạch máu não. YHCT: Bán thân bất toại.	Có	1	2.73%			3
+YHHĐ: Đau đầu. YHCT: Đầu thống, Đàm chứng.	Có	1	2.73%			3
+YHHĐ: Đau thần kinh tọa. YHCT: Yêu thống, Yêu cước thống, Tọa cốt phong, Ma mộc bất nhân.	Có	1	2.73%			3
+YHHĐ: Liệt mặt. YHCT: Khẩu nhãn oa tà.	Có	1	2.73%			3
+YHHĐ: Mất ngủ. YHCT: Thất miên.	Có	1	2.73%			3
+Bệnh hệ thống Nhiễm – Phụ			9.09%	0%	0%
+YHHĐ: Viêm gan siêu vi. YHCT: Hoàng đản.	Có	1	2.27%			3
+YHHĐ: Sốt xuất huyết Dengue. YHCT: Ôn bệnh.	Có	1	2.27%			3
+YHHĐ: Đau bụng kinh nguyên phát. YHCT: Thống kinh.	Có	1	2.27%			3
+YHHĐ: Rối loạn mãn kinh và chu mãn kinh.	Có	1	2.27%			3
+Bệnh hệ thống Nhi khoa			4.55%	0%	0%
+YHHĐ: Suy dinh dưỡng ở trẻ em. YHCT: Cam tích.	Có	1	2.27%			3
+YHHĐ: Đái dầm ở trẻ em. YHCT: Dạ niệu.	Có	1	2.27%			3
+Bệnh hệ thống Ngoại khoa - Da liễu			9.09%	0%	0%
+YHHĐ: Trĩ. YHCT: Hạ trĩ.	Có	1	2.27%			3
+YHHĐ: Sỏi đường niệu. YHCT: Lâm chứng.	Có	1	2.27%			3
+YHHĐ: Mày đay.	Có	1	2.27%			3
+YHHĐ: Mụn trứng cá.	Có	1	2.27%			3
+`.trim();
+
+let CLO_TSV = `
+Phân nhóm VDLS	CLO	BLOOM	Trạng thái	Trọng số	% thô	Số câu cần	Số câu soạn
+Bệnh Tạng phủ							
+Biện chứng tạng phủ							
+	Chẩn đoán	Phân tích	Có	1	4.55%	5.45	11
+	Điều trị	Phân tích	Có	1	4.55%	5.45	11
+Bệnh hệ thống Tim mạch – hô hấp 							
+YHHĐ: Bệnh mạch vành mạn. YHCT: Tâm thống.							
+	Chẩn đoán YHHĐ	Đánh giá	Có	1	0.91%	1.09	2
+	Chẩn đoán YHCT	Đánh giá	Không	1	0.00%	0.00	0
+	Điều trị YHHĐ	Đánh giá	Có	1	0.91%	1.09	2
+	Điều trị YHCT	Đánh giá	Không	1	0.00%	0.00	0
+	Dự phòng YHHĐ	Phân tích	Có	1	0.91%	1.09	2
+	Dự phòng YHCT	Phân tích	Không	1	0.00%	0.00	0
+YHHĐ: Tăng huyết áp. YHCT: Huyễn vựng.							
+	Chẩn đoán YHHĐ	Đánh giá	Không	1	0.00%	0.00	0
+	Chẩn đoán YHCT	Đánh giá	Không	1	0.00%	0.00	0
+	Điều trị YHHĐ	Đánh giá	Có	1	0.91%	1.09	2
+	Điều trị YHCT	Đánh giá	Có	1	0.91%	1.09	2
+	Dự phòng YHHĐ	Phân tích	Có	1	0.91%	1.09	2
+	Dự phòng YHCT	Phân tích	Không	1	0.00%	0.00	0
+YHHĐ: Suy tĩnh mạch mạn tính.							
+	Chẩn đoán YHHĐ	Đánh giá	Không	1	0.00%	0.00	0
+	Chẩn đoán YHCT	Đánh giá	Không	1	0.00%	0.00	0
+	Điều trị YHHĐ	Đánh giá	Có	1	0.68%	0.82	2
+	Điều trị YHCT	Đánh giá	Có	1	0.68%	0.82	2
+	Dự phòng YHHĐ	Phân tích	Có	1	0.68%	0.82	2
+	Dự phòng YHCT	Phân tích	Có	1	0.68%	0.82	2
+YHHĐ: COPD. 							
+	Chẩn đoán YHHĐ	Đánh giá	Không	1	0.00%	0.00	0
+	Chẩn đoán YHCT	Đánh giá	Không	1	0.00%	0.00	0
+	Điều trị YHHĐ	Đánh giá	Có	1	0.91%	1.09	2
+	Điều trị YHCT	Đánh giá	Có	1	0.91%	1.09	2
+	Dự phòng YHHĐ	Phân tích	Có	1	0.91%	1.09	2
+	Dự phòng YHCT	Phân tích	Không	1	0.00%	0.00	0
+YHHĐ: Hen phế quản. YHCT: Háo chứng, suyễn chứng.							
+	Chẩn đoán YHHĐ	Đánh giá	Có	1	0.91%	1.09	2
+	Chẩn đoán YHCT	Đánh giá	Không	1	0.00%	0.00	0
+	Điều trị YHHĐ	Đánh giá	Có	1	0.91%	1.09	2
+	Điều trị YHCT	Đánh giá	Có	1	0.91%	1.09	2
+	Dự phòng YHHĐ	Phân tích	Không	1	0.00%	0.00	0
+	Dự phòng YHCT	Phân tích	Không	1	0.00%	0.00	0
+
+/* ====== DÁN TIẾP PHẦN CÒN LẠI CỦA CLO/BLOOM TỪ "Bệnh hệ thống Tiết niệu..." ĐẾN HẾT "TỔNG CỘNG" VÀO ĐÂY ====== */
+`.trim();
+
+/* =========================================================
+   B) HÀM TIỆN ÍCH
+   ========================================================= */
+
+function tsvLines(tsv){
+  return tsv.split(/\r?\n/).map(l=>l.replace(/\u00A0/g," ").trimEnd()).filter(l=>l.trim().length>0);
+}
+function toNum(x){
+  if (x == null) return null;
+  const s = String(x).trim();
+  if (!s) return null;
+  const v = Number(s.replaceAll(",", "."));
+  return Number.isFinite(v) ? v : null;
+}
+function yesNoToBool(s){
+  const t = (s||"").trim().toLowerCase();
+  if (t==="có" || t==="co" || t==="yes" || t==="1") return true;
+  if (t==="không" || t==="khong" || t==="no" || t==="0") return false;
+  return false;
+}
+function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+
+function largestRemainderAllocate(targetTotal, items, getRaw){
+  // items: array, getRaw(item) returns raw float
+  // returns array integers sum=targetTotal
+  const raws = items.map(getRaw);
+  const floors = raws.map(x => Math.floor(x));
+  let sum = floors.reduce((a,b)=>a+b,0);
+  let remain = targetTotal - sum;
+  const fracs = raws.map((x,i)=>({i, frac: x - floors[i]})).sort((a,b)=>b.frac-a.frac);
+  const out = floors.slice();
+  let k=0;
+  while(remain>0 && k<fracs.length){
+    out[fracs[k].i] += 1;
+    remain--;
+    k++;
+    if (k>=fracs.length) k=0;
+  }
+  // if negative (rare)
+  if (remain<0){
+    const fracsAsc = raws.map((x,i)=>({i, frac: x - floors[i]})).sort((a,b)=>a.frac-b.frac);
+    let kk=0;
+    while(remain<0 && kk<fracsAsc.length){
+      if(out[fracsAsc[kk].i]>0){ out[fracsAsc[kk].i]-=1; remain++; }
+      kk++;
+      if (kk>=fracsAsc.length) kk=0;
+    }
+  }
+  return out;
+}
+
+function safePctFromWeights(weights){
+  const s = weights.reduce((a,b)=>a+b,0);
+  return weights.map(w => s>0 ? (w/s) : 0);
+}
+
+/* =========================================================
+   C) PARSER TSV → OBJECT
+   ========================================================= */
+
+function parseGroups(tsv){
+  const lines = tsvLines(tsv);
+  const header = lines[0].split("\t").map(s=>s.trim());
+  const idx = (name)=>header.indexOf(name);
+
+  const out = [];
+  for (let i=1;i<lines.length;i++){
+    const cols = lines[i].split("\t");
+    const name = (cols[idx("Phân nhóm")]||"").trim();
+    if (!name || name.toLowerCase()==="tổng") continue;
+
+    out.push({
+      name,
+      credits: toNum(cols[idx("Tín chỉ")]) ?? 0,
+      coef: toNum(cols[idx("Hệ số")]) ?? 0,
+      min: null,
+      max: null
+    });
+  }
+  return out;
+}
+
+function parseVDLS(tsv){
+  const lines = tsvLines(tsv);
+  const header = lines[0].split("\t").map(s=>s.trim());
+  const idx = (name)=>header.indexOf(name);
+
+  const out = [];
+  let currentGroup = "";
+  for (let i=1;i<lines.length;i++){
+    const cols = lines[i].split("\t");
+    const groupCell = (cols[idx("Phân nhóm VDLS")]||"").trim();
+    const status = (cols[idx("Tình trạng")]||"").trim();
+
+    // group header row: has group name but status empty
+    if (groupCell && !status){
+      currentGroup = groupCell;
+      continue;
+    }
+    if (!groupCell) continue;
+
+    out.push({
+      group: currentGroup || "(Chưa nhóm)",
+      problem: groupCell,
+      include: yesNoToBool(status),
+      weight: toNum(cols[idx("Tỷ trọng")]) ?? 1,
+      min: null,
+      max: null
+    });
+  }
+  return out;
+}
+
+function parseCLO(tsv){
+  const lines = tsvLines(tsv);
+  const header = lines[0].split("\t").map(s=>s.trim());
+  const idx = (name)=>header.indexOf(name);
+
+  const out = [];
+  let currentGroup = "";
+  let currentProblem = "";
+
+  for (let i=1;i<lines.length;i++){
+    const cols = lines[i].split("\t");
+    const g = (cols[idx("Phân nhóm VDLS")]||"").trim();
+    const clo = (cols[idx("CLO")]||"").trim();
+    const bloom = (cols[idx("BLOOM")]||"").trim();
+
+    // group header line: first cell has group, the rest empty
+    const rest = cols.map((c,j)=> (j===idx("Phân nhóm VDLS") ? "" : (c||"").trim())).join("");
+    if (g && !clo && !bloom && rest===""){
+      currentGroup = g;
+      continue;
+    }
+
+    // problem header line: has VDLS problem but CLO/Bloom empty
+    if (g && !clo && !bloom){
+      currentProblem = g;
+      continue;
+    }
+
+    if (!clo || !bloom) continue;
+
+    const status = (cols[idx("Trạng thái")]||"").trim();
+    const w = toNum(cols[idx("Trọng số")]) ?? 1;
+
+    out.push({
+      group: currentGroup || "(Chưa nhóm)",
+      problem: currentProblem || "(Chưa VDLS)",
+      clo,
+      bloom,
+      include: yesNoToBool(status),
+      weight: w
+    });
+  }
+  return out;
+}
+
+/* =========================================================
+   D) APP STATE
+   ========================================================= */
+
 const APP = {
-  meta: {
-    totalQuestions: 120,
-    durationMinutes: 90,
-    examName: "Kỳ thi"
-  },
+  meta: { totalQuestions: 120, durationMinutes: 90, examName: "Kỳ thi" },
   bloomDefault: { nho:15, hieu:20, vd:25, pt:20, dg:15, st:5 },
   lockBloom: false,
   lockMinMaxGroup: true,
   lockMinMaxVDLS: true,
 
-  groups: [
-    {"name":"Bệnh Tạng phủ","credits":2,"coef":1,"min":null,"max":null},
-    {"name":"Bệnh Kinh lạc","credits":2,"coef":1,"min":null,"max":null},
-    {"name":"Bệnh Thương hàn","credits":2,"coef":1,"min":null,"max":null},
-    {"name":"Bệnh Ôn bệnh","credits":2,"coef":1,"min":null,"max":null},
-    {"name":"Bệnh Nội khoa","credits":4,"coef":1,"min":null,"max":null},
-    {"name":"Bệnh Nhi khoa","credits":2,"coef":1,"min":null,"max":null},
-    {"name":"Bệnh Phụ khoa","credits":2,"coef":1,"min":null,"max":null},
-    {"name":"Bệnh Ngoại khoa","credits":2,"coef":1,"min":null,"max":null},
-    {"name":"Bệnh Da liễu","credits":2,"coef":1,"min":null,"max":null},
-    {"name":"Bệnh Nhãn khoa","credits":1,"coef":1,"min":null,"max":null},
-    {"name":"Bệnh Tai mũi họng","credits":1,"coef":1,"min":null,"max":null}
-  ],
+  groups: parseGroups(GROUP_TSV),
+  vdls: parseVDLS(VDLS_TSV),
+  allocations: parseCLO(CLO_TSV),
 
-  // VDLS: 114 dòng (đã nhúng từ Excel)
-  vdls: [
-    {"group":"Bệnh Tạng phủ","problem":"Biện chứng tạng phủ","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Tạng phủ","problem":"Bệnh Tâm (tạng)","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Tạng phủ","problem":"Bệnh Can (tạng)","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Tạng phủ","problem":"Bệnh Tỳ (tạng)","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Tạng phủ","problem":"Bệnh Phế (tạng)","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Tạng phủ","problem":"Bệnh Thận (tạng)","include":true,"weight":1,"min":null,"max":null},
-
-    {"group":"Bệnh Kinh lạc","problem":"Biện chứng kinh lạc","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Kinh lạc","problem":"Bệnh lý kinh Thủ thái âm (Phế)","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Kinh lạc","problem":"Bệnh lý kinh Thủ thiếu âm (Tâm)","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Kinh lạc","problem":"Bệnh lý kinh Thủ quyết âm (Tâm bào)","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Kinh lạc","problem":"Bệnh lý kinh Thủ dương minh (Đại trường)","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Kinh lạc","problem":"Bệnh lý kinh Thủ thái dương (Tiểu trường)","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Kinh lạc","problem":"Bệnh lý kinh Thủ thiếu dương (Tam tiêu)","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Kinh lạc","problem":"Bệnh lý kinh Túc thái âm (Tỳ)","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Kinh lạc","problem":"Bệnh lý kinh Túc thiếu âm (Thận)","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Kinh lạc","problem":"Bệnh lý kinh Túc quyết âm (Can)","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Kinh lạc","problem":"Bệnh lý kinh Túc dương minh (Vị)","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Kinh lạc","problem":"Bệnh lý kinh Túc thái dương (Bàng quang)","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Kinh lạc","problem":"Bệnh lý kinh Túc thiếu dương (Đởm)","include":true,"weight":1,"min":null,"max":null},
-
-    {"group":"Bệnh Thương hàn","problem":"Biện chứng thương hàn","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Thương hàn","problem":"Bệnh lý kinh Thái dương","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Thương hàn","problem":"Bệnh lý kinh Dương minh","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Thương hàn","problem":"Bệnh lý kinh Thiếu dương","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Thương hàn","problem":"Bệnh lý kinh Thái âm","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Thương hàn","problem":"Bệnh lý kinh Thiếu âm","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Thương hàn","problem":"Bệnh lý kinh Quyết âm","include":true,"weight":1,"min":null,"max":null},
-
-    {"group":"Bệnh Ôn bệnh","problem":"Biện chứng ôn bệnh","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Ôn bệnh","problem":"Bệnh lý vệ phần","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Ôn bệnh","problem":"Bệnh lý khí phần","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Ôn bệnh","problem":"Bệnh lý dinh phần","include":true,"weight":1,"min":null,"max":null},
-    {"group":"Bệnh Ôn bệnh","problem":"Bệnh lý huyết phần","include":true,"weight":1,"min":null,"max":null},
-
-    {"group":"Bệnh Nội khoa","problem":"Hệ hô hấp","include":true,"weight":4,"min":null,"max":null},
-    {"group":"Bệnh Nội khoa","problem":"Hệ tiêu hóa","include":true,"weight":4,"min":null,"max":null},
-    {"group":"Bệnh Nội khoa","problem":"Hệ tim mạch","include":true,"weight":4,"min":null,"max":null},
-    {"group":"Bệnh Nội khoa","problem":"Hệ thận tiết niệu","include":true,"weight":4,"min":null,"max":null},
-    {"group":"Bệnh Nội khoa","problem":"Hệ thần kinh","include":true,"weight":4,"min":null,"max":null},
-    {"group":"Bệnh Nội khoa","problem":"Hệ cơ - xương khớp","include":true,"weight":4,"min":null,"max":null},
-    {"group":"Bệnh Nội khoa","problem":"Bệnh lý rối loạn chuyển hóa","include":true,"weight":2,"min":null,"max":null},
-    {"group":"Bệnh Nội khoa","problem":"Bệnh lý huyết học","include":true,"weight":2,"min":null,"max":null},
-
-    {"group":"Bệnh Nhi khoa","problem":"Bệnh hệ hô hấp","include":true,"weight":4,"min":null,"max":null},
-    {"group":"Bệnh Nhi khoa","problem":"Bệnh hệ tiêu hóa","include":true,"weight":4,"min":null,"max":null},
-    {"group":"Bệnh Nhi khoa","problem":"Bệnh hệ thần kinh","include":true,"weight":4,"min":null,"max":null},
-    {"group":"Bệnh Nhi khoa","problem":"Bệnh lý nhiễm trùng","include":true,"weight":3,"min":null,"max":null},
-    {"group":"Bệnh Nhi khoa","problem":"Bệnh lý dinh dưỡng","include":true,"weight":3,"min":null,"max":null},
-    {"group":"Bệnh Nhi khoa","problem":"Bệnh lý sơ sinh","include":true,"weight":2,"min":null,"max":null},
-
-    {"group":"Bệnh Phụ khoa","problem":"Bệnh lý kinh nguyệt","include":true,"weight":4,"min":null,"max":null},
-    {"group":"Bệnh Phụ khoa","problem":"Bệnh lý thai nghén","include":true,"weight":4,"min":null,"max":null},
-    {"group":"Bệnh Phụ khoa","problem":"Bệnh lý hậu sản","include":true,"weight":4,"min":null,"max":null},
-    {"group":"Bệnh Phụ khoa","problem":"Bệnh lý phụ khoa","include":true,"weight":4,"min":null,"max":null},
-
-    {"group":"Bệnh Ngoại khoa","problem":"Ngoại khoa hệ cơ xương khớp","include":true,"weight":4,"min":null,"max":null},
-    {"group":"Bệnh Ngoại khoa","problem":"Ngoại khoa hệ tiêu hóa","include":true,"weight":4,"min":null,"max":null},
-    {"group":"Bệnh Ngoại khoa","problem":"Ngoại khoa hệ tiết niệu","include":true,"weight":4,"min":null,"max":null},
-    {"group":"Bệnh Ngoại khoa","problem":"Ngoại khoa hệ thần kinh","include":true,"weight":2,"min":null,"max":null},
-    {"group":"Bệnh Ngoại khoa","problem":"Ngoại khoa hệ hô hấp","include":true,"weight":2,"min":null,"max":null},
-    {"group":"Bệnh Ngoại khoa","problem":"Ngoại khoa hệ tim mạch","include":true,"weight":2,"min":null,"max":null},
-    {"group":"Bệnh Ngoại khoa","problem":"Ngoại khoa hệ nội tiết","include":true,"weight":2,"min":null,"max":null},
-
-    {"group":"Bệnh Da liễu","problem":"Các bệnh viêm da","include":true,"weight":4,"min":null,"max":null},
-    {"group":"Bệnh Da liễu","problem":"Các bệnh nhiễm trùng da","include":true,"weight":3,"min":null,"max":null},
-    {"group":"Bệnh Da liễu","problem":"Các bệnh dị ứng da","include":true,"weight":4,"min":null,"max":null},
-    {"group":"Bệnh Da liễu","problem":"Các bệnh u da","include":true,"weight":2,"min":null,"max":null},
-    {"group":"Bệnh Da liễu","problem":"Các bệnh ký sinh trùng da","include":true,"weight":2,"min":null,"max":null},
-
-    {"group":"Bệnh Nhãn khoa","problem":"Các bệnh phần trước","include":true,"weight":3,"min":null,"max":null},
-    {"group":"Bệnh Nhãn khoa","problem":"Các bệnh phần sau","include":true,"weight":3,"min":null,"max":null},
-    {"group":"Bệnh Nhãn khoa","problem":"Các bệnh chức năng","include":true,"weight":2,"min":null,"max":null},
-
-    {"group":"Bệnh Tai mũi họng","problem":"Bệnh tai","include":true,"weight":3,"min":null,"max":null},
-    {"group":"Bệnh Tai mũi họng","problem":"Bệnh mũi xoang","include":true,"weight":3,"min":null,"max":null},
-    {"group":"Bệnh Tai mũi họng","problem":"Bệnh họng thanh quản","include":true,"weight":2,"min":null,"max":null},
-
-    // (… trong file Excel còn nhiều dòng VDLS khác: app vẫn chạy tốt nếu bạn bổ sung thêm theo đúng format)
-  ],
-
-  // Allocations: 218 dòng phân bổ CLO/Bloom theo từng “VD phụ” (đã nhúng từ Excel).
-  // Để code không quá dài ở phần chat, mình nhúng đầy đủ logic; bạn có thể paste toàn bộ allocations từ bản mình xuất JSON/Excel trong app.
-  // Tuy nhiên app vẫn hoạt động vì sẽ tạo allocations tối thiểu nếu thiếu (fallback).
-  allocations: [] // sẽ được nạp fallback bên dưới nếu để trống
+  computed: null
 };
 
-/* =========================================================
-   1) FALLBACK allocations (nếu bạn muốn: có thể để trống và tự sinh)
-   - Nếu bạn cần NHÚNG ĐỦ 218 dòng như Excel: mở app → bấm “Xuất JSON”
-     rồi copy allocations vào đây để app “đúng 100%” như file.
-   ========================================================= */
-function ensureAllocations() {
-  if (APP.allocations && APP.allocations.length > 0) return;
+const BLOOM_KEYS = [
+  {key:"nho", label:"Nhớ"},
+  {key:"hieu", label:"Hiểu"},
+  {key:"vd", label:"Vận dụng"},
+  {key:"pt", label:"Phân tích"},
+  {key:"dg", label:"Đánh giá"},
+  {key:"st", label:"Sáng tạo"},
+];
 
-  // Fallback: mỗi VDLS tạo 6 dòng bloom với trọng số theo Bloom mặc định, CLO = "Chẩn đoán"
-  const blooms = ["Nhớ","Hiểu","Vận dụng","Phân tích","Đánh giá","Sáng tạo"];
-  const bloomWeights = () => {
-    const b = APP.bloomDefault;
-    return [b.nho,b.hieu,b.vd,b.pt,b.dg,b.st].map(x => Math.max(0, Number(x)||0));
-  };
-
-  APP.allocations = [];
-  for (const it of APP.vdls) {
-    const w = bloomWeights();
-    for (let i=0;i<6;i++) {
-      APP.allocations.push({
-        problem: it.problem,
-        clo: "Chẩn đoán",
-        bloom: blooms[i],
-        include: it.include,
-        weight: w[i] || 1
-      });
-    }
-  }
+function bloomKeyFromLabel(b){
+  const t = (b||"").toLowerCase().trim();
+  if (t.includes("nhớ")) return "nho";
+  if (t.includes("hiểu")) return "hieu";
+  if (t.includes("v.d") || t.includes("vận")) return "vd";
+  if (t.includes("p.t") || t.includes("phân")) return "pt";
+  if (t.includes("đ.") || t.includes("đánh")) return "dg";
+  if (t.includes("s.") || t.includes("sáng")) return "st";
+  return null;
 }
 
 /* =========================================================
-   2) CORE CALC (tái hiện công thức Excel)
-   - Phan nhom: %PM = (TC*HS)/SUM(TC*HS)
-   - VDLS: %thô = %PM * (w / SUM(w) trong cùng PM, chỉ tính dòng “Có”)
-   - CLO:  %thô = %VDLS(problem) * (w / SUM(w) trong cùng problem, chỉ tính “Có”)
-   - Câu: dùng apportionment để tổng câu đúng bằng totalQuestions
+   E) CORE COMPUTE
    ========================================================= */
-function sum(arr) { return arr.reduce((a,b)=>a+b,0); }
 
-function apportionIntegers(items, total, getExact) {
-  // Largest remainder method
-  const exact = items.map(it => Math.max(0, getExact(it)));
-  const floors = exact.map(x => Math.floor(x));
-  let used = sum(floors);
-  let remain = Math.max(0, total - used);
+function computeAll(){
+  // 1) group weights
+  const gw = APP.groups.map(g => (g.credits||0) * (g.coef||0));
+  const gpct = safePctFromWeights(gw); // fraction
+  const groupRawQ = gpct.map(fr => fr * APP.meta.totalQuestions);
+  let groupQ = largestRemainderAllocate(APP.meta.totalQuestions, APP.groups, (_,i)=>groupRawQ[i]);
 
-  const fracIdx = exact.map((x,i)=>({i, frac: x - floors[i]}))
-                       .sort((a,b)=>b.frac - a.frac);
-
-  const result = floors.slice();
-  for (let k=0; k<fracIdx.length && remain>0; k++) {
-    result[fracIdx[k].i] += 1;
-    remain -= 1;
+  // apply min/max if NOT locked
+  if (!APP.lockMinMaxGroup){
+    // clamp then re-balance
+    groupQ = applyMinMaxAndRebalance(APP.meta.totalQuestions, groupQ, APP.groups.map(g=>g.min), APP.groups.map(g=>g.max));
   }
 
-  // Nếu dư (do total < sum(floors)), trừ bớt từ frac nhỏ nhất
-  if (used > total) {
-    let over = used - total;
-    const rev = fracIdx.slice().reverse();
-    for (let k=0; k<rev.length && over>0; k++) {
-      const i = rev[k].i;
-      if (result[i] > 0) { result[i] -= 1; over -= 1; }
-    }
-  }
-  return { exact, allocated: result };
-}
-
-function computeGroupPercents() {
-  const rows = APP.groups.map(g => ({
+  const groupsComputed = APP.groups.map((g,i)=>({
     ...g,
-    credits: Number(g.credits)||0,
-    coef: Number(g.coef)||0,
-    score: (Number(g.credits)||0) * (Number(g.coef)||0)
+    rawPct: gpct[i]*100,
+    q: groupQ[i]
   }));
-  const denom = sum(rows.map(r => r.score)) || 1;
-  for (const r of rows) r.pct = r.score / denom; // fraction
-  return rows;
+
+  // 2) VDLS per group
+  const vdlsByGroup = new Map();
+  APP.vdls.forEach(v=>{
+    if(!vdlsByGroup.has(v.group)) vdlsByGroup.set(v.group, []);
+    vdlsByGroup.get(v.group).push(v);
+  });
+
+  const vdlsComputed = [];
+  const vdlsQMap = new Map(); // key group|problem -> q
+
+  for (const g of groupsComputed){
+    const list = (vdlsByGroup.get(g.name) || []).slice();
+
+    // if group has no VDLS rows, skip
+    if (list.length===0) continue;
+
+    const included = list.filter(x=>x.include);
+    const base = included.length ? included : list; // if none included, fallback all
+    const weights = base.map(x=>x.weight || 1);
+    const fracs = safePctFromWeights(weights);
+    const raw = fracs.map(fr => fr * g.q);
+    let qs = largestRemainderAllocate(g.q, base, (_,i)=>raw[i]);
+
+    if (!APP.lockMinMaxVDLS){
+      qs = applyMinMaxAndRebalance(g.q, qs, base.map(x=>x.min), base.map(x=>x.max));
+    }
+
+    base.forEach((v,i)=>{
+      const q = qs[i];
+      vdlsComputed.push({
+        ...v,
+        q,
+        groupQ: g.q
+      });
+      vdlsQMap.set(`${v.group}|||${v.problem}`, q);
+    });
+  }
+
+  // 3) CLO allocations within each VDLS problem
+  // For each VDLS problem, allocate its q among CLO rows (included)
+  const rowsByProblem = new Map();
+  APP.allocations.forEach(r=>{
+    const k = `${r.group}|||${r.problem}`;
+    if(!rowsByProblem.has(k)) rowsByProblem.set(k, []);
+    rowsByProblem.get(k).push(r);
+  });
+
+  const cloComputed = [];
+  const bloomTotals = {nho:0,hieu:0,vd:0,pt:0,dg:0,st:0};
+  let totalCLO = 0;
+
+  for (const [k, rows] of rowsByProblem.entries()){
+    const [groupName, problem] = k.split("|||");
+    const vdlsQ = vdlsQMap.get(`${groupName}|||${problem}`) ?? 0;
+
+    const included = rows.filter(r=>r.include);
+    const base = included.length ? included : rows;
+    const weights = base.map(r=>r.weight || 1);
+    const fracs = safePctFromWeights(weights);
+    const raw = fracs.map(fr => fr * vdlsQ);
+    const qs = largestRemainderAllocate(vdlsQ, base, (_,i)=>raw[i]);
+
+    base.forEach((r,i)=>{
+      const q = qs[i];
+      const bk = bloomKeyFromLabel(r.bloom);
+      if (bk) bloomTotals[bk] += q;
+      totalCLO += q;
+
+      cloComputed.push({
+        ...r,
+        q,
+        bloomKey: bk
+      });
+    });
+  }
+
+  // 4) Nếu khóa Bloom (tự phân bổ): ép tổng Bloom theo tỷ lệ mặc định
+  // Cách làm: chỉ thống kê bloom totals theo default (để user xem), KHÔNG ép từng CLO vì CLO đã cố định Bloom theo dòng.
+  // (Nếu bạn muốn ép từng dòng, cần mapping lại Bloom của từng CLO theo default — mình giữ logic "khóa bloom" cho tổng phân bổ)
+  let bloomByDefault = null;
+  if (APP.lockBloom){
+    bloomByDefault = allocateBloomTotals(APP.meta.totalQuestions, APP.bloomDefault);
+  }
+
+  APP.computed = {
+    groups: groupsComputed,
+    vdls: vdlsComputed,
+    clo: cloComputed,
+    totals: {
+      groups: groupsComputed.reduce((a,b)=>a+b.q,0),
+      vdls: vdlsComputed.reduce((a,b)=>a+b.q,0),
+      clo: totalCLO,
+      bloomTotals,
+      bloomByDefault
+    }
+  };
 }
 
-function computeVDLS(groupRows) {
-  const totalQ = Number(APP.meta.totalQuestions)||120;
-  const groupPct = new Map(groupRows.map(r => [r.name, r.pct]));
+function applyMinMaxAndRebalance(total, qs, mins, maxs){
+  // mins/maxs are possibly null
+  const out = qs.slice();
+  const n = out.length;
+  const minA = mins.map(x => (x==null? null : Math.max(0, Math.floor(x))));
+  const maxA = maxs.map(x => (x==null? null : Math.max(0, Math.floor(x))));
 
-  // raw % for VDLS within each group
-  const byGroup = new Map();
-  for (const it of APP.vdls) {
-    if (!byGroup.has(it.group)) byGroup.set(it.group, []);
-    byGroup.get(it.group).push(it);
+  // 1) apply min
+  let sum = out.reduce((a,b)=>a+b,0);
+  for (let i=0;i<n;i++){
+    if (minA[i]!=null && out[i] < minA[i]) out[i]=minA[i];
   }
 
-  const vdCalc = [];
-  for (const [gname, arr] of byGroup.entries()) {
-    const gP = groupPct.get(gname) ?? 0;
-    const included = arr.filter(x => !!x.include);
-    const denomW = sum(included.map(x => Number(x.weight)||0)) || 1;
-
-    for (const x of arr) {
-      const w = Number(x.weight)||0;
-      const rawPct = (x.include ? (gP * (w/denomW)) : 0);
-      vdCalc.push({
-        ...x,
-        rawPct,
-        exactQ: rawPct * totalQ
-      });
-    }
+  // 2) apply max
+  for (let i=0;i<n;i++){
+    if (maxA[i]!=null && out[i] > maxA[i]) out[i]=maxA[i];
   }
 
-  // Nếu khóa Min/Max VDLS: clamp theo min/max của từng dòng (nếu có)
-  if (APP.lockMinMaxVDLS) {
-    // clamp exactQ, sau đó phân bổ lại phần còn thiếu/ thừa theo nhóm
-    const grouped = new Map();
-    for (const v of vdCalc) {
-      if (!grouped.has(v.group)) grouped.set(v.group, []);
-      grouped.get(v.group).push(v);
-    }
+  // 3) rebalance to total
+  sum = out.reduce((a,b)=>a+b,0);
+  let diff = total - sum;
 
-    for (const [gname, arr] of grouped.entries()) {
-      const eligible = arr.filter(x=>x.include);
-      if (eligible.length === 0) continue;
-
-      let fixed = 0;
-      const free = [];
-      for (const x of eligible) {
-        const min = (x.min==null||x.min==="") ? null : Number(x.min);
-        const max = (x.max==null||x.max==="") ? null : Number(x.max);
-        let ex = x.exactQ;
-
-        let clamped = ex;
-        if (min!=null && !Number.isNaN(min)) clamped = Math.max(clamped, min);
-        if (max!=null && !Number.isNaN(max)) clamped = Math.min(clamped, max);
-
-        x._clampedQ = clamped;
-        const isFixed = (clamped !== ex) && (min!=null || max!=null);
-        if (isFixed) fixed += clamped; else free.push(x);
-      }
-
-      const groupTotal = sum(eligible.map(x=>x.exactQ));
-      let target = groupTotal; // giữ tổng nhóm
-      let remain = target - fixed;
-
-      if (free.length > 0) {
-        const freeSum = sum(free.map(x=>x.exactQ)) || 1;
-        for (const x of free) {
-          x._clampedQ = Math.max(0, remain) * (x.exactQ / freeSum);
+  // If need add
+  if (diff>0){
+    // add to those not hitting max
+    while(diff>0){
+      let changed=false;
+      for (let i=0;i<n && diff>0;i++){
+        if (maxA[i]==null || out[i] < maxA[i]){
+          out[i] += 1;
+          diff -= 1;
+          changed=true;
         }
       }
-      // update exactQ
-      for (const x of eligible) x.exactQ = x._clampedQ;
-      for (const x of arr.filter(x=>!x.include)) x.exactQ = 0;
+      if(!changed) break;
     }
   }
-
-  // apportion to integers across all included VDLS to match totalQ
-  const includedVD = vdCalc.filter(x=>x.include);
-  const alloc = apportionIntegers(includedVD, totalQ, it => it.exactQ);
-
-  for (let i=0;i<includedVD.length;i++) includedVD[i].qInt = alloc.allocated[i];
-
-  // set qInt=0 for not include
-  for (const x of vdCalc) if (!x.include) x.qInt = 0;
-
-  // recompute rawPct from integer (for display consistency)
-  for (const x of vdCalc) x.pctDisplay = (totalQ>0 ? (x.qInt/totalQ) : 0);
-
-  return vdCalc;
+  // If need remove
+  if (diff<0){
+    diff = -diff;
+    while(diff>0){
+      let changed=false;
+      for (let i=0;i<n && diff>0;i++){
+        if (out[i]>0 && (minA[i]==null || out[i] > minA[i])){
+          out[i] -= 1;
+          diff -= 1;
+          changed=true;
+        }
+      }
+      if(!changed) break;
+    }
+  }
+  return out;
 }
 
-function computeCLO(vdCalc) {
-  ensureAllocations();
+function allocateBloomTotals(totalQ, bloomDefault){
+  const weights = BLOOM_KEYS.map(x => bloomDefault[x.key] || 0);
+  const fracs = safePctFromWeights(weights);
+  const raw = fracs.map(fr => fr * totalQ);
+  const alloc = largestRemainderAllocate(totalQ, BLOOM_KEYS, (_,i)=>raw[i]);
+  const out = {};
+  BLOOM_KEYS.forEach((b,i)=>out[b.key]=alloc[i]);
+  return out;
+}
 
-  const totalQ = Number(APP.meta.totalQuestions)||120;
+/* =========================================================
+   F) RENDER
+   ========================================================= */
 
-  const vdByProblem = new Map();
-  for (const v of vdCalc) vdByProblem.set(v.problem, v);
+function fmtPct(x){
+  if (!Number.isFinite(x)) return "";
+  return `${x.toFixed(2)}%`;
+}
+function escapeHtml(s){
+  return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+function badgeYesNo(b){
+  return b
+    ? `<span class="chip rounded-full px-3 py-1 text-xs font-semibold text-emerald-700 border-emerald-200 bg-emerald-50">Có</span>`
+    : `<span class="chip rounded-full px-3 py-1 text-xs font-semibold text-slate-600">Không</span>`;
+}
 
-  // Build allocations with computed %thô like Excel
-  const rows = APP.allocations.map(a => {
-    const vd = vdByProblem.get(a.problem);
-    const group = vd ? vd.group : "";
-    return {
-      ...a,
-      group,
-      include: !!a.include,
-      weight: Number(a.weight)||0,
-      problemPct: vd ? vd.rawPct : 0
+function render(){
+  computeAll();
+
+  // meta
+  document.getElementById("metaLine").textContent =
+    `Tổng câu: ${APP.meta.totalQuestions} | Thời gian: ${APP.meta.durationMinutes} phút | ${APP.meta.examName || ""}`;
+
+  // Overview groups table
+  const gbody = document.getElementById("tblGroups");
+  gbody.innerHTML = APP.computed.groups.map((g,i)=>`
+    <tr>
+      <td class="p-3 font-semibold">${escapeHtml(g.name)}</td>
+      <td class="p-3 text-right">${g.credits}</td>
+      <td class="p-3 text-right">${g.coef}</td>
+      <td class="p-3 text-right">${fmtPct(g.rawPct)}</td>
+      <td class="p-3 text-right">
+        <input data-gmin="${i}" ${APP.lockMinMaxGroup?'disabled':''}
+          class="input w-20 rounded-xl px-2 py-1 text-right"
+          type="number" min="0" value="${g.min ?? ''}" placeholder="—">
+      </td>
+      <td class="p-3 text-right">
+        <input data-gmax="${i}" ${APP.lockMinMaxGroup?'disabled':''}
+          class="input w-20 rounded-xl px-2 py-1 text-right"
+          type="number" min="0" value="${g.max ?? ''}" placeholder="—">
+      </td>
+      <td class="p-3 text-right font-bold">${g.q}</td>
+    </tr>
+  `).join("");
+
+  // VDLS table
+  const q = (document.getElementById("searchVDLS").value || "").trim().toLowerCase();
+  const vbody = document.getElementById("tblVDLS");
+  vbody.innerHTML = APP.computed.vdls
+    .filter(v => !q || v.problem.toLowerCase().includes(q) || v.group.toLowerCase().includes(q))
+    .map((v,i)=>`
+      <tr>
+        <td class="p-3 sticky-left font-semibold">${escapeHtml(v.group)}</td>
+        <td class="p-3 sticky-left-2">${escapeHtml(v.problem)}</td>
+        <td class="p-3 text-center">${badgeYesNo(v.include)}</td>
+        <td class="p-3 text-right">
+          <input data-vw="${v.group}|||${v.problem}" class="input w-20 rounded-xl px-2 py-1 text-right" type="number" min="0" value="${v.weight ?? 1}">
+        </td>
+        <td class="p-3 text-right">
+          <input data-vmin="${v.group}|||${v.problem}" ${APP.lockMinMaxVDLS?'disabled':''}
+            class="input w-20 rounded-xl px-2 py-1 text-right" type="number" min="0" value="${v.min ?? ''}" placeholder="—">
+        </td>
+        <td class="p-3 text-right">
+          <input data-vmax="${v.group}|||${v.problem}" ${APP.lockMinMaxVDLS?'disabled':''}
+            class="input w-20 rounded-xl px-2 py-1 text-right" type="number" min="0" value="${v.max ?? ''}" placeholder="—">
+        </td>
+        <td class="p-3 text-right font-bold">${v.q}</td>
+      </tr>
+    `).join("");
+
+  // CLO table
+  const filterGroup = document.getElementById("filterGroup").value || "";
+  const qc = (document.getElementById("searchCLO").value || "").trim().toLowerCase();
+
+  const cbody = document.getElementById("tblCLO");
+  cbody.innerHTML = APP.computed.clo
+    .filter(r => !filterGroup || r.group === filterGroup)
+    .filter(r => !qc || r.problem.toLowerCase().includes(qc) || r.clo.toLowerCase().includes(qc) || r.group.toLowerCase().includes(qc))
+    .map(r=>`
+      <tr>
+        <td class="p-3 sticky-left font-semibold">${escapeHtml(r.group)}</td>
+        <td class="p-3 sticky-left-2">${escapeHtml(r.problem)}</td>
+        <td class="p-3">${escapeHtml(r.clo)}</td>
+        <td class="p-3 text-center"><span class="chip rounded-full px-3 py-1 text-xs font-semibold">${escapeHtml(r.bloom)}</span></td>
+        <td class="p-3 text-center">${badgeYesNo(r.include)}</td>
+        <td class="p-3 text-right">${r.weight ?? 1}</td>
+        <td class="p-3 text-right font-bold">${r.q}</td>
+      </tr>
+    `).join("");
+
+  // filterGroup options
+  const sel = document.getElementById("filterGroup");
+  const current = sel.value;
+  const uniqueGroups = Array.from(new Set(APP.allocations.map(x=>x.group))).filter(Boolean);
+  sel.innerHTML = `<option value="">Tất cả phân nhóm</option>` + uniqueGroups.map(g=>`<option ${g===current?'selected':''} value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join("");
+
+  // Summary
+  document.getElementById("sumGroups").textContent = APP.computed.totals.groups;
+  document.getElementById("sumVDLS").textContent = APP.computed.totals.vdls;
+  document.getElementById("sumCLO").textContent = APP.computed.totals.clo;
+
+  const bt = APP.computed.totals.bloomTotals;
+  document.getElementById("t_nho").textContent = bt.nho;
+  document.getElementById("t_hieu").textContent = bt.hieu;
+  document.getElementById("t_vd").textContent = bt.vd;
+  document.getElementById("t_pt").textContent = bt.pt;
+  document.getElementById("t_dg").textContent = bt.dg;
+  document.getElementById("t_st").textContent = bt.st;
+
+  // bloom sum hint
+  const s = BLOOM_KEYS.reduce((a,b)=>a+(APP.bloomDefault[b.key]||0),0);
+  document.getElementById("bloomSumHint").textContent = `Tổng Bloom hiện tại = ${s}% (nên = 100%)`;
+
+  // badge calc
+  const ok = APP.computed.totals.groups === APP.meta.totalQuestions;
+  document.getElementById("badgeCalc").textContent = ok ? "OK" : "Đang tính…";
+}
+
+/* =========================================================
+   G) EVENTS
+   ========================================================= */
+
+function bind(){
+  // inputs
+  const inpTotalQ = document.getElementById("inpTotalQ");
+  const inpDuration = document.getElementById("inpDuration");
+  const inpExamName = document.getElementById("inpExamName");
+  const chkLockBloom = document.getElementById("chkLockBloom");
+  const chkLockMinMaxGroup = document.getElementById("chkLockMinMaxGroup");
+  const chkLockMinMaxVDLS = document.getElementById("chkLockMinMaxVDLS");
+
+  inpTotalQ.value = APP.meta.totalQuestions;
+  inpDuration.value = APP.meta.durationMinutes;
+  inpExamName.value = APP.meta.examName;
+
+  chkLockBloom.checked = APP.lockBloom;
+  chkLockMinMaxGroup.checked = APP.lockMinMaxGroup;
+  chkLockMinMaxVDLS.checked = APP.lockMinMaxVDLS;
+
+  // bloom inputs
+  document.getElementById("b_nho").value = APP.bloomDefault.nho;
+  document.getElementById("b_hieu").value = APP.bloomDefault.hieu;
+  document.getElementById("b_vd").value = APP.bloomDefault.vd;
+  document.getElementById("b_pt").value = APP.bloomDefault.pt;
+  document.getElementById("b_dg").value = APP.bloomDefault.dg;
+  document.getElementById("b_st").value = APP.bloomDefault.st;
+
+  inpTotalQ.addEventListener("input", ()=>{
+    APP.meta.totalQuestions = Math.max(1, Math.floor(toNum(inpTotalQ.value) || 1));
+    render();
+  });
+  inpDuration.addEventListener("input", ()=>{
+    APP.meta.durationMinutes = Math.max(1, Math.floor(toNum(inpDuration.value) || 1));
+    render();
+  });
+  inpExamName.addEventListener("input", ()=>{
+    APP.meta.examName = inpExamName.value || "";
+    render();
+  });
+
+  chkLockBloom.addEventListener("change", ()=>{
+    APP.lockBloom = chkLockBloom.checked;
+    render();
+  });
+  chkLockMinMaxGroup.addEventListener("change", ()=>{
+    APP.lockMinMaxGroup = chkLockMinMaxGroup.checked;
+    render();
+  });
+  chkLockMinMaxVDLS.addEventListener("change", ()=>{
+    APP.lockMinMaxVDLS = chkLockMinMaxVDLS.checked;
+    render();
+  });
+
+  document.getElementById("btnApplyBloom").addEventListener("click", ()=>{
+    APP.bloomDefault.nho = clamp(toNum(document.getElementById("b_nho").value)||0,0,100);
+    APP.bloomDefault.hieu = clamp(toNum(document.getElementById("b_hieu").value)||0,0,100);
+    APP.bloomDefault.vd = clamp(toNum(document.getElementById("b_vd").value)||0,0,100);
+    APP.bloomDefault.pt = clamp(toNum(document.getElementById("b_pt").value)||0,0,100);
+    APP.bloomDefault.dg = clamp(toNum(document.getElementById("b_dg").value)||0,0,100);
+    APP.bloomDefault.st = clamp(toNum(document.getElementById("b_st").value)||0,0,100);
+    render();
+  });
+
+  // delegation for min/max group
+  document.addEventListener("input", (e)=>{
+    const t = e.target;
+
+    // group min/max
+    if (t.dataset.gmin != null){
+      const i = Number(t.dataset.gmin);
+      APP.groups[i].min = (t.value==="" ? null : Math.max(0, Math.floor(toNum(t.value)||0)));
+      render();
+    }
+    if (t.dataset.gmax != null){
+      const i = Number(t.dataset.gmax);
+      APP.groups[i].max = (t.value==="" ? null : Math.max(0, Math.floor(toNum(t.value)||0)));
+      render();
+    }
+
+    // vdls weight
+    if (t.dataset.vw){
+      const key = t.dataset.vw;
+      const [g,p] = key.split("|||");
+      const item = APP.vdls.find(x=>x.group===g && x.problem===p);
+      if (item){
+        item.weight = Math.max(0, toNum(t.value) ?? 1);
+        render();
+      }
+    }
+
+    // vdls min/max
+    if (t.dataset.vmin){
+      const key = t.dataset.vmin;
+      const [g,p] = key.split("|||");
+      const item = APP.vdls.find(x=>x.group===g && x.problem===p);
+      if (item){
+        item.min = (t.value==="" ? null : Math.max(0, Math.floor(toNum(t.value)||0)));
+        render();
+      }
+    }
+    if (t.dataset.vmax){
+      const key = t.dataset.vmax;
+      const [g,p] = key.split("|||");
+      const item = APP.vdls.find(x=>x.group===g && x.problem===p);
+      if (item){
+        item.max = (t.value==="" ? null : Math.max(0, Math.floor(toNum(t.value)||0)));
+        render();
+      }
+    }
+  });
+
+  // search
+  document.getElementById("searchVDLS").addEventListener("input", render);
+  document.getElementById("searchCLO").addEventListener("input", render);
+  document.getElementById("filterGroup").addEventListener("change", render);
+
+  // tabs
+  document.querySelectorAll(".tab").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const tabId = btn.dataset.tab;
+      document.querySelectorAll(".tabPanel").forEach(p=>p.classList.add("hidden"));
+      document.getElementById(tabId).classList.remove("hidden");
+
+      document.querySelectorAll(".tab").forEach(b=>b.classList.remove("tab-active"));
+      btn.classList.add("tab-active");
+    });
+  });
+
+  // export
+  document.getElementById("btnExportJson").addEventListener("click", ()=>{
+    const payload = {
+      meta: APP.meta,
+      bloomDefault: APP.bloomDefault,
+      lockBloom: APP.lockBloom,
+      lockMinMaxGroup: APP.lockMinMaxGroup,
+      lockMinMaxVDLS: APP.lockMinMaxVDLS,
+      groups: APP.groups,
+      vdls: APP.vdls,
+      allocations: APP.allocations,
+      computed: APP.computed
     };
+    downloadFile(`medmatrix_${Date.now()}.json`, JSON.stringify(payload, null, 2), "application/json");
   });
 
-  // denom within each problem for included rows
-  const byProb = new Map();
-  for (const r of rows) {
-    if (!byProb.has(r.problem)) byProb.set(r.problem, []);
-    byProb.get(r.problem).push(r);
-  }
-
-  for (const [p, arr] of byProb.entries()) {
-    const inc = arr.filter(x=>x.include);
-    const denomW = sum(inc.map(x=>x.weight)) || 1;
-    const pPct = (vdByProblem.get(p)?.rawPct) ?? 0;
-
-    for (const x of arr) {
-      x.rawPct = x.include ? (pPct * (x.weight/denomW)) : 0;
-      x.exactQ = x.rawPct * totalQ;
-      x.exactDraft = x.exactQ * 2;
-    }
-  }
-
-  // apportion integer questions across ALL included CLO rows so total matches totalQ
-  const included = rows.filter(x=>x.include);
-  const alloc = apportionIntegers(included, totalQ, it => it.exactQ);
-  for (let i=0;i<included.length;i++) included[i].qInt = alloc.allocated[i];
-  for (const r of rows) if (!r.include) r.qInt = 0;
-
-  // draft = 2x (như excel I*2); giữ integer theo qInt*2
-  for (const r of rows) r.draftInt = r.qInt * 2;
-
-  return rows;
-}
-
-/* =========================================================
-   3) UI RENDER
-   ========================================================= */
-const el = (id) => document.getElementById(id);
-
-function pctFmt(x) { return (x*100).toFixed(2) + "%"; }
-function numFmt(x) { return (Number(x)||0).toLocaleString("vi-VN"); }
-
-function unique(arr) { return [...new Set(arr)].filter(Boolean); }
-
-function renderAll() {
-  // sync meta
-  el("inpTotalQ").value = APP.meta.totalQuestions;
-  el("inpDuration").value = APP.meta.durationMinutes;
-  el("inpExam").value = APP.meta.examName;
-
-  // bloom default
-  el("bNho").value = APP.bloomDefault.nho;
-  el("bHieu").value = APP.bloomDefault.hieu;
-  el("bVD").value = APP.bloomDefault.vd;
-  el("bPT").value = APP.bloomDefault.pt;
-  el("bDG").value = APP.bloomDefault.dg;
-  el("bST").value = APP.bloomDefault.st;
-  el("chkLockBloom").checked = !!APP.lockBloom;
-
-  el("chkLockMinMaxGroup").checked = !!APP.lockMinMaxGroup;
-  el("chkLockMinMaxVDLS").checked = !!APP.lockMinMaxVDLS;
-
-  const groupRows = computeGroupPercents();
-  const vdCalc = computeVDLS(groupRows);
-  const cloRows = computeCLO(vdCalc);
-
-  // Groups table
-  const tbG = el("tblGroups");
-  tbG.innerHTML = "";
-  for (const g of groupRows) {
-    const qExact = g.pct * (Number(APP.meta.totalQuestions)||120);
-    const tr = document.createElement("tr");
-    tr.className = "border-t border-slate-100";
-    tr.innerHTML = `
-      <td class="py-2 pr-2 font-semibold">${g.name}</td>
-      <td class="py-2 pr-2">${numFmt(g.credits)}</td>
-      <td class="py-2 pr-2">${numFmt(g.coef)}</td>
-      <td class="py-2 pr-2 font-bold">${pctFmt(g.pct)}</td>
-      <td class="py-2 pr-2">${qExact.toFixed(2)}</td>
-    `;
-    tbG.appendChild(tr);
-  }
-  el("sumGroupPct").textContent = pctFmt(sum(groupRows.map(x=>x.pct)));
-  el("sumGroupQ").textContent = numFmt(APP.meta.totalQuestions);
-
-  // Filters
-  const groups = unique(APP.groups.map(x=>x.name));
-  const fg = el("filterGroupVDLS");
-  fg.innerHTML = `<option value="all">Tất cả phân môn</option>` + groups.map(g=>`<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join("");
-
-  const fg2 = el("filterGroupCLO");
-  fg2.innerHTML = `<option value="all">Tất cả phân môn</option>` + groups.map(g=>`<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join("");
-
-  const problems = unique(APP.vdls.map(x=>x.problem));
-  const fp = el("filterProblemCLO");
-  fp.innerHTML = `<option value="all">Tất cả vấn đề</option>` + problems.map(p=>`<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("");
-
-  const clos = unique((APP.allocations||[]).map(x=>x.clo));
-  const fc = el("filterCLO");
-  fc.innerHTML = `<option value="all">Tất cả CLO</option>` + clos.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
-
-  const blooms = unique((APP.allocations||[]).map(x=>x.bloom));
-  const fb = el("filterBloom");
-  fb.innerHTML = `<option value="all">Tất cả Bloom</option>` + blooms.map(b=>`<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join("");
-
-  // VDLS table render (with filter/search)
-  renderVDLS(vdCalc);
-
-  // CLO render (with filter/search)
-  renderCLO(cloRows);
-
-  // store computed results for exports
-  APP._computed = { groupRows, vdCalc, cloRows };
-}
-
-function escapeHtml(s) {
-  return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;")
-                  .replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
-}
-
-function renderVDLS(vdCalc) {
-  const groupSel = el("filterGroupVDLS").value;
-  const q = (el("searchVDLS").value||"").toLowerCase().trim();
-
-  const filtered = vdCalc.filter(x=>{
-    const okGroup = (groupSel==="all" || x.group===groupSel);
-    const okSearch = (!q || x.problem.toLowerCase().includes(q));
-    return okGroup && okSearch;
-  });
-
-  const tb = el("tblVDLS");
-  tb.innerHTML = "";
-  for (const v of filtered) {
-    const tr = document.createElement("tr");
-    tr.className = "border-t border-slate-100";
-    tr.innerHTML = `
-      <td class="py-2 pr-2">
-        <input type="checkbox" ${v.include?"checked":""}
-          data-vdls="${escapeHtml(v.problem)}"
-          class="w-4 h-4" />
-      </td>
-      <td class="py-2 pr-2 font-semibold">${escapeHtml(v.problem)}</td>
-      <td class="py-2 pr-2">${escapeHtml(v.group)}</td>
-      <td class="py-2 pr-2">
-        <input type="number" step="0.1" min="0" value="${v.weight}"
-          data-w="${escapeHtml(v.problem)}" class="input text-sm w-[90px]" />
-      </td>
-      <td class="py-2 pr-2 font-bold">${pctFmt(v.rawPct)}</td>
-      <td class="py-2 pr-2">
-        <input type="number" min="0" value="${v.min??""}"
-          data-min="${escapeHtml(v.problem)}" class="input text-sm w-[80px]" />
-      </td>
-      <td class="py-2 pr-2">
-        <input type="number" min="0" value="${v.max??""}"
-          data-max="${escapeHtml(v.problem)}" class="input text-sm w-[80px]" />
-      </td>
-      <td class="py-2 pr-2 font-extrabold">${numFmt(v.qInt)}</td>
-    `;
-    tb.appendChild(tr);
-  }
-
-  // summary
-  el("vdlsCount").textContent = numFmt(filtered.length);
-  const pctSum = sum(filtered.map(x=>x.rawPct));
-  const qSum = sum(filtered.map(x=>x.qInt));
-  el("vdlsPct").textContent = pctFmt(pctSum);
-  el("vdlsQ").textContent = numFmt(qSum);
-
-  // events
-  tb.querySelectorAll("input[type=checkbox][data-vdls]").forEach(chk=>{
-    chk.addEventListener("change", (e)=>{
-      const prob = e.target.getAttribute("data-vdls");
-      const item = APP.vdls.find(x=>x.problem===prob);
-      if (item) item.include = e.target.checked;
-
-      // keep allocations include synced by problem
-      for (const a of APP.allocations) if (a.problem===prob) a.include = e.target.checked;
-
-      renderAll();
+  document.getElementById("btnExportCsv").addEventListener("click", ()=>{
+    // CSV theo CLO (mỗi dòng: Group, VDLS, CLO, Bloom, Q)
+    const rows = [["Phân nhóm","VDLS","CLO","Bloom","Số câu"]];
+    (APP.computed?.clo || []).forEach(r=>{
+      rows.push([r.group, r.problem, r.clo, r.bloom, String(r.q)]);
     });
+    downloadFile(`medmatrix_export_${Date.now()}.csv`, rows.map(r=>r.map(csvEscape).join(",")).join("\n"), "text/csv;charset=utf-8");
   });
 
-  tb.querySelectorAll("input[data-w]").forEach(inp=>{
-    inp.addEventListener("input", (e)=>{
-      const prob = e.target.getAttribute("data-w");
-      const item = APP.vdls.find(x=>x.problem===prob);
-      if (item) item.weight = Number(e.target.value)||0;
-      renderAll();
-    });
-  });
+  // Embedded data tab (textarea)
+  document.getElementById("txtGroup").value = GROUP_TSV;
+  document.getElementById("txtVDLS").value = VDLS_TSV;
+  document.getElementById("txtCLO").value = CLO_TSV;
 
-  tb.querySelectorAll("input[data-min]").forEach(inp=>{
-    inp.addEventListener("input", (e)=>{
-      const prob = e.target.getAttribute("data-min");
-      const item = APP.vdls.find(x=>x.problem===prob);
-      if (item) item.min = (e.target.value===""? null : Number(e.target.value));
-      renderAll();
-    });
-  });
+  document.getElementById("btnReloadFromText").addEventListener("click", ()=>{
+    GROUP_TSV = document.getElementById("txtGroup").value.trim();
+    VDLS_TSV  = document.getElementById("txtVDLS").value.trim();
+    CLO_TSV   = document.getElementById("txtCLO").value.trim();
 
-  tb.querySelectorAll("input[data-max]").forEach(inp=>{
-    inp.addEventListener("input", (e)=>{
-      const prob = e.target.getAttribute("data-max");
-      const item = APP.vdls.find(x=>x.problem===prob);
-      if (item) item.max = (e.target.value===""? null : Number(e.target.value));
-      renderAll();
-    });
+    APP.groups = parseGroups(GROUP_TSV);
+    APP.vdls = parseVDLS(VDLS_TSV);
+    APP.allocations = parseCLO(CLO_TSV);
+
+    render();
   });
 }
 
-function renderCLO(cloRows) {
-  const gSel = el("filterGroupCLO").value;
-  const pSel = el("filterProblemCLO").value;
-  const cloSel = el("filterCLO").value;
-  const bSel = el("filterBloom").value;
-  const incSel = el("filterInclude").value;
-  const q = (el("searchCLO").value||"").toLowerCase().trim();
-
-  const filtered = cloRows.filter(r=>{
-    const okG = (gSel==="all" || r.group===gSel);
-    const okP = (pSel==="all" || r.problem===pSel);
-    const okC = (cloSel==="all" || r.clo===cloSel);
-    const okB = (bSel==="all" || r.bloom===bSel);
-    const okI = (incSel==="all" || (incSel==="yes" ? r.include : !r.include));
-    const okS = (!q || (r.problem||"").toLowerCase().includes(q) || (r.clo||"").toLowerCase().includes(q) || (r.bloom||"").toLowerCase().includes(q));
-    return okG && okP && okC && okB && okI && okS;
-  });
-
-  const tb = el("tblCLO");
-  tb.innerHTML = "";
-  for (const r of filtered) {
-    const tr = document.createElement("tr");
-    tr.className = "border-t border-slate-100";
-    tr.innerHTML = `
-      <td class="py-2 pr-2"><input type="checkbox" ${r.include?"checked":""} data-inc-row="1"
-        data-key="${escapeHtml(r.problem)}|||${escapeHtml(r.clo)}|||${escapeHtml(r.bloom)}" class="w-4 h-4"/></td>
-      <td class="py-2 pr-2 font-semibold">${escapeHtml(r.problem)}</td>
-      <td class="py-2 pr-2">${escapeHtml(r.group||"")}</td>
-      <td class="py-2 pr-2">${escapeHtml(r.clo)}</td>
-      <td class="py-2 pr-2">${escapeHtml(r.bloom)}</td>
-      <td class="py-2 pr-2">
-        <input type="number" step="0.1" min="0" value="${r.weight}"
-          data-w-row="1" data-key="${escapeHtml(r.problem)}|||${escapeHtml(r.clo)}|||${escapeHtml(r.bloom)}"
-          class="input text-sm w-[110px]" />
-      </td>
-      <td class="py-2 pr-2 font-bold">${pctFmt(r.rawPct||0)}</td>
-      <td class="py-2 pr-2 font-extrabold">${numFmt(r.qInt||0)}</td>
-      <td class="py-2 pr-2 font-extrabold">${numFmt(r.draftInt||0)}</td>
-    `;
-    tb.appendChild(tr);
-  }
-
-  // summary
-  el("cloRows").textContent = numFmt(filtered.length);
-  el("cloPct").textContent = pctFmt(sum(filtered.map(x=>x.rawPct||0)));
-  el("cloQ").textContent = numFmt(sum(filtered.map(x=>x.qInt||0)));
-  el("cloDraft").textContent = numFmt(sum(filtered.map(x=>x.draftInt||0)));
-
-  // events for include/weight edits
-  tb.querySelectorAll("input[data-inc-row]").forEach(chk=>{
-    chk.addEventListener("change", (e)=>{
-      const key = e.target.getAttribute("data-key");
-      const [problem, clo, bloom] = key.split("|||");
-      const row = APP.allocations.find(x=>x.problem===problem && x.clo===clo && x.bloom===bloom);
-      if (row) row.include = e.target.checked;
-      renderAll();
-    });
-  });
-
-  tb.querySelectorAll("input[data-w-row]").forEach(inp=>{
-    inp.addEventListener("input", (e)=>{
-      const key = e.target.getAttribute("data-key");
-      const [problem, clo, bloom] = key.split("|||");
-      const row = APP.allocations.find(x=>x.problem===problem && x.clo===clo && x.bloom===bloom);
-      if (row) row.weight = Number(e.target.value)||0;
-      renderAll();
-    });
-  });
+function csvEscape(v){
+  const s = String(v ?? "");
+  if (s.includes(",") || s.includes('"') || s.includes("\n")) return `"${s.replaceAll('"','""')}"`;
+  return s;
 }
 
-/* =========================================================
-   4) TAB + EVENTS
-   ========================================================= */
-function setTab(which) {
-  const over = el("pageOverview");
-  const det = el("pageDetail");
-  const t1 = el("tabOverview");
-  const t2 = el("tabDetail");
-
-  if (which==="overview") {
-    over.classList.remove("hidden");
-    det.classList.add("hidden");
-    t1.classList.add("tabActive"); t1.classList.remove("tabIdle");
-    t2.classList.add("tabIdle"); t2.classList.remove("tabActive");
-  } else {
-    over.classList.add("hidden");
-    det.classList.remove("hidden");
-    t2.classList.add("tabActive"); t2.classList.remove("tabIdle");
-    t1.classList.add("tabIdle"); t1.classList.remove("tabActive");
-  }
-}
-
-function validateBloom() {
-  const b = APP.bloomDefault;
-  const total = (Number(b.nho)||0)+(Number(b.hieu)||0)+(Number(b.vd)||0)+(Number(b.pt)||0)+(Number(b.dg)||0)+(Number(b.st)||0);
-  const warn = el("bloomWarn");
-  if (total !== 100) warn.classList.remove("hidden");
-  else warn.classList.add("hidden");
-  return total===100;
-}
-
-function applyBloomToAllocations() {
-  // Chỉ áp dụng nếu lockBloom bật: set trọng số theo bloom default cho các dòng hiện có
-  if (!APP.lockBloom) return;
-
-  const b = APP.bloomDefault;
-  const map = {
-    "Nhớ": b.nho, "Hiểu": b.hieu, "Vận dụng": b.vd,
-    "Phân tích": b.pt, "Đánh giá": b.dg, "Sáng tạo": b.st
-  };
-
-  for (const a of APP.allocations) {
-    if (map[a.bloom] != null) a.weight = Number(map[a.bloom]) || 0;
-  }
-}
-
-function exportJSON() {
-  const payload = {
-    meta: APP.meta,
-    bloomDefault: APP.bloomDefault,
-    lockBloom: APP.lockBloom,
-    lockMinMaxGroup: APP.lockMinMaxGroup,
-    lockMinMaxVDLS: APP.lockMinMaxVDLS,
-    groups: APP.groups,
-    vdls: APP.vdls,
-    allocations: APP.allocations,
-    computed: APP._computed
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+function downloadFile(filename, content, mime){
+  const blob = new Blob([content], {type: mime});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "blueprint_mcq_vdls_clo_bloom.json";
+  a.download = filename;
+  document.body.appendChild(a);
   a.click();
+  a.remove();
   URL.revokeObjectURL(url);
 }
 
-function exportExcel() {
-  // Create workbook with sheets tương tự Excel: Phan nhom, VDLS, CLO
-  const wb = XLSX.utils.book_new();
-
-  // Phan nhom sheet
-  const gRows = (APP._computed?.groupRows || computeGroupPercents()).map(r=>({
-    "Phân môn": r.name,
-    "Tín chỉ": r.credits,
-    "Hệ số": r.coef,
-    "% phân môn": Number((r.pct*100).toFixed(4)),
-    "Câu (ước tính)": Number((r.pct*(APP.meta.totalQuestions||120)).toFixed(2))
-  }));
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(gRows), "Phan nhom");
-
-  // VDLS sheet
-  const vdRows = (APP._computed?.vdCalc || []).map(v=>({
-    "Vấn đề": v.problem,
-    "Phân môn": v.group,
-    "Có": v.include ? "Có":"Không",
-    "Tỷ trọng": v.weight,
-    "% thô": Number((v.rawPct*100).toFixed(4)),
-    "Min": v.min ?? "",
-    "Max": v.max ?? "",
-    "Câu": v.qInt ?? 0
-  }));
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(vdRows), "VDLS");
-
-  // CLO sheet
-  const cloRows = (APP._computed?.cloRows || []).map(r=>({
-    "Vấn đề (VD phụ)": r.problem,
-    "Phân môn": r.group,
-    "Có": r.include ? "Có":"Không",
-    "CLO": r.clo,
-    "Bloom": r.bloom,
-    "Tỷ trọng": r.weight,
-    "% thô": Number(((r.rawPct||0)*100).toFixed(4)),
-    "Câu": r.qInt ?? 0,
-    "Câu soạn": r.draftInt ?? 0
-  }));
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cloRows), "CLO");
-
-  XLSX.writeFile(wb, "Blueprint_MCQString_VDLS_CLO_Bloom.xlsx");
-}
-
 /* =========================================================
-   5) INIT + WIRING
+   INIT
    ========================================================= */
-function wire() {
-  el("tabOverview").addEventListener("click", ()=>setTab("overview"));
-  el("tabDetail").addEventListener("click", ()=>setTab("detail"));
+bind();
+render();
 
-  // Meta inputs
-  el("inpTotalQ").addEventListener("input", (e)=>{ APP.meta.totalQuestions = Number(e.target.value)||120; renderAll(); });
-  el("inpDuration").addEventListener("input", (e)=>{ APP.meta.durationMinutes = Number(e.target.value)||90; });
-  el("inpExam").addEventListener("input", (e)=>{ APP.meta.examName = e.target.value||""; });
-
-  // Bloom
-  el("chkLockBloom").addEventListener("change", (e)=>{ APP.lockBloom = e.target.checked; applyBloomToAllocations(); renderAll(); });
-  ["bNho","bHieu","bVD","bPT","bDG","bST"].forEach(id=>{
-    el(id).addEventListener("input", ()=>{
-      APP.bloomDefault = {
-        nho:Number(el("bNho").value)||0,
-        hieu:Number(el("bHieu").value)||0,
-        vd:Number(el("bVD").value)||0,
-        pt:Number(el("bPT").value)||0,
-        dg:Number(el("bDG").value)||0,
-        st:Number(el("bST").value)||0
-      };
-      validateBloom();
-    });
-  });
-  el("btnApplyBloom").addEventListener("click", ()=>{
-    APP.bloomDefault = {
-      nho:Number(el("bNho").value)||0,
-      hieu:Number(el("bHieu").value)||0,
-      vd:Number(el("bVD").value)||0,
-      pt:Number(el("bPT").value)||0,
-      dg:Number(el("bDG").value)||0,
-      st:Number(el("bST").value)||0
-    };
-    if (!validateBloom()) return;
-    applyBloomToAllocations();
-    renderAll();
-  });
-
-  // Min/Max
-  el("chkLockMinMaxGroup").addEventListener("change", (e)=>{ APP.lockMinMaxGroup = e.target.checked; renderAll(); });
-  el("chkLockMinMaxVDLS").addEventListener("change", (e)=>{ APP.lockMinMaxVDLS = e.target.checked; renderAll(); });
-
-  // VDLS filter/search
-  el("filterGroupVDLS").addEventListener("change", ()=>renderVDLS(APP._computed?.vdCalc||[]));
-  el("searchVDLS").addEventListener("input", ()=>renderVDLS(APP._computed?.vdCalc||[]));
-
-  // CLO filter/search
-  ["filterGroupCLO","filterProblemCLO","filterCLO","filterBloom","filterInclude","searchCLO"].forEach(id=>{
-    el(id).addEventListener("change", ()=>renderCLO(APP._computed?.cloRows||[]));
-    if (id==="searchCLO") el(id).addEventListener("input", ()=>renderCLO(APP._computed?.cloRows||[]));
-  });
-
-  // Export
-  el("btnExportJson").addEventListener("click", exportJSON);
-  el("btnExportExcel").addEventListener("click", exportExcel);
-}
-
-ensureAllocations();
-wire();
-validateBloom();
-renderAll();
 </script>
 </body>
 </html>
