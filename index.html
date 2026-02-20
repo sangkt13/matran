@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MedMatrix VDLS + Bloom (Editable + Excel + Resize)</title>
+  <title>MedMatrix VDLS + Bloom (Editable + Excel + Resize + Matrix)</title>
   <meta name="theme-color" content="#2563eb" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -14,6 +14,7 @@
     :root{
       --colGroupW: 280px; /* resizable */
       --colVdlsW: 520px;  /* resizable */
+      --colCloW: 220px;   /* matrix clo col */
     }
     body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
     .table-scroll::-webkit-scrollbar { height: 10px; width: 10px; }
@@ -68,6 +69,26 @@
       padding: 16px;
     }
     .modal-backdrop.show{ display:flex; }
+
+    /* matrix cell visuals */
+    .cell-box{
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 10px;
+      background: white;
+    }
+    .bloom-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid #e2e8f0;
+      font-size: 11px;
+      background: #f8fafc;
+      color: #334155;
+      white-space: nowrap;
+    }
   </style>
 </head>
 
@@ -77,7 +98,7 @@
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
       <div>
         <div class="text-2xl font-bold">MedMatrix – VDLS & Bloom</div>
-        <div class="text-sm text-slate-600">Chỉnh sửa trực tiếp • Lưu tự động • Kéo dãn cột • Xuất Excel</div>
+        <div class="text-sm text-slate-600">Chỉnh sửa trực tiếp • Lưu tự động • Kéo dãn cột • Xuất Excel • Ma trận VDLS × CLO</div>
       </div>
       <div class="flex flex-wrap gap-2">
         <button id="btnExportJson" class="btn rounded-xl px-4 py-2 text-sm font-semibold">Xuất JSON</button>
@@ -91,6 +112,7 @@
       <button data-tab="tabOverview" class="tab btn tab-active rounded-xl px-4 py-2 text-sm font-semibold">Tổng quan</button>
       <button data-tab="tabGroups" class="tab btn rounded-xl px-4 py-2 text-sm font-semibold">Phân nhóm & VDLS</button>
       <button data-tab="tabBloom" class="tab btn rounded-xl px-4 py-2 text-sm font-semibold">Chi tiết CLO & Bloom</button>
+      <button data-tab="tabMatrix" class="tab btn rounded-xl px-4 py-2 text-sm font-semibold">Ma trận VDLS × CLO</button>
       <button data-tab="tabData" class="tab btn rounded-xl px-4 py-2 text-sm font-semibold">Dữ liệu nhúng</button>
     </div>
 
@@ -238,7 +260,7 @@
           </div>
 
           <div class="mt-2 text-xs text-slate-500">
-            Tip: tick “Được dạy” ở VDLS để thay đổi % câu (nếu bật tùy chọn bên trên).
+            Tip: tick “Được dạy” ở VDLS/CLO để thay đổi % câu (nếu bật tùy chọn).
           </div>
         </div>
 
@@ -336,7 +358,7 @@
           </div>
 
           <div class="mt-3 text-xs text-slate-500">
-            • Bạn có thể click vào text VDLS để sửa. • Xóa VDLS sẽ đồng thời xóa các dòng CLO liên quan.
+            • Click VDLS để sửa. • Xóa VDLS sẽ xóa các dòng CLO liên quan.
           </div>
         </div>
 
@@ -382,6 +404,35 @@
 
           <div class="mt-3 text-xs text-slate-500">
             • Bloom là dropdown. • Tick “Được dạy” để đưa vào phân bổ. • Số câu = phân bổ theo VDLS → CLO.
+          </div>
+        </div>
+
+        <!-- Tab: Matrix VDLS x CLO -->
+        <div id="tabMatrix" class="tabPanel hidden bg-white rounded-2xl shadow-soft border border-slate-200 p-4">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+            <div>
+              <div class="text-lg font-bold">Ma trận VDLS × CLO</div>
+              <div class="text-sm text-slate-600">
+                Hàng = Phân nhóm / VDLS • Cột = CLO • Ô hiển thị <span class="mono">w</span> (tỷ trọng) + <span class="mono">q</span> (số câu tự tính) + Bloom nổi trội
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2 justify-end">
+              <input id="searchMatrix" class="input rounded-xl px-3 py-2 text-sm w-[260px]" placeholder="Tìm VDLS / CLO...">
+              <button id="btnSaveMatrix" class="btn rounded-xl px-4 py-2 text-sm font-semibold">💾 Lưu dữ liệu</button>
+              <button id="btnGoData" class="btn rounded-xl px-4 py-2 text-sm font-semibold">✍️ Chỉnh dữ liệu gốc</button>
+              <button id="btnExportMatrixExcel" class="btn-purple rounded-xl px-4 py-2 text-sm font-semibold">📤 Xuất Excel (Ma trận)</button>
+            </div>
+          </div>
+
+          <div class="mt-4 table-scroll overflow-auto border border-slate-200 rounded-2xl">
+            <table class="min-w-[1400px] w-full text-sm">
+              <thead class="sticky-top bg-slate-50 border-b border-slate-200" id="tblMatrixHead"></thead>
+              <tbody id="tblMatrixBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+
+          <div class="mt-3 text-xs text-slate-500">
+            • Sửa <b>tỷ trọng (w)</b> trong ô → app tự phân bổ lại. • Nếu 1 ô chưa có CLO, nhập w và rời ô (blur) để tự tạo CLO mới (Bloom mặc định: Nhớ).
           </div>
         </div>
 
@@ -494,9 +545,9 @@
   </div>
 
 <script>
-/* =========================================================
-   A) DỮ LIỆU NHÚNG (TSV) — BẠN CÓ THỂ DÁN/SỬA TRONG TAB “DỮ LIỆU NHÚNG”
-   ========================================================= */
+/* =========================
+   A) TSV
+   ========================= */
 
 let GROUP_TSV = `
 Phân nhóm	Tín chỉ	Hệ số	% thô	Tỷ lệ (%) min	Tỷ lệ (%) max	Số câu	Số VDLS
@@ -637,13 +688,10 @@ YHHĐ: Thiếu máu mạn.
 	Dự phòng YHCT	Phân tích	Không	1
 `.trim();
 
-/* =========================================================
-   B) HÀM TIỆN ÍCH
-   ========================================================= */
-
-function tsvLines(tsv){
-  return tsv.split(/\r?\n/).map(l=>l.replace(/\u00A0/g," ").trimEnd()).filter(l=>l.trim().length>0);
-}
+/* =========================
+   B) Utils
+   ========================= */
+function tsvLines(tsv){ return tsv.split(/\r?\n/).map(l=>l.replace(/\u00A0/g," ").trimEnd()).filter(l=>l.trim().length>0); }
 function toNum(x){
   if (x == null) return null;
   const s = String(x).trim();
@@ -659,68 +707,47 @@ function yesNoToBool(s){
 }
 function boolToYesNo(b){ return b ? "Có" : "Không"; }
 function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
-
 function safePctFromWeights(weights){
   const s = weights.reduce((a,b)=>a+b,0);
   return weights.map(w => s>0 ? (w/s) : 0);
 }
-
 function largestRemainderAllocate(targetTotal, items, getRaw){
   const raws = items.map(getRaw);
   const floors = raws.map(x => Math.floor(x));
   let sum = floors.reduce((a,b)=>a+b,0);
   let remain = targetTotal - sum;
-
   const fracs = raws.map((x,i)=>({i, frac: x - floors[i]})).sort((a,b)=>b.frac-a.frac);
   const out = floors.slice();
-
   let k=0;
   while(remain>0 && fracs.length){
     out[fracs[k].i] += 1;
-    remain--;
-    k++;
-    if (k>=fracs.length) k=0;
+    remain--; k++; if (k>=fracs.length) k=0;
   }
-
   if (remain<0){
     const fracsAsc = raws.map((x,i)=>({i, frac: x - floors[i]})).sort((a,b)=>a.frac-b.frac);
-    let kk=0;
-    remain = -remain;
+    let kk=0; remain = -remain;
     while(remain>0 && fracsAsc.length){
       const idx = fracsAsc[kk].i;
       if(out[idx]>0){ out[idx]-=1; remain--; }
-      kk++;
-      if (kk>=fracsAsc.length) kk=0;
+      kk++; if (kk>=fracsAsc.length) kk=0;
     }
   }
   return out;
 }
-
 function applyMinMaxAndRebalance(total, qs, mins, maxs){
   const out = qs.slice();
   const n = out.length;
   const minA = mins.map(x => (x==null? null : Math.max(0, Math.floor(x))));
   const maxA = maxs.map(x => (x==null? null : Math.max(0, Math.floor(x))));
-
-  for (let i=0;i<n;i++){
-    if (minA[i]!=null && out[i] < minA[i]) out[i]=minA[i];
-  }
-  for (let i=0;i<n;i++){
-    if (maxA[i]!=null && out[i] > maxA[i]) out[i]=maxA[i];
-  }
-
+  for (let i=0;i<n;i++){ if (minA[i]!=null && out[i] < minA[i]) out[i]=minA[i]; }
+  for (let i=0;i<n;i++){ if (maxA[i]!=null && out[i] > maxA[i]) out[i]=maxA[i]; }
   let sum = out.reduce((a,b)=>a+b,0);
   let diff = total - sum;
-
   if (diff>0){
     while(diff>0){
       let changed=false;
       for (let i=0;i<n && diff>0;i++){
-        if (maxA[i]==null || out[i] < maxA[i]){
-          out[i] += 1;
-          diff -= 1;
-          changed=true;
-        }
+        if (maxA[i]==null || out[i] < maxA[i]){ out[i] += 1; diff -= 1; changed=true; }
       }
       if(!changed) break;
     }
@@ -730,99 +757,58 @@ function applyMinMaxAndRebalance(total, qs, mins, maxs){
     while(diff>0){
       let changed=false;
       for (let i=0;i<n && diff>0;i++){
-        if (out[i]>0 && (minA[i]==null || out[i] > minA[i])){
-          out[i] -= 1;
-          diff -= 1;
-          changed=true;
-        }
+        if (out[i]>0 && (minA[i]==null || out[i] > minA[i])){ out[i] -= 1; diff -= 1; changed=true; }
       }
       if(!changed) break;
     }
   }
   return out;
 }
-
 function escapeHtml(s){
   return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 }
-function fmtPct(x){
-  if (!Number.isFinite(x)) return "";
-  return `${x.toFixed(2)}%`;
-}
+function fmtPct(x){ if (!Number.isFinite(x)) return ""; return `${x.toFixed(2)}%`; }
 
-/* =========================================================
-   C) PARSER TSV → OBJECT
-   ========================================================= */
-
+/* =========================
+   C) TSV parser
+   ========================= */
 function parseGroups(tsv){
   const lines = tsvLines(tsv);
   const header = lines[0].split("\t").map(s=>s.trim());
   const idx = (name)=>header.indexOf(name);
-
   const out = [];
   for (let i=1;i<lines.length;i++){
     const cols = lines[i].split("\t");
     const name = (cols[idx("Phân nhóm")]||"").trim();
     if (!name || name.toLowerCase()==="tổng") continue;
-    out.push({
-      name,
-      credits: toNum(cols[idx("Tín chỉ")]) ?? 0,
-      coef: toNum(cols[idx("Hệ số")]) ?? 0,
-      min: null,
-      max: null
-    });
+    out.push({ name, credits: toNum(cols[idx("Tín chỉ")]) ?? 0, coef: toNum(cols[idx("Hệ số")]) ?? 0, min: null, max: null });
   }
   return out;
 }
-
 function parseVDLS(tsv){
   const lines = tsvLines(tsv);
   const header = lines[0].split("\t").map(s=>s.trim());
   const idx = (name)=>header.indexOf(name);
-
   const out = [];
   let currentGroup = "";
   for (let i=1;i<lines.length;i++){
     const cols = lines[i].split("\t");
     const groupCell = (cols[idx("Phân nhóm VDLS")]||"").trim();
     const status = (cols[idx("Tình trạng")]||"").trim();
-
-    // group header row: has group name but status empty
-    if (groupCell && !status){
-      currentGroup = groupCell;
-      continue;
-    }
+    if (groupCell && !status){ currentGroup = groupCell; continue; }
     if (!groupCell) continue;
-
-    out.push({
-      group: currentGroup || "(Chưa nhóm)",
-      problem: groupCell,
-      include: yesNoToBool(status),
-      weight: toNum(cols[idx("Tỷ trọng")]) ?? 1,
-      min: null,
-      max: null
-    });
+    out.push({ group: currentGroup || "(Chưa nhóm)", problem: groupCell, include: yesNoToBool(status), weight: toNum(cols[idx("Tỷ trọng")]) ?? 1, min: null, max: null });
   }
   return out;
 }
-
-/* NOTE:
-   FIX NHẦM LẪN GROUP/VDLS:
-   - Dòng "Phân nhóm" = phải trùng GROUP_NAME_SET
-   - Dòng "VDLS" = có text nhưng CLO/Bloom rỗng, không thuộc GROUP_NAME_SET
-   - Dòng CLO thật = clo + bloom có dữ liệu
-*/
-let GROUP_NAME_SET = new Set(); // sẽ set sau khi parse groups
-
+let GROUP_NAME_SET = new Set();
 function parseCLO(tsv){
   const lines = tsvLines(tsv);
   const header = lines[0].split("\t").map(s=>s.trim());
   const idx = (name)=>header.indexOf(name);
-
   const out = [];
   let currentGroup = "";
   let currentProblem = "";
-
   for (let i=1;i<lines.length;i++){
     const cols = lines[i].split("\t");
     const first = (cols[idx("Phân nhóm VDLS")]||"").trim();
@@ -831,38 +817,22 @@ function parseCLO(tsv){
     const status= (cols[idx("Trạng thái")]||"").trim();
     const w     = toNum(cols[idx("Trọng số")]) ?? 1;
 
-    // Group header line: only when first matches a real group name
     if (first && !clo && !bloom && GROUP_NAME_SET.has(first)){
-      currentGroup = first;
-      currentProblem = "";
-      continue;
+      currentGroup = first; currentProblem = ""; continue;
     }
-
-    // Problem header line (VDLS): text in first, clo/bloom empty, and NOT a group name
     if (first && !clo && !bloom){
-      currentProblem = first;
-      continue;
+      currentProblem = first; continue;
     }
-
-    // CLO row: clo + bloom exist
     if (clo && bloom){
-      out.push({
-        group: currentGroup || "(Chưa nhóm)",
-        problem: currentProblem || "(Chưa VDLS)",
-        clo,
-        bloom,
-        include: yesNoToBool(status),
-        weight: w
-      });
+      out.push({ group: currentGroup || "(Chưa nhóm)", problem: currentProblem || "(Chưa VDLS)", clo, bloom, include: yesNoToBool(status), weight: w });
     }
   }
   return out;
 }
 
-/* =========================================================
-   D) APP STATE
-   ========================================================= */
-
+/* =========================
+   D) App state
+   ========================= */
 const BLOOM_KEYS = [
   {key:"nho", label:"Nhớ"},
   {key:"hieu", label:"Hiểu"},
@@ -871,7 +841,6 @@ const BLOOM_KEYS = [
   {key:"dg", label:"Đánh giá"},
   {key:"st", label:"Sáng tạo"},
 ];
-
 function bloomKeyFromLabel(b){
   const t = (b||"").toLowerCase().trim();
   if (t.includes("nhớ")) return "nho";
@@ -882,7 +851,6 @@ function bloomKeyFromLabel(b){
   if (t.includes("sáng") || t.includes("s.")) return "st";
   return null;
 }
-
 const APP = {
   meta: { totalQuestions: 120, durationMinutes: 90, examName: "Kỳ thi" },
   bloomDefault: { nho:15, hieu:20, vd:25, pt:20, dg:15, st:5 },
@@ -890,38 +858,28 @@ const APP = {
   lockMinMaxGroup: true,
   lockMinMaxVDLS: true,
   teachWeightOnGroups: true,
-
   groups: [],
   vdls: [],
   allocations: [],
-
   computed: null
 };
+function rebuildSets(){ GROUP_NAME_SET = new Set(APP.groups.map(g => (g.name||"").trim())); }
 
-function rebuildSets(){
-  GROUP_NAME_SET = new Set(APP.groups.map(g => (g.name||"").trim()));
-}
-
-/* =========================================================
-   E) CORE COMPUTE
-   ========================================================= */
-
+/* =========================
+   E) Compute core
+   ========================= */
 function computeAll(){
-  // build map VDLS by group
   const vdlsByGroup = new Map();
   APP.vdls.forEach(v=>{
     if(!vdlsByGroup.has(v.group)) vdlsByGroup.set(v.group, []);
     vdlsByGroup.get(v.group).push(v);
   });
 
-  // 1) group weights
   const gw = APP.groups.map(g=>{
     const base = (g.credits||0) * (g.coef||0);
     if(!APP.teachWeightOnGroups) return base;
-
     const list = vdlsByGroup.get(g.name) || [];
     if(list.length===0) return base;
-
     const taught = list.filter(x=>x.include);
     const used = taught.length ? taught : list;
     const teachFactor = used.reduce((s,x)=> s + (x.weight||1), 0);
@@ -936,31 +894,22 @@ function computeAll(){
     groupQ = applyMinMaxAndRebalance(APP.meta.totalQuestions, groupQ, APP.groups.map(g=>g.min), APP.groups.map(g=>g.max));
   }
 
-  const groupsComputed = APP.groups.map((g,i)=>({
-    ...g,
-    rawPct: gpct[i]*100,
-    q: groupQ[i]
-  }));
+  const groupsComputed = APP.groups.map((g,i)=>({ ...g, rawPct: gpct[i]*100, q: groupQ[i] }));
 
-  // 2) VDLS per group
   const vdlsComputed = [];
-  const vdlsQMap = new Map(); // key group|problem -> q
-
+  const vdlsQMap = new Map();
   for (const g of groupsComputed){
     const list = (vdlsByGroup.get(g.name) || []).slice();
     if (list.length===0) continue;
-
     const included = list.filter(x=>x.include);
     const base = included.length ? included : list;
     const weights = base.map(x=>x.weight || 1);
     const fracs = safePctFromWeights(weights);
     const raw = fracs.map(fr => fr * g.q);
     let qs = largestRemainderAllocate(g.q, base, (_,i)=>raw[i]);
-
     if (!APP.lockMinMaxVDLS){
       qs = applyMinMaxAndRebalance(g.q, qs, base.map(x=>x.min), base.map(x=>x.max));
     }
-
     base.forEach((v,i)=>{
       const q = qs[i];
       vdlsComputed.push({ ...v, q, groupQ: g.q });
@@ -968,7 +917,6 @@ function computeAll(){
     });
   }
 
-  // 3) CLO allocations within each VDLS problem
   const rowsByProblem = new Map();
   APP.allocations.forEach(r=>{
     const k = `${r.group}|||${r.problem}`;
@@ -983,7 +931,6 @@ function computeAll(){
   for (const [k, rows] of rowsByProblem.entries()){
     const [groupName, problem] = k.split("|||");
     const vdlsQ = vdlsQMap.get(`${groupName}|||${problem}`) ?? 0;
-
     const included = rows.filter(r=>r.include);
     const base = included.length ? included : rows;
     const weights = base.map(r=>r.weight || 1);
@@ -1013,23 +960,89 @@ function computeAll(){
   };
 }
 
-/* =========================================================
-   F) RENDER
-   ========================================================= */
+/* =========================
+   F) Matrix helpers
+   ========================= */
+function getMatrixColumns(){
+  // unique CLO names (giữ thứ tự xuất hiện)
+  const seen = new Set();
+  const out = [];
+  APP.allocations.forEach(a=>{
+    const c = (a.clo||"").trim();
+    if(c && !seen.has(c)){ seen.add(c); out.push(c); }
+  });
+  return out;
+}
+function dominantBloomPill(lines){
+  if(!lines || !lines.length) return "";
+  const map = new Map();
+  lines.forEach(x=>{
+    const b = x.bloom || "";
+    map.set(b, (map.get(b)||0) + (x.q||0));
+  });
+  let best = ["",0];
+  map.forEach((v,k)=>{ if(v>best[1]) best=[k,v]; });
+  const label = best[0] || "—";
+  return `<span class="bloom-pill">🧠 ${escapeHtml(label)} • q=${best[1]}</span>`;
+}
+function setMatrixCellWeight(group, problem, cloName, newWeight){
+  newWeight = Math.max(0, toNum(newWeight) ?? 0);
 
-function bloomDropdown(selected){
-  const opts = ["Nhớ","Hiểu","Vận dụng","Phân tích","Đánh giá","Sáng tạo"];
-  return `
-    <select class="input rounded-xl px-2 py-1 text-xs" data-cbloom>
-      ${opts.map(o=>`<option ${o===selected?'selected':''}>${escapeHtml(o)}</option>`).join("")}
-    </select>
-  `;
+  // find all allocation rows for (group,problem,cloName)
+  const rows = APP.allocations.filter(a=>a.group===group && a.problem===problem && (a.clo||"").trim()===cloName);
+
+  if(rows.length){
+    // distribute equally across existing bloom variants
+    const per = rows.length ? (newWeight/rows.length) : newWeight;
+    rows.forEach(r=> r.weight = per);
+  }else{
+    // auto-create a new CLO row if doesn't exist
+    APP.allocations.push({
+      group, problem,
+      clo: cloName,
+      bloom: "Nhớ",
+      include: true,
+      weight: newWeight
+    });
+  }
+  saveAllToLocal();
+}
+function buildMatrixMaps(){
+  computeAll();
+
+  const cols = getMatrixColumns();
+  const rows = (APP.computed?.vdls || []).map(v=>({group:v.group, problem:v.problem}));
+
+  const byRow = new Map(); // rowKey -> Map(cloName -> lines[])
+  (APP.computed?.clo || []).forEach(r=>{
+    const rowKey = `${r.group}|||${r.problem}`;
+    if(!byRow.has(rowKey)) byRow.set(rowKey, new Map());
+    const m = byRow.get(rowKey);
+    const cloName = (r.clo||"").trim();
+    if(!m.has(cloName)) m.set(cloName, []);
+    m.get(cloName).push(r);
+  });
+
+  // weights map from raw allocations (for editing display)
+  const wByRow = new Map(); // rowKey -> Map(cloName -> wSum)
+  APP.allocations.forEach(a=>{
+    const rowKey = `${a.group}|||${a.problem}`;
+    if(!wByRow.has(rowKey)) wByRow.set(rowKey, new Map());
+    const m = wByRow.get(rowKey);
+    const cloName = (a.clo||"").trim();
+    const old = m.get(cloName) || 0;
+    m.set(cloName, old + (a.weight||0));
+  });
+
+  return {cols, rows, byRow, wByRow};
 }
 
+/* =========================
+   G) Render
+   ========================= */
 function render(){
   computeAll();
 
-  // meta line
   document.getElementById("metaLine").textContent =
     `Tổng câu: ${APP.meta.totalQuestions} | Thời gian: ${APP.meta.durationMinutes} phút | ${APP.meta.examName || ""}`;
 
@@ -1183,14 +1196,95 @@ function render(){
   document.getElementById("inpColGroupW").value = cg;
   document.getElementById("inpColVdlsW").value = cv;
 
-  // Update add CLO dropdowns (group/problem)
   refreshAddForms();
+  renderMatrix();
 }
 
-/* =========================================================
-   G) SAVE / LOAD (LOCAL STORAGE)
-   ========================================================= */
+function renderMatrix(){
+  const {cols, rows, byRow, wByRow} = buildMatrixMaps();
+  const q = (document.getElementById("searchMatrix")?.value || "").trim().toLowerCase();
 
+  // filter columns by search (optional)
+  const filteredCols = !q ? cols : cols.filter(c=>c.toLowerCase().includes(q));
+  const filteredRows = !q ? rows : rows.filter(r=>{
+    return (r.group.toLowerCase().includes(q) || r.problem.toLowerCase().includes(q));
+  });
+
+  // head
+  const thead = document.getElementById("tblMatrixHead");
+  thead.innerHTML = `
+    <tr>
+      <th class="text-left p-3 sticky-left th-resize" style="width: var(--colGroupW);">
+        Phân nhóm
+        <span class="resizer" data-resize-col="group"></span>
+      </th>
+      <th class="text-left p-3 sticky-left-2 th-resize" style="width: var(--colVdlsW);">
+        VDLS
+        <span class="resizer" data-resize-col="vdls"></span>
+      </th>
+      ${filteredCols.map(c=>`
+        <th class="text-left p-3" style="min-width: var(--colCloW);">
+          <div class="font-semibold">${escapeHtml(c)}</div>
+          <div class="text-[11px] text-slate-500">w + q + Bloom</div>
+        </th>
+      `).join("")}
+    </tr>
+  `;
+
+  // body
+  const tbody = document.getElementById("tblMatrixBody");
+  tbody.innerHTML = filteredRows.map(r=>{
+    const rowKey = `${r.group}|||${r.problem}`;
+    const m = byRow.get(rowKey) || new Map();
+    const wm = wByRow.get(rowKey) || new Map();
+
+    const cells = filteredCols.map(cloName=>{
+      const lines = m.get(cloName) || [];
+      const qSum = lines.reduce((s,x)=>s+(x.q||0),0);
+      const wSum = wm.get(cloName) || 0;
+      const pill = dominantBloomPill(lines);
+
+      return `
+        <td class="p-3 align-top">
+          <div class="cell-box">
+            <div class="flex items-center justify-between gap-2">
+              <div class="text-xs text-slate-600">tỷ trọng (w)</div>
+              <div class="text-xs text-slate-600">số câu (q)</div>
+            </div>
+            <div class="mt-1 flex items-center justify-between gap-2">
+              <input
+                class="input w-24 rounded-xl px-2 py-1 text-right text-sm"
+                type="number" min="0" step="0.1"
+                value="${Number(wSum).toFixed(1)}"
+                data-mw="${escapeHtml(r.group)}|||${escapeHtml(r.problem)}|||${escapeHtml(cloName)}"
+              >
+              <div class="font-bold text-base">${qSum}</div>
+            </div>
+            <div class="mt-2">${pill || `<span class="bloom-pill">🧠 —</span>`}</div>
+            <div class="mt-2 text-[11px] text-slate-500">
+              ${lines.length ? `${lines.length} dòng Bloom` : `Chưa có CLO (nhập w để tạo)`}
+            </div>
+          </div>
+        </td>
+      `;
+    }).join("");
+
+    return `
+      <tr>
+        <td class="p-3 sticky-left font-semibold" style="width: var(--colGroupW);">${escapeHtml(r.group)}</td>
+        <td class="p-3 sticky-left-2" style="width: var(--colVdlsW);">
+          <div class="font-medium">${escapeHtml(r.problem)}</div>
+          <div class="text-[11px] text-slate-500 mt-1">RowKey: <span class="mono">${escapeHtml(rowKey)}</span></div>
+        </td>
+        ${cells}
+      </tr>
+    `;
+  }).join("");
+}
+
+/* =========================
+   H) Local storage
+   ========================= */
 const LS_KEYS = {
   meta: "medmatrix_meta_v1",
   bloom: "medmatrix_bloom_v1",
@@ -1201,7 +1295,6 @@ const LS_KEYS = {
   tsv: "medmatrix_tsv_v1",
   widths: "medmatrix_widths_v1",
 };
-
 function saveAllToLocal(){
   try{
     localStorage.setItem(LS_KEYS.meta, JSON.stringify(APP.meta));
@@ -1217,7 +1310,6 @@ function saveAllToLocal(){
     localStorage.setItem(LS_KEYS.clo, JSON.stringify(APP.allocations));
   }catch(err){}
 }
-
 function loadAllFromLocal(){
   try{
     const meta = JSON.parse(localStorage.getItem(LS_KEYS.meta) || "null");
@@ -1226,7 +1318,6 @@ function loadAllFromLocal(){
     const groups=JSON.parse(localStorage.getItem(LS_KEYS.groups)||"null");
     const vdls  =JSON.parse(localStorage.getItem(LS_KEYS.vdls)||"null");
     const clo   =JSON.parse(localStorage.getItem(LS_KEYS.clo)||"null");
-
     if(meta) APP.meta = meta;
     if(bloom) APP.bloomDefault = bloom;
     if(flags){
@@ -1239,7 +1330,6 @@ function loadAllFromLocal(){
     if(Array.isArray(vdls) && vdls.length) APP.vdls = vdls;
     if(Array.isArray(clo) && clo.length) APP.allocations = clo;
 
-    // widths
     const widths = JSON.parse(localStorage.getItem(LS_KEYS.widths) || "null");
     if(widths){
       if(widths.colGroupW) document.documentElement.style.setProperty("--colGroupW", widths.colGroupW);
@@ -1247,17 +1337,22 @@ function loadAllFromLocal(){
     }
   }catch(err){}
 }
-
 function resetLocal(){
-  Object.values(LS_KEYS).forEach(k=>{
-    try{ localStorage.removeItem(k); }catch(e){}
-  });
+  Object.values(LS_KEYS).forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} });
 }
 
-/* =========================================================
-   H) EXCEL / JSON EXPORT
-   ========================================================= */
-
+/* =========================
+   I) Export JSON / Excel (current UI)
+   ========================= */
+function downloadFile(filename, content, mime){
+  const blob = new Blob([content], {type: mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a);
+  a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
 function exportToJson(){
   const payload = {
     meta: APP.meta,
@@ -1273,11 +1368,8 @@ function exportToJson(){
   };
   downloadFile(`medmatrix_${Date.now()}.json`, JSON.stringify(payload, null, 2), "application/json");
 }
-
 function exportToExcel(){
-  // ensure computed fresh
   computeAll();
-
   const wb = XLSX.utils.book_new();
 
   const sheetGroups = (APP.computed?.groups || []).map(g=>({
@@ -1316,17 +1408,103 @@ function exportToExcel(){
   XLSX.writeFile(wb, `MedMatrix_${Date.now()}.xlsx`);
 }
 
-/* =========================================================
-   I) TSV SAVE/LOAD (TAB DATA)
-   ========================================================= */
+/* =========================
+   J) Export Excel for Matrix tab
+   ========================= */
+function exportMatrixToExcel(){
+  computeAll();
 
+  const cols = getMatrixColumns();
+  const rows = (APP.computed?.vdls || []).map(v=>({ group:v.group, problem:v.problem }));
+
+  const byRow = new Map();
+  (APP.computed?.clo || []).forEach(r=>{
+    const rowKey = `${r.group}|||${r.problem}`;
+    if(!byRow.has(rowKey)) byRow.set(rowKey, new Map());
+    const m = byRow.get(rowKey);
+    const cloName = (r.clo||"").trim();
+    if(!m.has(cloName)) m.set(cloName, []);
+    m.get(cloName).push(r);
+  });
+
+  const sheetMatrix = rows.map(r=>{
+    const rowKey = `${r.group}|||${r.problem}`;
+    const m = byRow.get(rowKey) || new Map();
+    const obj = { "Phân nhóm": r.group, "VDLS": r.problem };
+    cols.forEach(cloName=>{
+      const lines = (m.get(cloName) || []);
+      if(!lines.length){ obj[cloName] = ""; return; }
+      const totalQ = lines.reduce((s,x)=>s+(x.q||0),0);
+      const totalW = lines.reduce((s,x)=>s+(x.weight||0),0);
+      const bloomMap = new Map();
+      lines.forEach(x=>{
+        const b = x.bloom || "";
+        bloomMap.set(b, (bloomMap.get(b)||0) + (x.q||0));
+      });
+      const bloomStr = Array.from(bloomMap.entries()).map(([b,q])=> `${b}:${q}`).join("; ");
+      obj[cloName] = `q=${totalQ} | w=${Number(totalW).toFixed(1)} | ${bloomStr}`;
+    });
+    return obj;
+  });
+
+  const sheetMatrixQ = rows.map(r=>{
+    const rowKey = `${r.group}|||${r.problem}`;
+    const m = byRow.get(rowKey) || new Map();
+    const obj = {"Phân nhóm": r.group, "VDLS": r.problem};
+    cols.forEach(cloName=>{
+      const lines = (m.get(cloName) || []);
+      obj[cloName] = lines.reduce((s,x)=>s+(x.q||0),0);
+    });
+    return obj;
+  });
+
+  const sheetMatrixW = rows.map(r=>{
+    const rowKey = `${r.group}|||${r.problem}`;
+    const m = byRow.get(rowKey) || new Map();
+    const obj = {"Phân nhóm": r.group, "VDLS": r.problem};
+    cols.forEach(cloName=>{
+      const lines = (m.get(cloName) || []);
+      obj[cloName] = Number(lines.reduce((s,x)=>s+(x.weight||0),0).toFixed(1));
+    });
+    return obj;
+  });
+
+  const bt = APP.computed?.totals?.bloomTotals || {nho:0,hieu:0,vd:0,pt:0,dg:0,st:0};
+  const sheetBloom = [
+    {"Bloom":"Nhớ", "Số câu": bt.nho},
+    {"Bloom":"Hiểu","Số câu": bt.hieu},
+    {"Bloom":"Vận dụng","Số câu": bt.vd},
+    {"Bloom":"Phân tích","Số câu": bt.pt},
+    {"Bloom":"Đánh giá","Số câu": bt.dg},
+    {"Bloom":"Sáng tạo","Số câu": bt.st},
+  ];
+
+  const sheetMeta = [{
+    "Kỳ thi": APP.meta.examName || "",
+    "Tổng số câu": APP.meta.totalQuestions,
+    "Thời gian (phút)": APP.meta.durationMinutes,
+    "Lock Bloom": APP.lockBloom ? "Có" : "Không",
+    "Lock Min/Max Group": APP.lockMinMaxGroup ? "Có" : "Không",
+    "Lock Min/Max VDLS": APP.lockMinMaxVDLS ? "Có" : "Không",
+    "TeachWeightOnGroups": APP.teachWeightOnGroups ? "Có" : "Không",
+    "Xuất lúc": new Date().toISOString()
+  }];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetMeta), "Meta");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetBloom), "Bloom_Summary");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetMatrix), "Matrix");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetMatrixQ), "Matrix_Q");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sheetMatrixW), "Matrix_W");
+  XLSX.writeFile(wb, `MedMatrix_Matrix_${Date.now()}.xlsx`);
+}
+
+/* =========================
+   K) TSV save/load
+   ========================= */
 function saveTSVToLocal(){
   try{
-    localStorage.setItem(LS_KEYS.tsv, JSON.stringify({
-      GROUP_TSV,
-      VDLS_TSV,
-      CLO_TSV
-    }));
+    localStorage.setItem(LS_KEYS.tsv, JSON.stringify({ GROUP_TSV, VDLS_TSV, CLO_TSV }));
   }catch(e){}
 }
 function loadTSVFromLocal(){
@@ -1339,7 +1517,6 @@ function loadTSVFromLocal(){
       document.getElementById("txtGroup").value = GROUP_TSV;
       document.getElementById("txtVDLS").value  = VDLS_TSV;
       document.getElementById("txtCLO").value   = CLO_TSV;
-      // reload
       APP.groups = parseGroups(GROUP_TSV);
       rebuildSets();
       APP.vdls = parseVDLS(VDLS_TSV);
@@ -1350,41 +1527,25 @@ function loadTSVFromLocal(){
   }catch(e){}
 }
 
-/* =========================================================
-   J) INLINE EDIT / DELETE HELPERS
-   ========================================================= */
-
+/* =========================
+   L) Inline edit helpers
+   ========================= */
 function updateVDLSText(group, oldProblem, newProblem){
   newProblem = (newProblem||"").trim();
   if(!newProblem) return;
-
   const item = APP.vdls.find(x=>x.group===group && x.problem===oldProblem);
   if(!item) return;
-
-  // prevent duplicates in same group
   const dup = APP.vdls.find(x=>x.group===group && x.problem===newProblem);
   if(dup && dup!==item) return;
-
   item.problem = newProblem;
-
-  // update CLO allocations that point to old problem
-  APP.allocations.forEach(a=>{
-    if(a.group===group && a.problem===oldProblem){
-      a.problem = newProblem;
-    }
-  });
-
+  APP.allocations.forEach(a=>{ if(a.group===group && a.problem===oldProblem){ a.problem = newProblem; }});
   saveAllToLocal();
 }
-
 function deleteVDLS(group, problem){
-  // remove VDLS
   APP.vdls = APP.vdls.filter(v=> !(v.group===group && v.problem===problem));
-  // remove CLO under it
   APP.allocations = APP.allocations.filter(a=> !(a.group===group && a.problem===problem));
   saveAllToLocal();
 }
-
 function updateCLOText(group, problem, oldClo, bloom, newClo){
   newClo = (newClo||"").trim();
   if(!newClo) return;
@@ -1393,29 +1554,25 @@ function updateCLOText(group, problem, oldClo, bloom, newClo){
   item.clo = newClo;
   saveAllToLocal();
 }
-
 function updateCLOBloom(group, problem, clo, oldBloom, newBloom){
   const item = APP.allocations.find(x=>x.group===group && x.problem===problem && x.clo===clo && x.bloom===oldBloom);
   if(!item) return;
   item.bloom = newBloom;
   saveAllToLocal();
 }
-
 function deleteCLO(group, problem, clo, bloom){
   APP.allocations = APP.allocations.filter(x=> !(x.group===group && x.problem===problem && x.clo===clo && x.bloom===bloom));
   saveAllToLocal();
 }
 
-/* =========================================================
-   K) RESIZABLE COLUMNS (drag on header)
-   ========================================================= */
-
+/* =========================
+   M) Resizable columns
+   ========================= */
 function setColWidth(which, px){
   const v = clamp(px, which==="group" ? 160 : 260, 1400);
   const css = `${Math.floor(v)}px`;
   if(which==="group") document.documentElement.style.setProperty("--colGroupW", css);
   if(which==="vdls")  document.documentElement.style.setProperty("--colVdlsW", css);
-
   try{
     const widths = JSON.parse(localStorage.getItem(LS_KEYS.widths) || "{}");
     if(which==="group") widths.colGroupW = css;
@@ -1423,56 +1580,39 @@ function setColWidth(which, px){
     localStorage.setItem(LS_KEYS.widths, JSON.stringify(widths));
   }catch(e){}
 }
-
 function initResizers(){
   let dragging = null;
-
   document.querySelectorAll(".resizer").forEach(handle=>{
     handle.addEventListener("pointerdown", (e)=>{
       const which = handle.dataset.resizeCol;
       const startX = e.clientX;
-
       const startVal = parseInt(getComputedStyle(document.documentElement).getPropertyValue(which==="group" ? "--colGroupW" : "--colVdlsW")) || (which==="group"?280:520);
       dragging = { which, startX, startVal };
       handle.setPointerCapture(e.pointerId);
       e.preventDefault();
     });
   });
-
   window.addEventListener("pointermove", (e)=>{
     if(!dragging) return;
     const dx = e.clientX - dragging.startX;
     setColWidth(dragging.which, dragging.startVal + dx);
-    render(); // keep sticky offsets consistent
+    render();
   });
-
-  window.addEventListener("pointerup", ()=>{
-    dragging = null;
-  });
+  window.addEventListener("pointerup", ()=>{ dragging = null; });
 }
 
-/* =========================================================
-   L) ADD FORMS
-   ========================================================= */
-
-function openModal(id){
-  document.getElementById(id).classList.add("show");
-}
-function closeModal(id){
-  document.getElementById(id).classList.remove("show");
-}
-
+/* =========================
+   N) Add forms + modals
+   ========================= */
+function openModal(id){ document.getElementById(id).classList.add("show"); }
+function closeModal(id){ document.getElementById(id).classList.remove("show"); }
 function refreshAddForms(){
-  // VDLS group options
   const selG = document.getElementById("addVdlsGroup");
   if(selG){
     selG.innerHTML = APP.groups.map(g=>`<option value="${escapeHtml(g.name)}">${escapeHtml(g.name)}</option>`).join("");
   }
-
-  // CLO group + problem
   const selCG = document.getElementById("addCloGroup");
   const selCP = document.getElementById("addCloProblem");
-
   if(selCG){
     selCG.innerHTML = APP.groups.map(g=>`<option value="${escapeHtml(g.name)}">${escapeHtml(g.name)}</option>`).join("");
   }
@@ -1485,10 +1625,9 @@ function refreshAddForms(){
   }
 }
 
-/* =========================================================
-   M) EVENTS / BIND
-   ========================================================= */
-
+/* =========================
+   O) Bind events
+   ========================= */
 function bind(){
   // Init base data from TSV
   APP.groups = parseGroups(GROUP_TSV);
@@ -1496,14 +1635,14 @@ function bind(){
   APP.vdls = parseVDLS(VDLS_TSV);
   APP.allocations = parseCLO(CLO_TSV);
 
-  // Load from local if any
+  // Load from local
   loadAllFromLocal();
   rebuildSets();
 
   // Fill textarea
   document.getElementById("txtGroup").value = GROUP_TSV;
-  document.getElementById("txtVDLS").value = VDLS_TSV;
-  document.getElementById("txtCLO").value  = CLO_TSV;
+  document.getElementById("txtVDLS").value  = VDLS_TSV;
+  document.getElementById("txtCLO").value   = CLO_TSV;
 
   // inputs
   const inpTotalQ = document.getElementById("inpTotalQ");
@@ -1523,7 +1662,6 @@ function bind(){
   chkLockMinMaxVDLS.checked = APP.lockMinMaxVDLS;
   chkTeach.checked = APP.teachWeightOnGroups;
 
-  // bloom inputs
   document.getElementById("b_nho").value = APP.bloomDefault.nho;
   document.getElementById("b_hieu").value = APP.bloomDefault.hieu;
   document.getElementById("b_vd").value = APP.bloomDefault.vd;
@@ -1533,39 +1671,32 @@ function bind(){
 
   inpTotalQ.addEventListener("input", ()=>{
     APP.meta.totalQuestions = Math.max(1, Math.floor(toNum(inpTotalQ.value) || 1));
-    saveAllToLocal();
-    render();
+    saveAllToLocal(); render();
   });
   inpDuration.addEventListener("input", ()=>{
     APP.meta.durationMinutes = Math.max(1, Math.floor(toNum(inpDuration.value) || 1));
-    saveAllToLocal();
-    render();
+    saveAllToLocal(); render();
   });
   inpExamName.addEventListener("input", ()=>{
     APP.meta.examName = inpExamName.value || "";
-    saveAllToLocal();
-    render();
+    saveAllToLocal(); render();
   });
 
   chkLockBloom.addEventListener("change", ()=>{
     APP.lockBloom = chkLockBloom.checked;
-    saveAllToLocal();
-    render();
+    saveAllToLocal(); render();
   });
   chkLockMinMaxGroup.addEventListener("change", ()=>{
     APP.lockMinMaxGroup = chkLockMinMaxGroup.checked;
-    saveAllToLocal();
-    render();
+    saveAllToLocal(); render();
   });
   chkLockMinMaxVDLS.addEventListener("change", ()=>{
     APP.lockMinMaxVDLS = chkLockMinMaxVDLS.checked;
-    saveAllToLocal();
-    render();
+    saveAllToLocal(); render();
   });
   chkTeach.addEventListener("change", ()=>{
     APP.teachWeightOnGroups = chkTeach.checked;
-    saveAllToLocal();
-    render();
+    saveAllToLocal(); render();
   });
 
   document.getElementById("btnApplyBloom").addEventListener("click", ()=>{
@@ -1575,14 +1706,14 @@ function bind(){
     APP.bloomDefault.pt = clamp(toNum(document.getElementById("b_pt").value)||0,0,100);
     APP.bloomDefault.dg = clamp(toNum(document.getElementById("b_dg").value)||0,0,100);
     APP.bloomDefault.st = clamp(toNum(document.getElementById("b_st").value)||0,0,100);
-    saveAllToLocal();
-    render();
+    saveAllToLocal(); render();
   });
 
   // search/filter
   document.getElementById("searchVDLS").addEventListener("input", render);
   document.getElementById("searchCLO").addEventListener("input", render);
   document.getElementById("filterGroup").addEventListener("change", render);
+  document.getElementById("searchMatrix").addEventListener("input", render);
 
   // tabs
   document.querySelectorAll(".tab").forEach(btn=>{
@@ -1590,13 +1721,13 @@ function bind(){
       const tabId = btn.dataset.tab;
       document.querySelectorAll(".tabPanel").forEach(p=>p.classList.add("hidden"));
       document.getElementById(tabId).classList.remove("hidden");
-
       document.querySelectorAll(".tab").forEach(b=>b.classList.remove("tab-active"));
       btn.classList.add("tab-active");
+      if(tabId==="tabMatrix") renderMatrix();
     });
   });
 
-  // export buttons
+  // export
   document.getElementById("btnExportJson").addEventListener("click", exportToJson);
   document.getElementById("btnExportExcel").addEventListener("click", exportToExcel);
 
@@ -1611,16 +1742,13 @@ function bind(){
     GROUP_TSV = document.getElementById("txtGroup").value.trim();
     VDLS_TSV  = document.getElementById("txtVDLS").value.trim();
     CLO_TSV   = document.getElementById("txtCLO").value.trim();
-
     APP.groups = parseGroups(GROUP_TSV);
     rebuildSets();
     APP.vdls = parseVDLS(VDLS_TSV);
     APP.allocations = parseCLO(CLO_TSV);
-
     saveAllToLocal();
     render();
   });
-
   document.getElementById("btnSaveToLocal").addEventListener("click", ()=>{
     GROUP_TSV = document.getElementById("txtGroup").value.trim();
     VDLS_TSV  = document.getElementById("txtVDLS").value.trim();
@@ -1628,43 +1756,23 @@ function bind(){
     saveTSVToLocal();
     alert("Đã lưu TSV vào trình duyệt.");
   });
-
-  document.getElementById("btnLoadFromLocal").addEventListener("click", ()=>{
-    loadTSVFromLocal();
-  });
+  document.getElementById("btnLoadFromLocal").addEventListener("click", ()=>{ loadTSVFromLocal(); });
 
   // quick width inputs
-  document.getElementById("inpColGroupW").addEventListener("input", (e)=>{
-    setColWidth("group", toNum(e.target.value) || 280);
-    render();
-  });
-  document.getElementById("inpColVdlsW").addEventListener("input", (e)=>{
-    setColWidth("vdls", toNum(e.target.value) || 520);
-    render();
-  });
+  document.getElementById("inpColGroupW").addEventListener("input", (e)=>{ setColWidth("group", toNum(e.target.value) || 280); render(); });
+  document.getElementById("inpColVdlsW").addEventListener("input", (e)=>{ setColWidth("vdls", toNum(e.target.value) || 520); render(); });
 
   // modals open
-  document.getElementById("btnAddVDLS").addEventListener("click", ()=>{
-    refreshAddForms();
-    openModal("modalVDLS");
-  });
-  document.getElementById("btnAddCLO").addEventListener("click", ()=>{
-    refreshAddForms();
-    openModal("modalCLO");
-  });
+  document.getElementById("btnAddVDLS").addEventListener("click", ()=>{ refreshAddForms(); openModal("modalVDLS"); });
+  document.getElementById("btnAddCLO").addEventListener("click", ()=>{ refreshAddForms(); openModal("modalCLO"); });
 
   // modal close buttons
   document.querySelectorAll("[data-close-modal]").forEach(b=>{
-    b.addEventListener("click", ()=>{
-      closeModal(b.dataset.closeModal);
-    });
+    b.addEventListener("click", ()=>{ closeModal(b.dataset.closeModal); });
   });
-  // click backdrop to close
   ["modalVDLS","modalCLO"].forEach(id=>{
     const el = document.getElementById(id);
-    el.addEventListener("click", (e)=>{
-      if(e.target === el) closeModal(id);
-    });
+    el.addEventListener("click", (e)=>{ if(e.target === el) closeModal(id); });
   });
 
   // Add VDLS confirm
@@ -1673,16 +1781,8 @@ function bind(){
     const text = (document.getElementById("addVdlsText").value || "").trim();
     const weight = Math.max(0, toNum(document.getElementById("addVdlsWeight").value) ?? 1);
     const include = !!document.getElementById("addVdlsInclude").checked;
-
-    if(!group || !text){
-      alert("Vui lòng chọn nhóm và nhập nội dung VDLS.");
-      return;
-    }
-    // prevent duplicates
-    if(APP.vdls.some(v=>v.group===group && v.problem===text)){
-      alert("VDLS này đã tồn tại trong nhóm.");
-      return;
-    }
+    if(!group || !text){ alert("Vui lòng chọn nhóm và nhập nội dung VDLS."); return; }
+    if(APP.vdls.some(v=>v.group===group && v.problem===text)){ alert("VDLS này đã tồn tại trong nhóm."); return; }
     APP.vdls.push({ group, problem: text, include, weight, min: null, max: null });
     saveAllToLocal();
     closeModal("modalVDLS");
@@ -1691,10 +1791,7 @@ function bind(){
   });
 
   // Add CLO confirm
-  document.getElementById("addCloGroup").addEventListener("change", ()=>{
-    refreshAddForms();
-  });
-
+  document.getElementById("addCloGroup").addEventListener("change", ()=>{ refreshAddForms(); });
   document.getElementById("btnConfirmAddCLO").addEventListener("click", ()=>{
     const group = document.getElementById("addCloGroup").value || "";
     const problem = document.getElementById("addCloProblem").value || "";
@@ -1702,16 +1799,8 @@ function bind(){
     const bloom = document.getElementById("addCloBloom").value || "Nhớ";
     const weight = Math.max(0, toNum(document.getElementById("addCloWeight").value) ?? 1);
     const include = !!document.getElementById("addCloInclude").checked;
-
-    if(!group || !problem || !clo){
-      alert("Vui lòng chọn nhóm/VDLS và nhập CLO.");
-      return;
-    }
-    // ensure VDLS exists
-    if(!APP.vdls.some(v=>v.group===group && v.problem===problem)){
-      alert("VDLS chưa tồn tại trong nhóm. Hãy thêm VDLS trước.");
-      return;
-    }
+    if(!group || !problem || !clo){ alert("Vui lòng chọn nhóm/VDLS và nhập CLO."); return; }
+    if(!APP.vdls.some(v=>v.group===group && v.problem===problem)){ alert("VDLS chưa tồn tại trong nhóm. Hãy thêm VDLS trước."); return; }
     APP.allocations.push({ group, problem, clo, bloom, include, weight });
     saveAllToLocal();
     closeModal("modalCLO");
@@ -1719,7 +1808,22 @@ function bind(){
     render();
   });
 
-  // delegation for inputs/checkbox/blur/delete
+  // Matrix buttons
+  document.getElementById("btnSaveMatrix").addEventListener("click", ()=>{
+    saveAllToLocal();
+    alert("Đã lưu dữ liệu (localStorage).");
+  });
+  document.getElementById("btnGoData").addEventListener("click", ()=>{
+    // switch tab to data
+    document.querySelectorAll(".tabPanel").forEach(p=>p.classList.add("hidden"));
+    document.getElementById("tabData").classList.remove("hidden");
+    document.querySelectorAll(".tab").forEach(b=>b.classList.remove("tab-active"));
+    document.querySelectorAll(".tab").forEach(b=>{ if(b.dataset.tab==="tabData") b.classList.add("tab-active"); });
+    document.getElementById("txtCLO").focus();
+  });
+  document.getElementById("btnExportMatrixExcel").addEventListener("click", exportMatrixToExcel);
+
+  // delegation for inputs/checkbox/blur/delete + MATRIX weight inputs
   document.addEventListener("input", (e)=>{
     const t = e.target;
 
@@ -1727,14 +1831,12 @@ function bind(){
     if (t.dataset.gmin != null){
       const i = Number(t.dataset.gmin);
       APP.groups[i].min = (t.value==="" ? null : Math.max(0, Math.floor(toNum(t.value)||0)));
-      saveAllToLocal();
-      render();
+      saveAllToLocal(); render();
     }
     if (t.dataset.gmax != null){
       const i = Number(t.dataset.gmax);
       APP.groups[i].max = (t.value==="" ? null : Math.max(0, Math.floor(toNum(t.value)||0)));
-      saveAllToLocal();
-      render();
+      saveAllToLocal(); render();
     }
 
     // VDLS weight
@@ -1743,8 +1845,7 @@ function bind(){
       const item = APP.vdls.find(x=>x.group===g && x.problem===p);
       if(item){
         item.weight = Math.max(0, toNum(t.value) ?? 1);
-        saveAllToLocal();
-        render();
+        saveAllToLocal(); render();
       }
     }
 
@@ -1754,8 +1855,7 @@ function bind(){
       const item = APP.vdls.find(x=>x.group===g && x.problem===p);
       if(item){
         item.min = (t.value==="" ? null : Math.max(0, Math.floor(toNum(t.value)||0)));
-        saveAllToLocal();
-        render();
+        saveAllToLocal(); render();
       }
     }
     if (t.dataset.vmax){
@@ -1763,8 +1863,7 @@ function bind(){
       const item = APP.vdls.find(x=>x.group===g && x.problem===p);
       if(item){
         item.max = (t.value==="" ? null : Math.max(0, Math.floor(toNum(t.value)||0)));
-        saveAllToLocal();
-        render();
+        saveAllToLocal(); render();
       }
     }
 
@@ -1774,38 +1873,29 @@ function bind(){
       const item = APP.allocations.find(x=>x.group===g && x.problem===p && x.clo===clo && x.bloom===bloom);
       if(item){
         item.weight = Math.max(0, toNum(t.value) ?? 1);
-        saveAllToLocal();
-        render();
+        saveAllToLocal(); render();
       }
     }
   });
 
   document.addEventListener("change", (e)=>{
     const t = e.target;
-
-    // VDLS include
     if (t.dataset.vinclude){
       const [g,p] = t.dataset.vinclude.split("|||");
       const item = APP.vdls.find(x=>x.group===g && x.problem===p);
       if(item){
         item.include = !!t.checked;
-        saveAllToLocal();
-        render();
+        saveAllToLocal(); render();
       }
     }
-
-    // CLO include
     if (t.dataset.cinclude){
       const [g,p,clo,bloom] = t.dataset.cinclude.split("|||");
       const item = APP.allocations.find(x=>x.group===g && x.problem===p && x.clo===clo && x.bloom===bloom);
       if(item){
         item.include = !!t.checked;
-        saveAllToLocal();
-        render();
+        saveAllToLocal(); render();
       }
     }
-
-    // CLO bloom change
     if (t.dataset.cbloom){
       const [g,p,clo,oldBloom] = t.dataset.cbloom.split("|||");
       const newBloom = t.value;
@@ -1817,36 +1907,29 @@ function bind(){
   // blur handlers for contenteditable
   document.addEventListener("blur", (e)=>{
     const t = e.target;
-
-    // edit VDLS text
     if(t.dataset && t.dataset.vedit){
       const [g,oldP] = t.dataset.vedit.split("|||");
       const newP = t.textContent || "";
       if(newP.trim() && newP.trim() !== oldP){
         updateVDLSText(g, oldP, newP.trim());
-        // update dataset to new key (avoid future mismatch)
         t.dataset.vedit = `${g}|||${newP.trim()}`;
         render();
       }
     }
-
-    // edit CLO text
     if(t.dataset && t.dataset.cedit){
       const [g,p,oldClo,bloom] = t.dataset.cedit.split("|||");
       const newClo = t.textContent || "";
       if(newClo.trim() && newClo.trim() !== oldClo){
         updateCLOText(g,p,oldClo,bloom,newClo.trim());
-        // update dataset to new key
         t.dataset.cedit = `${g}|||${p}|||${newClo.trim()}|||${bloom}`;
         render();
       }
     }
   }, true);
 
-  // delete buttons (VDLS/CLO)
+  // click delete + MATRIX set weight on blur
   document.addEventListener("click", (e)=>{
     const t = e.target;
-
     if(t.dataset && t.dataset.vdel){
       const [g,p] = t.dataset.vdel.split("|||");
       if(confirm("Xóa VDLS này và toàn bộ CLO liên quan?")){
@@ -1854,7 +1937,6 @@ function bind(){
         render();
       }
     }
-
     if(t.dataset && t.dataset.cdel){
       const [g,p,clo,bloom] = t.dataset.cdel.split("|||");
       if(confirm("Xóa dòng CLO này?")){
@@ -1864,29 +1946,22 @@ function bind(){
     }
   });
 
-  // init resizers
+  // matrix weight editing: commit on blur
+  document.addEventListener("blur", (e)=>{
+    const t = e.target;
+    if(t && t.dataset && t.dataset.mw){
+      const [g,p,cloName] = t.dataset.mw.split("|||");
+      setMatrixCellWeight(g,p,cloName, t.value);
+      render();
+    }
+  }, true);
+
   initResizers();
 }
 
-/* =========================================================
-   UTIL: DOWNLOAD
-   ========================================================= */
-
-function downloadFile(filename, content, mime){
-  const blob = new Blob([content], {type: mime});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
-
-/* =========================================================
+/* =========================
    INIT
-   ========================================================= */
+   ========================= */
 bind();
 render();
 </script>
